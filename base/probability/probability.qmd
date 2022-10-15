@@ -1,0 +1,366 @@
+---
+title: Basic Probability 
+format: html
+reference-location: margin
+jupyter: python3
+bibliography: ../../references.bib
+html-math-method: katex
+editor:
+  render-on-save: true
+---
+
+
+### Questions from @Bertsekas2000
+::: {.border} 
+**Example 1.11**
+A class consisting of 4 graduate and 12 undergraduate students
+is randomly divided into 4 groups of 4. What is the probability that each group
+includes a graduate student? We interpret randomly to mean that given the assignment of some students to certain slots, any of the remaining students is equally
+likely to be assigned to any of the remaining slots. 
+:::
+
+**Solution**:
+
+At the beginning we have 16 different slots, where each group takes up 4 slots. Let $G$ be the event that every group has one grad student. 
+$$
+\begin{align}
+A_0 = \text{\{Grad student 1 is in different groups, but $P(A_0)=1$\}}  \nonumber \\
+A_1 = \text{\{Grad student 1 and 2 are in different groups\}}  \nonumber \\
+A_2 = \text{\{Grad student 1, 2 and 3 are in different groups\}} \nonumber \\
+A_3 = \text{\{Grad student 1, 2, 3, 4 are in different groups\}} \nonumber
+\end{align}
+$$
+
+After grad student 1 has been picked only 15 people will be left, and since the available slots left is 3 we have 12 possible locations (3*4=12). Thus:
+
+
+$$
+P(A_1) = P(A_0 \cap A_1)=P(A_0)P(A_1|A_0)=P(A_1|A_0)=12/15
+$$
+
+Similarily:
+
+$$
+P(A_2) =P(A_1)P(A_2|A_1)=(12/15)*(2*4/14)=12*8/15*14
+$$
+$$
+P(A_3) = P(A_2)P(A_3|A_2)=P(A_2)*4/13=0.1406
+$$
+
+Let us see if this is really the case with a simulation
+
+```{python}
+#| code-fold: true 
+import numpy as np
+import random
+from tqdm import tqdm
+valid_array = []
+num_sim = 1000 # NOTE : remember to set high for better results
+
+for _ in range(num_sim):
+  student_id = np.arange(1, 17)
+
+  random.shuffle(student_id)
+
+  groups = [
+    student_id[0:4],
+    student_id[4:8],
+    student_id[8:12],
+    student_id[12:16],
+    ] 
+
+  for g in groups:
+    num_grad_in_g = 0 
+    for g_id in [1,2,3,4]:
+      if g_id in g:
+        num_grad_in_g += 1
+    if num_grad_in_g > 1:
+      break
+    
+  if num_grad_in_g >1:
+    valid_array.append(0)
+  else: 
+    valid_array.append(1)
+
+print(f'Probability is {np.sum(valid_array)/float(num_sim)} after {num_sim} trails.')
+
+```
+
+
+
+::: {.border} 
+**Example 1.14.** Alice is taking a probability class and at the end of each week
+she can be either up-to-date or she may have fallen behind. If she is up-to-date in
+a given week, the probability that she will be up-to-date (or behind) in the next
+week is 0.8 (or 0.2, respectively). If she is behind in a given week, the probability
+that she will be up-to-date (or behind) in the next week is 0.6 (or 0.4, respectively).
+Alice is (by default) up-to-date when she starts the class. What is the probability
+that she is up-to-date after three weeks?
+:::
+
+
+**Solution**
+
+Let $U_i$ be the event that Alice is up-to-date at the end of week $i$ and $\overline{U}_i$ be not up-to-date, the goal is the find $P(U_3)$. 
+
+Starting with 
+$P(U_2)=P(U_2\cap U_1)\bigcup P(U_2\cap\overline{U}_1)$ which becomes $P(U_2) = P(U_1)P(U_2|U_1)+ P(\overline{U}_1)P(U_2|\overline{U}_1)$^[Additivity axiom: for disjoint sets $P(A_1 ∪ A_2 ∪···) = P(A_1) + P(A_2) + ···$]. Since she starts the week up-to-date, then $P(U_1)=0.8, P(\overline{U}_1) = 0.2$.  
+
+Thus, $P(U_2) = 0.8 * 0.8 + 0.2 * 0.4=0.72$. 
+Similarily: 
+$$
+P(\overline{U}_2) = P(U_1)P(\overline{U}_2|U_1)+ P(\overline{U}_1)P(\overline{U}_2|\overline{U}_1) \\
+=0.8 * 0.2 + 0.2 * 0.6 = 0.28
+$$
+
+Finally, 
+
+$$
+\begin{align}
+P(U_3) &= P(U_2)P(U_3|U_2)+ P(\overline{U}_2)P(U_3|\overline{U}_2) \\
+&=0.72*0.8 + 0.28 * 0.4 \\
+&=0.688
+\end{align}
+$$
+
+
+
+::: {.border} 
+**Example 1.17.** Consider an experiment involving two successive rolls of a 4-sided
+die in which all 16 possible outcomes are equally likely and have probability 1/16.
+
+ Are the events $A = \text{\{maximum of the two rolls is 2\}}, B = \text{\{minimum of the two rolls is 2}\}$ independent?
+::: 
+
+**Solution** 
+
+They are not independent because $P(A) = 3/16, P(B) = 5/16, P(A\cap B) = 1/16 \neq 15/(16*16)$. ^[For independence, we need $P(A\cap B) = P(A)P(B)$]
+
+
+::: {.border} 
+**Example 1.22.** Network connectivity. A computer network connects two
+nodes A and B through intermediate nodes C, D, E, F.
+For every pair of directly connected nodes, say i and j, there is a given probability
+pij that the link from i to j is up. We assume that link failures are independent of each other. What is the probability that there is a path connecting A and B in
+which all links are up?
+
+![](images/Example1.22.jpg)
+::: 
+**Solution** 
+
+$$
+\begin{align}
+P(l_1:= A\rightarrow D \rightarrow B) = 0.75 * 0.95 =0.7125\\
+P(l_2:=C\rightarrow E \rightarrow B) = 0.8 * 0.9 =0.72\\
+P(l_3:=C\rightarrow F \rightarrow B) = 0.95 * 0.85=0.8075 \\
+\end{align} 
+$$
+
+The probability that $l_4 : C\rightarrow B$ has at least one successful path is : 
+
+$$P(l_2 \cap l_3)\cup P(l_2 \cap \overline{l_3}) \cup P(\overline{l_2} \cap l_3) = 0.9461$$ 
+
+$$P(l_5 : A\rightarrow l_4) = 0.9 * 0.9461  = 0.85149 $$
+Finally,
+$$P(l_f) = P(l_1 \cap l_5)\cup P(l_1 \cap \overline{l_5}) \cup P(\overline{l_1} \cap l_5) $$ 
+$$P(l_f) = 0.7125 * 0.85149 + 0.7125 * (1- 0.85149) + (1-0.7125 ) * 0.85149=0.9573$$ 
+
+::: {.border}
+**Example 2.1.** Let $Y = |X|$ and let us apply the preceding formula for the PMF
+$p_Y$ to the case where
+
+$$
+p_X(x) = 
+\begin{cases}
+1/9, &\text{if x is an integer in the range [−4, 4]} \\
+0,  &\text{else}
+\end{cases}
+$$
+
+
+The possible values of $Y$ are $y = 0, 1, 2, 3, 4$.
+:::
+
+**Solution**
+$$
+\begin{align}
+p_Y(0)&= p_X(0) \nonumber \\
+p_Y(1)&= p_X(-1)  + p_X(1) \nonumber \\
+p_Y(2)&= p_X(-2)  + p_X(2) \nonumber  \\
+p_Y(3)&= p_X(-3)  + p_X(3)  \nonumber \\
+\end{align}
+$$
+
+
+Thus the PMF of $Y$ is 
+
+$$
+p_Y(y) = 
+\begin{cases}
+1/9, &\text{If $y=0$} \\
+2/9, &\text{If $y=1,2,3,4$} \\
+0, &\text{else} \\
+\end{cases}
+$$
+
+The mean^[$\bold{E}[X]=\sum_x x p_X (x)$] is then
+
+$$
+\bold{E}[Y]=0 * 1/9 + 2/9 + 2*2/9 + 3*2/9 + 4*2/9=20/9
+$$
+
+The variance^[$var(X) = \bold{E}((X-\bold{E}(X))^2)$], let $Z=(Y-\bold{E}(Y))^2$
+$$
+p_Z(z) = 
+\begin{cases}
+(20/9-1/9)^2, &\text{If $y=0$} \\
+(20/9-2/9)^2, &\text{If $y=1,2,3,4$} \\
+0, &\text{else} \\
+\end{cases}
+$$
+
+Thus
+
+$$
+var(Y) = (18/9)^2  +  2*(18/9)^2 +3*(18/9)^2 +4*(18/9)^2
+$$
+
+
+::: {.border}
+**Example 2.8.** Average Speed Versus Average Time. If the weather is good
+(which happens with probability 0.6), Alice walks the 2 miles to class at a speed of
+V = 5 miles per hour, and otherwise drives her motorcycle at a speed of V = 30
+miles per hour. What is the mean of the time T to get to class?
+:::
+
+**Solution**
+$$
+p_T(t) = 
+\begin{cases}
+0.6 & \text{if $t = 2/5$} \\
+0.4 & \text{if $t = 2/30$} \\
+\end{cases}
+$$
+
+Thus, 
+
+$$
+E[T] = 0.6*2/5 + 0.4*2/30
+$$
+
+But using $E[V]$ to find $E[T]$ using $E[T] = E[1/V] =1/E[V]$ doesn't work. Because $1/x$ is not linear.
+
+
+::: {.border}
+
+**Example 2.11.** Professor May B. Right often has her facts wrong, and answers
+each of her students’ questions incorrectly with probability 1/4, independently of
+other questions. In each lecture May is asked 0, 1, or 2 questions with equal probability 1/3. Let X and Y be the number of questions May is asked and the number of
+questions she answers wrong in a given lecture, respectively. Construct the joint
+PMF $p_{X,Y} (x, y)$
+
+:::
+**Solution**
+
+
+The PMF $p_{X,Y} (x, y)$^[Defined as $p_{X,Y} (x, y) = P(X=x, Y=y)$] can be found by using the multiplication rule^[$p_{X,Y}(x,y) = p_X(x)p_{Y|X}(y|x)$]:
+
+|     	|     	|      	|      	|
+|-----	|-----	|------	|------	|
+| y=2 	| 0   	| 0    	| 1/48 	|
+| y=1 	| 0   	| 1/12 	| 6/48 	|
+| y=0 	| 1/3   	| 3/12 	| 9/48 	|
+|     	| x=0 	| x=1  	| x=2  	|
+
+::: {.border}
+**Example 2.12.** Consider four independent rolls of a 6-sided die. Let $X$ be the
+number of 1’s and let $Y$ be the number of 2’s obtained. What is the joint PMF of
+$X$ and $Y$ ?
+:::
+
+**Solution**
+
+The PMF of $X$ is:
+
+$$
+p_X(x) =  \dbinom{4}{x} \left( \frac{1}{6} \right) ^x \left( \frac{5}{6}\right) ^ {4-x}
+$$
+
+$Y$  is the number 2's, so conditioned on $x$  (the number of 1's), the possible choices is limited to $2,3,4,5,6$, and the number of 2's required becomes $4-x$
+$$
+p_{Y|X}(y|x) =  \dbinom{4-x}{y} \left( \frac{1}{5} \right) ^y \left( \frac{4}{5}\right) ^ {4-x-y}
+$$
+
+Thus:
+
+$$
+p_{X|Y}(x,y) = 
+\begin{cases}
+ \dbinom{4}{x} \left( \frac{1}{6} \right) ^x \left( \frac{5}{6}\right) ^ {4-x}  \dbinom{4-x}{y} \left( \frac{1}{5} \right) ^y \left( \frac{4}{5}\right) ^ {4-x-y} &\text{If $0\leq x+y\leq 4$} \\
+ 0 &\text{else}
+\end{cases}
+$$
+
+::: {.border}
+**Example 2.15.** Mean and Variance of the Geometric Random Variable.
+You write a software program over and over, and each time there is probability $p$
+that it works correctly, independently from previous attempts. What is the mean
+and variance of $X$, the number of tries until the program works correctly?
+:::
+
+
+**Solution**
+
+$X$ is a geometric random variable with PMF:
+$$
+p_X(k) = (1-p)^{k-1} p  \quad k = 1,2,3,\dots
+$$
+
+$$
+E[X] = \sum_{k=1}^{\infty} k   (1-p)^{k-1} p
+$$
+
+### Monte Hall simulation
+```{python}
+#| code-fold: true 
+import numpy as np
+import random
+from tqdm import tqdm
+
+def mt(switch):
+  win_array = []
+  for _ in range(num_sim):
+    # 1 - car
+    prizes = np.arange(1, 4)
+    random.shuffle(prizes)
+
+    pick_id = np.random.randint(0, 3)
+    car_id,  = np.where(prizes == 1) 
+
+    allowed = [0,1,2]
+    allowed.remove(pick_id)
+    host_allowed = allowed.copy()
+
+    if prizes[pick_id] != 1:
+      host_allowed.remove(car_id[0])
+
+    allowed.remove(host_allowed[0])
+
+    if switch:
+      if prizes[allowed[0]] == 1: 
+        win_array.append(1) 
+      else:
+        win_array.append(0)
+    else:
+      if prizes[pick_id] == 1: 
+        win_array.append(1) 
+      else:
+        win_array.append(0)
+  return np.sum(win_array)/float(num_sim)
+
+print(f'After {num_sim} games')
+print(f'Probability of winning the car with switching is {mt(1)} ')
+print(f'Probability of winning the car without switching is {mt(0)} ')
+
+```
+
