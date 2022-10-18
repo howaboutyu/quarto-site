@@ -7,6 +7,9 @@ bibliography: ../../references.bib
 html-math-method: katex
 editor:
   render-on-save: true
+
+execute: 
+  freeze: true
 ---
 
 
@@ -51,11 +54,12 @@ Let us see if this is really the case with a simulation
 
 ```{python}
 #| code-fold: true 
+
 import numpy as np
 import random
 from tqdm import tqdm
 valid_array = []
-num_sim = 1000 # NOTE : remember to set high for better results
+num_sim = 10000000 # NOTE : remember to set high for better results
 
 for _ in range(num_sim):
   student_id = np.arange(1, 17)
