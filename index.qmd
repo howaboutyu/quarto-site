@@ -15,7 +15,6 @@ about:
 
 ---
 
-
 :::{#hero-heading}
 
 Hi, I'm David Yu, a machine learning engineer. I'm passionate about using machine learning to solve problems and I like to make things. In my spare time, I enjoy riding motorcycles, travelling and playing the guitar.
