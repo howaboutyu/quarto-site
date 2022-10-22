@@ -1,0 +1,277 @@
+
+
+---
+title: Computation neural science 
+format: html
+reference-location: margin
+jupyter: python3
+bibliography: ../../references.bib
+html-math-method: katex
+editor:
+  render-on-save: true
+---
+## Tutorials from @miller_introductory_2018
+
+### Tutorial 2.1
+
+**1a** Code LIF neuron using the equation
+
+$$C_m \frac{dV_m}{dt} = (E_L - V_m)/R_m + I_{app}   $$
+
+
+with the condition $\quad V_m > V_{th}$ then $V_m \rightarrow V_{reset}$
+
+
+```{python}
+#| code-fold: true
+
+import numpy as np
+
+
+C_m = 2.e-9
+E_L = -70.e-3
+E_K = -80e-3
+R_m = 5.e6
+G_L = 1./R_m
+V_th = -50.e-3
+V_reset = -65.e-3
+
+tau_m = C_m/G_L
+
+dt = 0.1e-3
+
+times = np.arange(0, 200.e-3, dt)
+V = np.zeros_like(times)
+
+I_th = G_L*(V_th - E_L)
+I = np.ones_like(times) * I_th 
+
+V[0] = E_L
+
+def dvdt(V_m, I_app, G_ref=None):
+    value = (E_L - V_m)/R_m + I_app 
+    if G_ref is not None:
+        value = value + G_ref* (E_K- V_m)
+    value = value/C_m
+    return value
+
+
+def simulate(V, I, noises=None, tau_ref=None, tau_vth=None, V_th_array=None, G_ref=None, tau_Gref=None):
+    num_fire = 0
+    last_fire_time = -100
+
+    dvthdt_array = []
+    for i in range(1, len(times)):
+        if G_ref is None:
+            V_new = V[i-1] + dvdt(V[i-1], I[i-1]) * dt
+        else:
+            V_new = V[i-1] + dvdt(V[i-1], I[i-1], G_ref[i-1]) * dt
+                
+        if tau_vth is not None:
+            dvthdt = (-50e-3 - V_th_array[i-i]) / tau_vth
+            dvthdt_array.append(V_th_array[i-i])
+            V_th_array[i] = V_th_array[i-1] + dt*dvthdt
+        
+        if G_ref is not None:            
+            dG_refdt = -G_ref[i-1]/tau_Gref
+            G_ref[i] = G_ref[i-1] + dt * dG_refdt
+        if tau_vth is not None:
+            
+            if V_new > V_th_array[i-1]:  # Fire
+                V_new = V_reset
+                num_fire += 1
+                
+                V_th_array[i-1] = 200e-3
+                
+                if G_ref is not None: 
+                    
+                    G_ref[i] =G_ref[i]+ 2e-6
+                                   
+        else:
+            if V_new > V_th: 
+                V_new = V_reset
+                num_fire += 1
+                last_fire_time = times[i]
+        
+        if noises is not None:
+            V_new += noises[i]
+        
+        if tau_ref is not None:
+            if times[i] - last_fire_time < tau_ref:
+                V_new = V_reset
+        
+        V[i] = V_new
+    
+    fire_rate = num_fire/(times[-1] - times[0])
+    
+    if tau_vth is not None:
+        return fire_rate, dvthdt_array
+    return fire_rate
+
+```
+
+**1b** What is the minimum required applied current for a spike?
+
+The threshold current is
+$$I_{th} = G_L(V_{th} - E_L)$$
+
+```{python}
+#| code-fold: true
+I_th = G_L * (V_th - E_L)
+print(f'I_th : {I_th}')
+```
+
+
+miller_introductory_2020
+```{python}    
+#| code-fold: true
+import matplotlib.pyplot as plt
+
+V_1 = np.copy(V)
+V_2 = np.copy(V)
+simulate(V_1, np.ones_like(V_1) * I_th*.99)
+simulate(V_2, np.ones_like(V_1) * I_th*1.01)
+
+plt.figure()
+plt.plot(times, V_1)
+plt.xlabel('Time (s) ')
+plt.ylabel('Voltage (V) ')
+plt.title('Applied current is : $0.99 * I_{th}$ ')
+
+plt.figure()
+plt.plot(times, V_2)
+plt.xlabel('Time (s) ')
+plt.ylabel('Voltage (V) ')
+plt.title('Applied current is : $1.01 * I_{th}$ ')
+
+
+```
+
+
+```{python}
+#| code-fold: true
+fr_array = []
+fr_eq_array = []    
+def fr_func(I):
+    value = tau_m * np.log(I * R_m + E_L - V_reset) - tau_m * np.log(I*R_m + E_L-V_th)
+    value = 1./value
+    return value
+
+
+for I in np.arange(4e-10, 4e-8, 1e-9):
+    V_3 = np.copy(V)
+    fr = simulate(V_3, np.ones_like(times) * I)
+    fr_array.append(fr)
+    fr_eq = fr_func(I)
+    fr_eq_array.append(fr_eq)
+plt.figure()
+plt.plot(np.arange(4e-10, 4e-8, 1e-9),fr_array)
+
+
+plt.plot(np.arange(4e-10, 4e-8, 1e-9),fr_eq_array)
+
+     
+```
+
+
+
+
+```{python}
+#| code-fold: true
+V_4 = np.copy(V)
+
+noises_fn = lambda sigma_I:  np.random.normal(size=times.shape) * sigma_I * np.sqrt(dt)
+
+for sigma_I in range(0, 5,):
+    fr_array = []
+    for I in np.arange(4e-10, 4e-8, 1e-9):
+        V_4 = np.copy(V)
+        fr = simulate(V_4, np.ones_like(times) * I, noises_fn(sigma_I))
+        fr_array.append(fr)
+    
+        
+
+    plt.figure()
+    plt.plot(np.arange(4e-10, 4e-8, 1e-9), fr_array)
+
+```
+
+Looks like as `sigma_I` increases the fr curve's slope decreases.
+
+
+## Tutorial 2.2
+```{python}
+#| code-fold: true
+C_m = 0.1e-9
+E_L = -70.e-3
+R_m = 100.e6
+G_L = 1./R_m
+V_th = -50e-3
+V_reset = -65.e-3
+
+tau_m = C_m/G_L
+I_th = G_L*(V_th - E_L)
+
+fr_array_1 = [] # Forced voltage clamp method
+mean_V_1 = []
+
+fr_array_2 = [] # Threshold increase
+mean_V_2 = []
+
+fr_array_3 = [] # Threshold increase
+mean_V_3 = []
+I_array = np.arange(100e-12, 600e-12, 50e-12)
+
+for I in I_array:
+    V_1 = np.copy(V)
+    fr_1 = simulate(V_1, np.ones_like(times) * I, tau_ref=2.5e-3)
+    fr_array_1.append(fr_1)
+    mean_V_1.append(np.mean(V_1))
+    
+    V_2 = np.copy(V)
+    V_th_array = np.zeros_like(times)
+    V_th_array[0] = V_th
+    fr_2,dvthdt_array = simulate(V_2, np.ones_like(times) * I, tau_vth=1e-3, V_th_array=V_th_array)
+    fr_array_2.append(fr_2)
+    mean_V_2.append(np.mean(V_2))
+    
+    
+    V_3 = np.copy(V)
+    V_th_array = np.zeros_like(times)
+    G_ref = np.zeros_like(times)
+    V_th_array[0] = V_th
+    G_ref[0] = 0.
+    fr_3,_ = simulate(V_3, np.ones_like(times) * I, tau_vth=1e-3, V_th_array=V_th_array, G_ref=G_ref, tau_Gref=0.2e-3)
+    print(fr_3)
+    fr_array_3.append(fr_3)
+    mean_V_3.append(np.mean(V_3))
+fig = plt.figure().suptitle('current vs fr')
+
+plt.plot(I_array, fr_array_1, label='forced voltage clamp')
+plt.plot(I_array, fr_array_2, label='threshold increase')
+plt.plot(I_array, fr_array_3, label='refractory conductance')
+plt.xlabel('I')
+plt.ylabel('fr')
+plt.legend(loc='lower right')
+plt.figure().suptitle('current vs mean V')
+plt.plot(I_array, mean_V_1,  label='forced voltage clamp')
+plt.plot(I_array, mean_V_2, label='threshold increase')
+plt.plot(I_array, mean_V_3, label='refractory')
+plt.xlabel('I')
+plt.ylabel('Mean V')
+plt.legend(loc='lower right')
+plt.figure().suptitle('  fr vs mean V')
+plt.plot( fr_array_1,mean_V_1, label='forced voltage clamp')
+plt.plot( fr_array_2,mean_V_2,label='threshold increase')
+plt.plot( fr_array_3,mean_V_3,label='refractory')
+plt.xlabel('fr')
+plt.ylabel('Mean V')
+plt.legend(loc='lower right')
+
+plt.figure().suptitle('  V vst ')
+plt.plot( times,V_1, label='forced voltage clamp')
+#plt.plot( times,V_2,label='threshold increase')
+plt.xlabel('fr')
+plt.ylabel('Mean V')
+plt.legend(loc='lower right') 
+```

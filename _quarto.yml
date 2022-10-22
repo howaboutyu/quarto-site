@@ -13,7 +13,7 @@ website:
       - section: "Notes and exercises"
         contents:
           - base/probability/probability.qmd
-          #- base/jax/simple_jax.qmd
+          - base/CompNeuro/cns.qmd
   
   #navbar:
   #  left:
