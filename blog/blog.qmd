@@ -21,3 +21,5 @@ Github: \
 Blog: \
 
 [example](https://google.com){.external target="_blank"}
+
+[blog](nerf/nerf.qmd)

@@ -19,13 +19,13 @@ Get the tiny blender nerf dataset
 
 #| code-fold: true
 import os 
-if not os.path.exists('/tmp/tiny_nerf_data.npz'):
-    !wget http://cseweb.ucsd.edu/~viscomp/projects/LF/papers/ECCV20/nerf/tiny_nerf_data.npz -P /tmp
+if not os.path.exists('tiny_nerf_data.npz'):
+    !wget http://cseweb.ucsd.edu/~viscomp/projects/LF/papers/ECCV20/nerf/tiny_nerf_data.npz 
 ```
 What does the data look like?
 ```{python}
 import numpy as np
-data = np.load('/tmp/tiny_nerf_data.npz', allow_pickle=True)
+data = np.load('tiny_nerf_data.npz') # , allow_pickle=True)
 images = data['images']
 poses = data['poses']
 focal = data['focal']
