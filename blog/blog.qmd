@@ -1,0 +1,23 @@
+---
+title: Blogs yo 
+format: html
+reference-location: margin
+jupyter: python3
+html-math-method: katex
+editor:
+  render-on-save: true
+
+execute: 
+  freeze: true 
+
+comments:
+  hypothesis: true
+---
+
+
+
+## Nerf with jax 
+Github: \
+Blog: \
+
+[example](https://google.com){.external target="_blank"}
