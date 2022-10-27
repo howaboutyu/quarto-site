@@ -9,6 +9,9 @@ bibliography: ../../references.bib
 html-math-method: katex
 editor:
   render-on-save: true
+
+execute: 
+  freeze: true 
 ---
 ## Tutorials from @miller_introductory_2018
 
