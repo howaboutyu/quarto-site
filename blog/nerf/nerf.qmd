@@ -104,7 +104,7 @@ def get_ray(H, W, focal, pose):
     x, y = jnp.mgrid[0:W, 0:H]
     x = x - W/2
     y = y - H/2
-    y = -y # bender seems to use -y 
+    y = -y 
 
     x = x.flatten()
     y = y.flatten()
@@ -181,23 +181,75 @@ $$
 This method is used to sampling points closer to the surface of the objects. They first sample $N_c$ locations using stratified sampling, then they sample a second set $N_f$ using inverse transform sampling of the $\text{PDF}$ created using $w_i = T_i(1-\exp(-\sigma_i \delta_i))$, or
 
 $$
-w_X(x) = \frac{T_x(1-\exp(-\sigma_x \delta_x))}{k} \quad 1 < x < N_c 
+f_X(x) = \frac{T_x(1-\exp(-\sigma_x \delta_x))}{k} \quad 1 < x < N_c 
 $$
 
-where $k=\frac{w_x}{\sum_j^{N_c} w_j }$ is the normalizing factor so the area under the PDF is 1.
+
+where $k=\sum_j^{N_c} w_j$ is the normalizing factor, this is the ensure that the area under the $\text{PDF}$ is 1. Let's plot the PDF for a ray (with 128 points) at the center of the image, and also verify that the area is 1 under the curve.
+
+```{python}
+#| code-fold: true
+weights = np.squeeze(np.load('weights.npy'))
+
+k = np.sum(weights) 
+# normalize
+weights = weights/k
+dx = 1. 
+x=np.arange(0, 128)
+
+import plotly.express as px
+fig = px.line(x=x, y=weights, \
+    labels={
+        'x': "counter along x",
+        'y': "probability"
+    }, title='PDF of weights')
+fig.show()
+
+# area
+area = np.sum(weights * dx)
+print(f'Area under the curve is :{area}')
+```
+
 
 ### Inverse transform sampling
 
-So,
+The idea behind inverse transform sampling is to use the inverse of the $\text{CDF}$ to generate random numbers for a probability distribution. The $\text{CDF}$ for a random variable $X$ is $F_X(x) = P(X\leq x)$. Then, generate random numbers from a uniform distribution  $Z \sim \text{uni}(0, 1)$, using this with the inverse $\text{CDF}$ (or  $F^{-1}_X(Z)$) to get samples from the original distribution.
 
+Let's plot the cdf and the inverse cdf.
 ```{python}
-weights = np.squeeze(np.load('weights.npy'))
-print(weights.shape)
 
-import plotly.express as px
+cdf = np.cumsum(weights)
+fig = px.line(x=x, y=cdf, title="CDF ", labels={
+    'x': 'counter along x',
+    'y': 'probability'
+})
+fig.show()
 
-fig = px.line(x=np.arange(1, len(weights) + 1), y=weights, title="sample figure")
+fig = px.line(x=cdf, y=x, title="Inverse CDF ", labels={
+    'y': 'counter along x',
+    'x': 'probability'
+})
 fig.show()
 
 
+
+```
+
+We can see that if we sample the inverse cdf - with a uniform distribution - the value of the y-axis (or the counter along the x-axis) would fall around 55, which corresponds to the section with the highest probability density of the pdf plot. 
+
+Let's plot a histogram of the sampled counter using the above approach. 
+```{python}
+#| code-fold: true
+Z = np.random.uniform(size=(1280))
+def inverse_cdf(prob):
+    return x[np.argmin(np.abs(prob-cdf))]
+
+X = []
+
+for z in Z:
+    X.append(inverse_cdf(z))
+
+    
+fig = px.histogram(X) #, x="total_bill")
+fig.show()
 ```
