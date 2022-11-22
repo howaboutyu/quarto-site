@@ -217,7 +217,7 @@ The idea behind inverse transform sampling is to use the inverse of the $\text{C
 
 Let's plot the cdf and the inverse cdf.
 ```{python}
-
+#| code-fold: true
 cdf = np.cumsum(weights)
 fig = px.line(x=x, y=cdf, title="CDF ", labels={
     'x': 'counter along x',
@@ -237,19 +237,31 @@ fig.show()
 
 We can see that if we sample the inverse cdf - with a uniform distribution - the value of the y-axis (or the counter along the x-axis) would fall around 55, which corresponds to the section with the highest probability density of the pdf plot. 
 
-Let's plot a histogram of the sampled counter using the above approach. 
+Let's plot a histogram of 1000 sampled counter using inverse transform sampling method. 
 ```{python}
-#| code-fold: true
-Z = np.random.uniform(size=(1280))
-def inverse_cdf(prob):
-    return x[np.argmin(np.abs(prob-cdf))]
+#| code-fold: true 
+import jax.numpy as jnp 
+import jax
+Z = jax.random.uniform(key=jax.random.PRNGKey(0), shape=[1000])
+cdf = jnp.array(cdf)
 
-X = []
+def inverse_cdf(prob, cdf):
+    x = jnp.linspace(2, 6, 128)
+    abs_diff = jnp.abs(prob[..., jnp.newaxis] - cdf[jnp.newaxis, ...])
+    argmin = jnp.argmin(abs_diff, -1)
+    return x[argmin]
 
-for z in Z:
-    X.append(inverse_cdf(z))
+X = inverse_cdf(Z, cdf)
 
-    
-fig = px.histogram(X) #, x="total_bill")
+ 
+fig = px.histogram(x=X, labels={'x':'distance along the camera ray '})
+fig.show()
+```
+
+```{python}
+t = np.load('../../t.npy')
+print(t.shape)
+
+fig = px.histogram(x=t[50,50])
 fig.show()
 ```

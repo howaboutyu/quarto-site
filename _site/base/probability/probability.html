@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.0.38">
+<meta name="generator" content="quarto-1.1.251">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -11,10 +11,15 @@
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
-span.underline{text-decoration: underline;}
-div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
 pre > code.sourceCode { white-space: pre; position: relative; }
 pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
@@ -53,7 +58,7 @@ code span.al { color: #ff0000; font-weight: bold; } /* Alert */
 code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
 code span.at { color: #7d9029; } /* Attribute */
 code span.bn { color: #40a070; } /* BaseN */
-code span.bu { } /* BuiltIn */
+code span.bu { color: #008000; } /* BuiltIn */
 code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
 code span.ch { color: #4070a0; } /* Char */
 code span.cn { color: #880000; } /* Constant */
@@ -66,7 +71,7 @@ code span.er { color: #ff0000; font-weight: bold; } /* Error */
 code span.ex { } /* Extension */
 code span.fl { color: #40a070; } /* Float */
 code span.fu { color: #06287e; } /* Function */
-code span.im { } /* Import */
+code span.im { color: #008000; font-weight: bold; } /* Import */
 code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
 code span.kw { color: #007020; font-weight: bold; } /* Keyword */
 code span.op { color: #666666; } /* Operator */
@@ -225,11 +230,11 @@ div.csl-indent {
 </nav>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc">
+        <nav id="TOC" role="doc-toc" class="toc-active">
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#questions-from-bertsekas2000" id="toc-questions-from-bertsekas2000" class="nav-link active" data-scroll-target="#questions-from-bertsekas2000">Questions from <span class="citation" data-cites="Bertsekas2000">Bertsekas and Tsitsiklis (<span>2000</span>)</span></a></li>
+  <li><a href="#questions-from-bertsekas2000" id="toc-questions-from-bertsekas2000" class="nav-link active" data-scroll-target="#questions-from-bertsekas2000">Questions from <span class="citation" data-cites="Bertsekas2000">Bertsekas and Tsitsiklis (2000)</span></a></li>
   <li><a href="#monte-hall-simulation" id="toc-monte-hall-simulation" class="nav-link" data-scroll-target="#monte-hall-simulation">Monte Hall simulation</a></li>
   </ul>
 </nav>
@@ -259,8 +264,7 @@ div.csl-indent {
 <p><strong>Example 1.11</strong> A class consisting of 4 graduate and 12 undergraduate students is randomly divided into 4 groups of 4. What is the probability that each group includes a graduate student? We interpret randomly to mean that given the assignment of some students to certain slots, any of the remaining students is equally likely to be assigned to any of the remaining slots.</p>
 </div>
 <p><strong>Solution</strong>:</p>
-<p>At the beginning we have 16 different slots, where each group takes up 4 slots. Let <span class="math inline">G</span> be the event that every group has one grad student.</p>
-<p><span class="math display">
+<p>At the beginning we have 16 different slots, where each group takes up 4 slots. Let <span class="math inline">G</span> be the event that every group has one grad student. <span class="math display">
 \begin{align}
 A_0 = \text{\{Grad student 1 is in different groups, but $P(A_0)=1$\}}  \nonumber \\
 A_1 = \text{\{Grad student 1 and 2 are in different groups\}}  \nonumber \\
@@ -275,8 +279,7 @@ P(A_1) = P(A_0 \cap A_1)=P(A_0)P(A_1|A_0)=P(A_1|A_0)=12/15
 <p>Similarily:</p>
 <p><span class="math display">
 P(A_2) =P(A_1)P(A_2|A_1)=(12/15)*(2*4/14)=12*8/15*14
-</span></p>
-<p><span class="math display">
+</span> <span class="math display">
 P(A_3) = P(A_2)P(A_3|A_2)=P(A_2)*4/13=0.1406
 </span></p>
 <p>Let us see if this is really the case with a simulation</p>
@@ -287,7 +290,7 @@ P(A_3) = P(A_2)P(A_3|A_2)=P(A_2)*4/13=0.1406
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> random</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tqdm <span class="im">import</span> tqdm</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>valid_array <span class="op">=</span> []</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>num_sim <span class="op">=</span> <span class="dv">100000</span> <span class="co"># </span><span class="al">NOTE</span><span class="co"> : remember to set high for better results</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>num_sim <span class="op">=</span> <span class="dv">1000</span> <span class="co"># </span><span class="al">NOTE</span><span class="co"> : remember to set high for better results</span></span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(num_sim):</span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  student_id <span class="op">=</span> np.arange(<span class="dv">1</span>, <span class="dv">17</span>)</span>
@@ -317,7 +320,7 @@ P(A_3) = P(A_2)P(A_3|A_2)=P(A_2)*4/13=0.1406
 <span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Probability is </span><span class="sc">{</span>np<span class="sc">.</span><span class="bu">sum</span>(valid_array)<span class="op">/</span><span class="bu">float</span>(num_sim)<span class="sc">}</span><span class="ss"> after </span><span class="sc">{</span>num_sim<span class="sc">}</span><span class="ss"> trials.'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>Probability is 0.14043 after 100000 trials.</code></pre>
+<pre><code>Probability is 0.127 after 1000 trials.</code></pre>
 </div>
 </div>
 <div class="border">
@@ -325,9 +328,8 @@ P(A_3) = P(A_2)P(A_3|A_2)=P(A_2)*4/13=0.1406
 </div>
 <p><strong>Solution</strong></p>
 <p>Let <span class="math inline">U_i</span> be the event that Alice is up-to-date at the end of week <span class="math inline">i</span> and <span class="math inline">\overline{U}_i</span> be not up-to-date, the goal is the find <span class="math inline">P(U_3)</span>.</p>
-<div class="page-columns page-full"><p>Starting with <span class="math inline">P(U_2)=P(U_2\cap U_1)\bigcup P(U_2\cap\overline{U}_1)</span> which becomes <span class="math inline">P(U_2) = P(U_1)P(U_2|U_1)+ P(\overline{U}_1)P(U_2|\overline{U}_1)</span><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. Since she starts the week up-to-date, then <span class="math inline">P(U_1)=0.8, P(\overline{U}_1) = 0.2</span>.</p><div class="no-row-height column-margin column-container"><li id="fn1" role="doc-endnote"><p><sup>1</sup>&nbsp;Additivity axiom: for disjoint sets <span class="math inline">P(A_1 ∪ A_2 ∪···) = P(A_1) + P(A_2) + ···</span></p></li></div></div>
-<p>Thus, <span class="math inline">P(U_2) = 0.8 * 0.8 + 0.2 * 0.4=0.72</span>. Similarily:</p>
-<p><span class="math display">
+<div class="page-columns page-full"><p>Starting with <span class="math inline">P(U_2)=P(U_2\cap U_1)\bigcup P(U_2\cap\overline{U}_1)</span> which becomes <span class="math inline">P(U_2) = P(U_1)P(U_2|U_1)+ P(\overline{U}_1)P(U_2|\overline{U}_1)</span><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. Since she starts the week up-to-date, then <span class="math inline">P(U_1)=0.8, P(\overline{U}_1) = 0.2</span>.</p><div class="no-row-height column-margin column-container"><li id="fn1"><p><sup>1</sup>&nbsp;Additivity axiom: for disjoint sets <span class="math inline">P(A_1 ∪ A_2 ∪···) = P(A_1) + P(A_2) + ···</span></p></li></div></div>
+<p>Thus, <span class="math inline">P(U_2) = 0.8 * 0.8 + 0.2 * 0.4=0.72</span>. Similarily: <span class="math display">
 P(\overline{U}_2) = P(U_1)P(\overline{U}_2|U_1)+ P(\overline{U}_1)P(\overline{U}_2|\overline{U}_1) \\
 =0.8 * 0.2 + 0.2 * 0.6 = 0.28
 </span></p>
@@ -344,7 +346,7 @@ P(U_3) &amp;= P(U_2)P(U_3|U_2)+ P(\overline{U}_2)P(U_3|\overline{U}_2) \\
 <p>Are the events <span class="math inline">A = \text{\{maximum of the two rolls is 2\}}, B = \text{\{minimum of the two rolls is 2}\}</span> independent?</p>
 </div>
 <p><strong>Solution</strong></p>
-<div class="page-columns page-full"><p>They are not independent because <span class="math inline">P(A) = 3/16, P(B) = 5/16, P(A\cap B) = 1/16 \neq 15/(16*16)</span>. <a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p><div class="no-row-height column-margin column-container"><li id="fn2" role="doc-endnote"><p><sup>2</sup>&nbsp;For independence, we need <span class="math inline">P(A\cap B) = P(A)P(B)</span></p></li></div></div>
+<div class="page-columns page-full"><p>They are not independent because <span class="math inline">P(A) = 3/16, P(B) = 5/16, P(A\cap B) = 1/16 \neq 15/(16*16)</span>. <a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p><div class="no-row-height column-margin column-container"><li id="fn2"><p><sup>2</sup>&nbsp;For independence, we need <span class="math inline">P(A\cap B) = P(A)P(B)</span></p></li></div></div>
 <div class="border">
 <p><strong>Example 1.22.</strong> Network connectivity. A computer network connects two nodes A and B through intermediate nodes C, D, E, F. For every pair of directly connected nodes, say i and j, there is a given probability pij that the link from i to j is up. We assume that link failures are independent of each other. What is the probability that there is a path connecting A and B in which all links are up?</p>
 <p><img src="images/Example1.22.jpg" class="img-fluid"></p>
@@ -359,10 +361,7 @@ P(l_3:=C\rightarrow F \rightarrow B) = 0.95 * 0.85=0.8075 \\
 </span></p>
 <p>The probability that <span class="math inline">l_4 : C\rightarrow B</span> has at least one successful path is :</p>
 <p><span class="math display">P(l_2 \cap l_3)\cup P(l_2 \cap \overline{l_3}) \cup P(\overline{l_2} \cap l_3) = 0.9461</span></p>
-<p><span class="math display">P(l_5 : A\rightarrow l_4) = 0.9 * 0.9461  = 0.85149 </span></p>
-<p>Finally,</p>
-<p><span class="math display">P(l_f) = P(l_1 \cap l_5)\cup P(l_1 \cap \overline{l_5}) \cup P(\overline{l_1} \cap l_5) </span></p>
-<p><span class="math display">P(l_f) = 0.7125 * 0.85149 + 0.7125 * (1- 0.85149) + (1-0.7125 ) * 0.85149=0.9573</span></p>
+<p><span class="math display">P(l_5 : A\rightarrow l_4) = 0.9 * 0.9461  = 0.85149 </span> Finally, <span class="math display">P(l_f) = P(l_1 \cap l_5)\cup P(l_1 \cap \overline{l_5}) \cup P(\overline{l_1} \cap l_5) </span> <span class="math display">P(l_f) = 0.7125 * 0.85149 + 0.7125 * (1- 0.85149) + (1-0.7125 ) * 0.85149=0.9573</span></p>
 <div class="border">
 <p><strong>Example 2.1.</strong> Let <span class="math inline">Y = |X|</span> and let us apply the preceding formula for the PMF <span class="math inline">p_Y</span> to the case where</p>
 <p><span class="math display">
@@ -374,8 +373,7 @@ p_X(x) =
 </span></p>
 <p>The possible values of <span class="math inline">Y</span> are <span class="math inline">y = 0, 1, 2, 3, 4</span>.</p>
 </div>
-<p><strong>Solution</strong></p>
-<p><span class="math display">
+<p><strong>Solution</strong> <span class="math display">
 \begin{align}
 p_Y(0)&amp;= p_X(0) \nonumber \\
 p_Y(1)&amp;= p_X(-1)  + p_X(1) \nonumber \\
@@ -392,19 +390,18 @@ p_Y(y) =
 0, &amp;\text{else} \\
 \end{cases}
 </span></p>
-<div class="page-columns page-full"><p>The mean<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> is then</p><div class="no-row-height column-margin column-container"><li id="fn3" role="doc-endnote"><p><sup>3</sup>&nbsp;<span class="math inline">\bold{E}[X]=\sum_x x p_X (x)</span></p></li></div></div>
+<div class="page-columns page-full"><p>The mean<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> is then</p><div class="no-row-height column-margin column-container"><li id="fn3"><p><sup>3</sup>&nbsp;<span class="math inline">\bold{E}[X]=\sum_x x p_X (x)</span></p></li></div></div>
 <p><span class="math display">
 \bold{E}[Y]=0 * 1/9 + 2/9 + 2*2/9 + 3*2/9 + 4*2/9=20/9
 </span></p>
-<div class="page-columns page-full"><p>The variance<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>, let <span class="math inline">Z=(Y-\bold{E}(Y))^2</span></p><div class="no-row-height column-margin column-container"><li id="fn4" role="doc-endnote"><p><sup>4</sup>&nbsp;<span class="math inline">var(X) = \bold{E}((X-\bold{E}(X))^2)</span></p></li></div></div>
-<p><span class="math display">
+<div class="page-columns page-full"><p>The variance<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>, let <span class="math inline">Z=(Y-\bold{E}(Y))^2</span> <span class="math display">
 p_Z(z) =
 \begin{cases}
 (20/9-1/9)^2, &amp;\text{If $y=0$} \\
 (20/9-2/9)^2, &amp;\text{If $y=1,2,3,4$} \\
 0, &amp;\text{else} \\
 \end{cases}
-</span></p>
+</span></p><div class="no-row-height column-margin column-container"><li id="fn4"><p><sup>4</sup>&nbsp;<span class="math inline">var(X) = \bold{E}((X-\bold{E}(X))^2)</span></p></li></div></div>
 <p>Thus</p>
 <p><span class="math display">
 var(Y) = (18/9)^2  +  2*(18/9)^2 +3*(18/9)^2 +4*(18/9)^2
@@ -412,8 +409,7 @@ var(Y) = (18/9)^2  +  2*(18/9)^2 +3*(18/9)^2 +4*(18/9)^2
 <div class="border">
 <p><strong>Example 2.8.</strong> Average Speed Versus Average Time. If the weather is good (which happens with probability 0.6), Alice walks the 2 miles to class at a speed of V = 5 miles per hour, and otherwise drives her motorcycle at a speed of V = 30 miles per hour. What is the mean of the time T to get to class?</p>
 </div>
-<p><strong>Solution</strong></p>
-<p><span class="math display">
+<p><strong>Solution</strong> <span class="math display">
 p_T(t) =
 \begin{cases}
 0.6 &amp; \text{if $t = 2/5$} \\
@@ -429,7 +425,7 @@ E[T] = 0.6*2/5 + 0.4*2/30
 <p><strong>Example 2.11.</strong> Professor May B. Right often has her facts wrong, and answers each of her students’ questions incorrectly with probability 1/4, independently of other questions. In each lecture May is asked 0, 1, or 2 questions with equal probability 1/3. Let X and Y be the number of questions May is asked and the number of questions she answers wrong in a given lecture, respectively. Construct the joint PMF <span class="math inline">p_{X,Y} (x, y)</span></p>
 </div>
 <p><strong>Solution</strong></p>
-<div class="page-columns page-full"><p>The PMF <span class="math inline">p_{X,Y} (x, y)</span><a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a> can be found by using the multiplication rule<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>:</p><div class="no-row-height column-margin column-container"><li id="fn5" role="doc-endnote"><p><sup>5</sup>&nbsp;Defined as <span class="math inline">p_{X,Y} (x, y) = P(X=x, Y=y)</span></p></li><li id="fn6" role="doc-endnote"><p><sup>6</sup>&nbsp;<span class="math inline">p_{X,Y}(x,y) = p_X(x)p_{Y|X}(y|x)</span></p></li></div></div>
+<div class="page-columns page-full"><p>The PMF <span class="math inline">p_{X,Y} (x, y)</span><a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a> can be found by using the multiplication rule<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>:</p><div class="no-row-height column-margin column-container"><li id="fn5"><p><sup>5</sup>&nbsp;Defined as <span class="math inline">p_{X,Y} (x, y) = P(X=x, Y=y)</span></p></li><li id="fn6"><p><sup>6</sup>&nbsp;<span class="math inline">p_{X,Y}(x,y) = p_X(x)p_{Y|X}(y|x)</span></p></li></div></div>
 <table class="table">
 <tbody>
 <tr class="odd">
@@ -466,8 +462,7 @@ E[T] = 0.6*2/5 + 0.4*2/30
 <p><span class="math display">
 p_X(x) =  \dbinom{4}{x} \left( \frac{1}{6} \right) ^x \left( \frac{5}{6}\right) ^ {4-x}
 </span></p>
-<p><span class="math inline">Y</span> is the number 2’s, so conditioned on <span class="math inline">x</span> (the number of 1’s), the possible choices is limited to <span class="math inline">2,3,4,5,6</span>, and the number of 2’s required becomes <span class="math inline">4-x</span></p>
-<p><span class="math display">
+<p><span class="math inline">Y</span> is the number 2’s, so conditioned on <span class="math inline">x</span> (the number of 1’s), the possible choices is limited to <span class="math inline">2,3,4,5,6</span>, and the number of 2’s required becomes <span class="math inline">4-x</span> <span class="math display">
 p_{Y|X}(y|x) =  \dbinom{4-x}{y} \left( \frac{1}{5} \right) ^y \left( \frac{4}{5}\right) ^ {4-x-y}
 </span></p>
 <p>Thus:</p>
@@ -479,15 +474,34 @@ p_{X|Y}(x,y) =
 \end{cases}
 </span></p>
 <div class="border">
-<p><strong>Example 2.15.</strong> Mean and Variance of the Geometric Random Variable. You write a software program over and over, and each time there is probability <span class="math inline">p</span> that it works correctly, independently from previous attempts. What is the mean and variance of <span class="math inline">X</span>, the number of tries until the program works correctly?</p>
+<p><strong>Example 2.15.</strong> <em>Mean and Variance of the Geometric Random Variable.</em></p>
+<p>You write a software program over and over, and each time there is probability <span class="math inline">p</span> that it works correctly, independently from previous attempts. What is the mean and variance of <span class="math inline">X</span>, the number of tries until the program works correctly?</p>
 </div>
 <p><strong>Solution</strong></p>
-<p><span class="math inline">X</span> is a geometric random variable with PMF:</p>
-<p><span class="math display">
+<p><span class="math inline">X</span> is a geometric random variable with PMF: <span class="math display">
 p_X(k) = (1-p)^{k-1} p  \quad k = 1,2,3,\dots
 </span></p>
-<p><span class="math display">
+<p>The mean is <span class="math display">
 E[X] = \sum_{k=1}^{\infty} k   (1-p)^{k-1} p
+</span></p>
+<p>The variance is</p>
+<p><span class="math display">
+\begin{align}
+var(X) &amp;= E[(X-E[X])^2] \nonumber \\
+       &amp;= \sum_{k=1}^{\infty} (k - E[X])   (1-p)^{k-1}  \nonumber \\
+\end{align}
+</span></p>
+<div class="page-columns page-full"><p>Using the total expectation theroem<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a>. Let <span class="math inline">A_1 = \{\text{first try is a success}\}</span>, and <span class="math inline">A_2 = \{\text{the first try is a failure}\}</span>.</p><div class="no-row-height column-margin column-container"><li id="fn7"><p><sup>7</sup>&nbsp;The conditional expectation of <span class="math inline">X</span> given <span class="math inline">y</span> from <span class="math inline">Y</span> is <span class="math inline">E[X|Y=y] = \sum_x x p_{X|Y}(x | y)</span>. The <strong>Total expectation theroem</strong> is then <span class="math inline">E[X] = \sum_y p_Y(y) E[X|Y=y]</span></p></li></div></div>
+<p>Then <span class="math inline">E[X| X=1] = \sum_x x P(X = x | X=1) = \sum_x x P(X = x \cap X = 1)/P(X=1) = p/p + 0 + 0 + \dots = 1</span>, since only the first value would contribute.</p>
+<p>Similarily,</p>
+<p><span class="math display">
+\begin{align}
+E[X| \{X&gt;1 \}] &amp;= \sum_x x P(X=x \cap X &gt; 1)/P(X &gt; 1)  \\
+&amp;=  1 * P(X=1 \cap X &gt; 1)/P(X &gt; 1) + \\
+&amp;\sum_{x=2}^{\inf} x P(X=x \cap X &gt; 1)/P(X &gt; 1) \\
+&amp;=(1-p)/(1-p) + \\
+&amp;\sum_{x=2}^{\inf} x P(X=x) P(X &gt; 1)/P(X &gt; 1)   \\
+\end{align}
 </span></p>
 </section>
 <section id="monte-hall-simulation" class="level3">
@@ -535,13 +549,9 @@ E[X] = \sum_{k=1}^{\infty} k   (1-p)^{k-1} p
 <span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Probability of winning the car without switching is </span><span class="sc">{</span>mt(<span class="dv">0</span>)<span class="sc">}</span><span class="ss"> '</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>After 100000 games</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Probability of winning the car with switching is 0.66543 </code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Probability of winning the car without switching is 0.33241 </code></pre>
+<pre><code>After 1000 games
+Probability of winning the car with switching is 0.671 
+Probability of winning the car without switching is 0.312 </code></pre>
 </div>
 </div>
 
@@ -624,7 +634,8 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   for (var i=0; i<noterefs.length; i++) {
     const ref = noterefs[i];
     tippyHover(ref, function() {
-      let href = ref.getAttribute('href');
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
       try { href = new URL(href).hash; } catch {}
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);

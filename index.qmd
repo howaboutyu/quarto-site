@@ -1,7 +1,7 @@
 
 ---
 title: "Home"
-image: images/dp.jpg
+image: images/photo_by_pat.jpg
 about:
   template: trestles 
   links:
@@ -31,6 +31,8 @@ Bachelors of Engineering (Hon) | 2012 - 2015
 ## Experience
 
 **Imagr Ltd** | Machine Learning Engineer | September 2018 - September 2022
+
+**Auckland Bioengineering Institute** | Research Assistant |  Mar 2017 – Aug 2018
 
 :::
 
