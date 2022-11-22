@@ -9,6 +9,9 @@ bibliography: ../../references.bib
 html-math-method: katex
 editor:
   render-on-save: true
+
+execute: 
+  freeze: true 
 ---
 ## Tutorials from @miller_introductory_2018
 
@@ -112,7 +115,7 @@ def simulate(V, I, noises=None, tau_ref=None, tau_vth=None, V_th_array=None, G_r
 
 **1b** What is the minimum required applied current for a spike?
 
-The threshold current is
+The equation for the current threshold is
 $$I_{th} = G_L(V_{th} - E_L)$$
 
 ```{python}
@@ -122,7 +125,6 @@ print(f'I_th : {I_th}')
 ```
 
 
-miller_introductory_2020
 ```{python}    
 #| code-fold: true
 import matplotlib.pyplot as plt
@@ -147,34 +149,42 @@ plt.title('Applied current is : $1.01 * I_{th}$ ')
 
 ```
 
+By plotting the voltage vs time plots the equation for the current threshold is validated; we can see that for slightly (1%) below the threshold current $I_{th}$ no spikes are generated, but when increased to higher than the threshold current, many spikes can be seen.
+
+**1c&d** Change $I_{app}$ and measure the average firing rate ($f$) varies in the range from $0$ to $100Hz$, and then verify the equation.
+
+
+
 
 ```{python}
 #| code-fold: true
 fr_array = []
 fr_eq_array = []    
 def fr_func(I):
-    value = tau_m * np.log(I * R_m + E_L - V_reset) - tau_m * np.log(I*R_m + E_L-V_th)
+    value = tau_m * np.log(max(0.00001, I * R_m + E_L - V_reset)) - tau_m * np.log(max(0.000001, I*R_m + E_L-V_th))
     value = 1./value
     return value
 
 
-for I in np.arange(4e-10, 4e-8, 1e-9):
+for I in np.arange(4e-10, 1e-8, 1e-9):
     V_3 = np.copy(V)
     fr = simulate(V_3, np.ones_like(times) * I)
     fr_array.append(fr)
     fr_eq = fr_func(I)
     fr_eq_array.append(fr_eq)
-plt.figure()
-plt.plot(np.arange(4e-10, 4e-8, 1e-9),fr_array)
+fig = plt.figure()
+
+plt.plot(np.arange(4e-10, 1e-8, 1e-9),fr_array)
 
 
-plt.plot(np.arange(4e-10, 4e-8, 1e-9),fr_eq_array)
+plt.plot(np.arange(4e-10, 1e-8, 1e-9),fr_eq_array)
 
-     
+plt.xlabel('Applied current $I_{app}$')
+plt.ylabel('Firing rate $f(hz)$') 
+_=plt.title('$I_{app}$ vs firing rate $f$')
 ```
 
-
-
+Add a noise term for each time step.
 
 ```{python}
 #| code-fold: true
@@ -182,21 +192,21 @@ V_4 = np.copy(V)
 
 noises_fn = lambda sigma_I:  np.random.normal(size=times.shape) * sigma_I * np.sqrt(dt)
 
+plt.figure()
 for sigma_I in range(0, 5,):
     fr_array = []
-    for I in np.arange(4e-10, 4e-8, 1e-9):
+    for I in np.arange(4e-10, 1e-8, 1e-9):
         V_4 = np.copy(V)
         fr = simulate(V_4, np.ones_like(times) * I, noises_fn(sigma_I))
         fr_array.append(fr)
     
         
 
-    plt.figure()
-    plt.plot(np.arange(4e-10, 4e-8, 1e-9), fr_array)
+    plt.plot(np.arange(4e-10, 1e-8, 1e-9), fr_array)
 
 ```
 
-Looks like as `sigma_I` increases the fr curve's slope decreases.
+Looks like as `sigma_I` increases the f-r curve slope is decreased, also the curve is less smooth.
 
 
 ## Tutorial 2.2

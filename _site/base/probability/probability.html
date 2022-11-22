@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Welcome - Basic Probability</title>
+<title>Home - Basic Probability</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -180,7 +180,7 @@ div.csl-indent {
   <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation docked overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
-      <a href="../../">Welcome</a> 
+      <a href="../../">Home</a> 
     </div>
       </div>
       <div class="mt-2 flex-shrink-0 align-items-center">
@@ -190,17 +190,9 @@ div.csl-indent {
       </div>
     <div class="sidebar-menu-container"> 
     <ul class="list-unstyled mt-1">
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../../index.html" class="sidebar-item-text sidebar-link">Home</a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  blog.qmd
-  </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">Notes and exercises</a>
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">Projects</a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -208,7 +200,27 @@ div.csl-indent {
       <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../../blog/blog.html" class="sidebar-item-text sidebar-link">Blogs yo</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">Notes and exercises</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../../base/probability/probability.html" class="sidebar-item-text sidebar-link active">Basic Probability</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../base/CompNeuro/cns.html" class="sidebar-item-text sidebar-link">Computation neural science</a>
   </div>
 </li>
       </ul>
@@ -278,7 +290,7 @@ P(A_3) = P(A_2)P(A_3|A_2)=P(A_2)*4/13=0.1406
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> random</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tqdm <span class="im">import</span> tqdm</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>valid_array <span class="op">=</span> []</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>num_sim <span class="op">=</span> <span class="dv">100000</span> <span class="co"># </span><span class="al">NOTE</span><span class="co"> : remember to set high for better results</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>num_sim <span class="op">=</span> <span class="dv">1000</span> <span class="co"># </span><span class="al">NOTE</span><span class="co"> : remember to set high for better results</span></span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(num_sim):</span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  student_id <span class="op">=</span> np.arange(<span class="dv">1</span>, <span class="dv">17</span>)</span>
@@ -308,7 +320,7 @@ P(A_3) = P(A_2)P(A_3|A_2)=P(A_2)*4/13=0.1406
 <span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Probability is </span><span class="sc">{</span>np<span class="sc">.</span><span class="bu">sum</span>(valid_array)<span class="op">/</span><span class="bu">float</span>(num_sim)<span class="sc">}</span><span class="ss"> after </span><span class="sc">{</span>num_sim<span class="sc">}</span><span class="ss"> trials.'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>Probability is 0.14043 after 100000 trials.</code></pre>
+<pre><code>Probability is 0.127 after 1000 trials.</code></pre>
 </div>
 </div>
 <div class="border">
@@ -462,14 +474,34 @@ p_{X|Y}(x,y) =
 \end{cases}
 </span></p>
 <div class="border">
-<p><strong>Example 2.15.</strong> Mean and Variance of the Geometric Random Variable. You write a software program over and over, and each time there is probability <span class="math inline">p</span> that it works correctly, independently from previous attempts. What is the mean and variance of <span class="math inline">X</span>, the number of tries until the program works correctly?</p>
+<p><strong>Example 2.15.</strong> <em>Mean and Variance of the Geometric Random Variable.</em></p>
+<p>You write a software program over and over, and each time there is probability <span class="math inline">p</span> that it works correctly, independently from previous attempts. What is the mean and variance of <span class="math inline">X</span>, the number of tries until the program works correctly?</p>
 </div>
 <p><strong>Solution</strong></p>
 <p><span class="math inline">X</span> is a geometric random variable with PMF: <span class="math display">
 p_X(k) = (1-p)^{k-1} p  \quad k = 1,2,3,\dots
 </span></p>
-<p><span class="math display">
+<p>The mean is <span class="math display">
 E[X] = \sum_{k=1}^{\infty} k   (1-p)^{k-1} p
+</span></p>
+<p>The variance is</p>
+<p><span class="math display">
+\begin{align}
+var(X) &amp;= E[(X-E[X])^2] \nonumber \\
+       &amp;= \sum_{k=1}^{\infty} (k - E[X])   (1-p)^{k-1}  \nonumber \\
+\end{align}
+</span></p>
+<div class="page-columns page-full"><p>Using the total expectation theroem<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a>. Let <span class="math inline">A_1 = \{\text{first try is a success}\}</span>, and <span class="math inline">A_2 = \{\text{the first try is a failure}\}</span>.</p><div class="no-row-height column-margin column-container"><li id="fn7"><p><sup>7</sup>&nbsp;The conditional expectation of <span class="math inline">X</span> given <span class="math inline">y</span> from <span class="math inline">Y</span> is <span class="math inline">E[X|Y=y] = \sum_x x p_{X|Y}(x | y)</span>. The <strong>Total expectation theroem</strong> is then <span class="math inline">E[X] = \sum_y p_Y(y) E[X|Y=y]</span></p></li></div></div>
+<p>Then <span class="math inline">E[X| X=1] = \sum_x x P(X = x | X=1) = \sum_x x P(X = x \cap X = 1)/P(X=1) = p/p + 0 + 0 + \dots = 1</span>, since only the first value would contribute.</p>
+<p>Similarily,</p>
+<p><span class="math display">
+\begin{align}
+E[X| \{X&gt;1 \}] &amp;= \sum_x x P(X=x \cap X &gt; 1)/P(X &gt; 1)  \\
+&amp;=  1 * P(X=1 \cap X &gt; 1)/P(X &gt; 1) + \\
+&amp;\sum_{x=2}^{\inf} x P(X=x \cap X &gt; 1)/P(X &gt; 1) \\
+&amp;=(1-p)/(1-p) + \\
+&amp;\sum_{x=2}^{\inf} x P(X=x) P(X &gt; 1)/P(X &gt; 1)   \\
+\end{align}
 </span></p>
 </section>
 <section id="monte-hall-simulation" class="level3">
@@ -517,13 +549,9 @@ E[X] = \sum_{k=1}^{\infty} k   (1-p)^{k-1} p
 <span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Probability of winning the car without switching is </span><span class="sc">{</span>mt(<span class="dv">0</span>)<span class="sc">}</span><span class="ss"> '</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>After 100000 games</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Probability of winning the car with switching is 0.66543 </code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Probability of winning the car without switching is 0.33241 </code></pre>
+<pre><code>After 1000 games
+Probability of winning the car with switching is 0.671 
+Probability of winning the car without switching is 0.312 </code></pre>
 </div>
 </div>
 

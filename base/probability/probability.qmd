@@ -59,7 +59,7 @@ import numpy as np
 import random
 from tqdm import tqdm
 valid_array = []
-num_sim = 100000 # NOTE : remember to set high for better results
+num_sim = 1000 # NOTE : remember to set high for better results
 
 for _ in range(num_sim):
   student_id = np.arange(1, 17)
@@ -89,7 +89,6 @@ for _ in range(num_sim):
 print(f'Probability is {np.sum(valid_array)/float(num_sim)} after {num_sim} trials.')
 
 ```
-
 
 
 ::: {.border} 
@@ -306,7 +305,8 @@ p_{X|Y}(x,y) =
 $$
 
 ::: {.border}
-**Example 2.15.** Mean and Variance of the Geometric Random Variable.
+**Example 2.15.** *Mean and Variance of the Geometric Random Variable.*
+
 You write a software program over and over, and each time there is probability $p$
 that it works correctly, independently from previous attempts. What is the mean
 and variance of $X$, the number of tries until the program works correctly?
@@ -320,9 +320,50 @@ $$
 p_X(k) = (1-p)^{k-1} p  \quad k = 1,2,3,\dots
 $$
 
+The mean is 
 $$
 E[X] = \sum_{k=1}^{\infty} k   (1-p)^{k-1} p
 $$
+
+The variance is
+
+$$
+\begin{align}
+var(X) &= E[(X-E[X])^2] \nonumber \\
+       &= \sum_{k=1}^{\infty} (k - E[X])   (1-p)^{k-1}  \nonumber \\
+\end{align}
+$$
+
+Using the total expectation theroem^[The conditional expectation of $X$ given $y$ from $Y$ is $E[X|Y=y] = \sum_x x p_{X|Y}(x | y)$. The **Total expectation theroem** is then $E[X] = \sum_y p_Y(y) E[X|Y=y]$]. Let $A_1 = \{\text{first try is a success}\}$, and $A_2 = \{\text{the first try is a failure}\}$. 
+
+Then $E[X| X=1] = \sum_x x P(X = x | X=1) = \sum_x x P(X = x \cap X = 1)/P(X=1) = p/p + 0 + 0 + \dots = 1$, since only the first value would contribute.
+
+Similarily, 
+
+$$
+\begin{align}
+E[X| \{X>1 \}] &= \sum_x x P(X=x \cap X > 1)/P(X > 1)  \\
+&=  1 * P(X=1 \cap X > 1)/P(X > 1) + \\ 
+&\sum_{x=2}^{\inf} x P(X=x \cap X > 1)/P(X > 1) \\
+&=(1-p)/(1-p) + \\
+&\sum_{x=2}^{\inf} x P(X=x) P(X > 1)/P(X > 1)   \\
+\end{align} 
+$$
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ### Monte Hall simulation
 ```{python}

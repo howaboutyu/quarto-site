@@ -1,0 +1,11 @@
+{
+  "hash": "0deab2176d0281b89a6839c62afd35e1",
+  "result": {
+    "markdown": "---\ntitle: Blogs yo\nformat: html\nreference-location: margin\nhtml-math-method: katex\neditor:\n  render-on-save: true\nexecute:\n  freeze: true\ncomments:\n  hypothesis: true\n---\n\n## Nerf with jax \nGithub: \\\nBlog: \\\n\n[example](https://google.com){.external target=\"_blank\"}\n\n[blog](nerf/nerf.qmd)\n\n",
+    "supporting": [
+      "blog_files"
+    ],
+    "filters": [],
+    "includes": {}
+  }
+}

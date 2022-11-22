@@ -1,2 +1,4 @@
 /.quarto/
 *env*
+*npz
+*npy*

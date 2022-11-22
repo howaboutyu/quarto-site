@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Welcome - Computation neural science</title>
+<title>Home - Computation neural science</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -180,7 +180,7 @@ div.csl-indent {
   <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation docked overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
-      <a href="../../">Welcome</a> 
+      <a href="../../">Home</a> 
     </div>
       </div>
       <div class="mt-2 flex-shrink-0 align-items-center">
@@ -190,22 +190,29 @@ div.csl-indent {
       </div>
     <div class="sidebar-menu-container"> 
     <ul class="list-unstyled mt-1">
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../../index.html" class="sidebar-item-text sidebar-link">Home</a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  blog.qmd
-  </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">Notes and exercises</a>
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">Projects</a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
       <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../blog/blog.html" class="sidebar-item-text sidebar-link">Blogs yo</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">Notes and exercises</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../../base/probability/probability.html" class="sidebar-item-text sidebar-link">Basic Probability</a>
@@ -349,7 +356,7 @@ div.csl-indent {
 </details>
 </div>
 <p><strong>1b</strong> What is the minimum required applied current for a spike?</p>
-<p>The threshold current is <span class="math display">I_{th} = G_L(V_{th} - E_L)</span></p>
+<p>The equation for the current threshold is <span class="math display">I_{th} = G_L(V_{th} - E_L)</span></p>
 <div class="cell" data-execution_count="2">
 <details>
 <summary>Code</summary>
@@ -360,7 +367,6 @@ div.csl-indent {
 <pre><code>I_th : 4e-09</code></pre>
 </div>
 </div>
-<p>miller_introductory_2020</p>
 <div class="cell" data-execution_count="3">
 <details>
 <summary>Code</summary>
@@ -387,79 +393,71 @@ div.csl-indent {
 <pre><code>Text(0.5, 1.0, 'Applied current is : $1.01 * I_{th}$ ')</code></pre>
 </div>
 <div class="cell-output cell-output-display">
-<p><img src="cns_files/figure-html/cell-4-output-2.png" width="625" height="450"></p>
+<p><img src="cns_files/figure-html/cell-4-output-2.png" width="625" height="443"></p>
 </div>
 <div class="cell-output cell-output-display">
-<p><img src="cns_files/figure-html/cell-4-output-3.png" width="625" height="450"></p>
+<p><img src="cns_files/figure-html/cell-4-output-3.png" width="625" height="443"></p>
 </div>
 </div>
+<p>By plotting the voltage vs time plots the equation for the current threshold is validated; we can see that for slightly (1%) below the threshold current <span class="math inline">I_{th}</span> no spikes are generated, but when increased to higher than the threshold current, many spikes can be seen.</p>
+<p><strong>1c&amp;d</strong> Change <span class="math inline">I_{app}</span> and measure the average firing rate (<span class="math inline">f</span>) varies in the range from <span class="math inline">0</span> to <span class="math inline">100Hz</span>, and then verify the equation.</p>
 <div class="cell" data-execution_count="4">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>fr_array <span class="op">=</span> []</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>fr_eq_array <span class="op">=</span> []    </span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> fr_func(I):</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    value <span class="op">=</span> tau_m <span class="op">*</span> np.log(I <span class="op">*</span> R_m <span class="op">+</span> E_L <span class="op">-</span> V_reset) <span class="op">-</span> tau_m <span class="op">*</span> np.log(I<span class="op">*</span>R_m <span class="op">+</span> E_L<span class="op">-</span>V_th)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    value <span class="op">=</span> tau_m <span class="op">*</span> np.log(<span class="bu">max</span>(<span class="fl">0.00001</span>, I <span class="op">*</span> R_m <span class="op">+</span> E_L <span class="op">-</span> V_reset)) <span class="op">-</span> tau_m <span class="op">*</span> np.log(<span class="bu">max</span>(<span class="fl">0.000001</span>, I<span class="op">*</span>R_m <span class="op">+</span> E_L<span class="op">-</span>V_th))</span>
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    value <span class="op">=</span> <span class="fl">1.</span><span class="op">/</span>value</span>
 <span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> value</span>
 <span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> I <span class="kw">in</span> np.arange(<span class="fl">4e-10</span>, <span class="fl">4e-8</span>, <span class="fl">1e-9</span>):</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> I <span class="kw">in</span> np.arange(<span class="fl">4e-10</span>, <span class="fl">1e-8</span>, <span class="fl">1e-9</span>):</span>
 <span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    V_3 <span class="op">=</span> np.copy(V)</span>
 <span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    fr <span class="op">=</span> simulate(V_3, np.ones_like(times) <span class="op">*</span> I)</span>
 <span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    fr_array.append(fr)</span>
 <span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    fr_eq <span class="op">=</span> fr_func(I)</span>
 <span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    fr_eq_array.append(fr_eq)</span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>plt.figure()</span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>plt.plot(np.arange(<span class="fl">4e-10</span>, <span class="fl">4e-8</span>, <span class="fl">1e-9</span>),fr_array)</span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> plt.figure()</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>plt.plot(np.arange(<span class="fl">4e-10</span>, <span class="fl">1e-8</span>, <span class="fl">1e-9</span>),fr_array)</span>
 <span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>plt.plot(np.arange(<span class="fl">4e-10</span>, <span class="fl">4e-8</span>, <span class="fl">1e-9</span>),fr_eq_array)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>plt.plot(np.arange(<span class="fl">4e-10</span>, <span class="fl">1e-8</span>, <span class="fl">1e-9</span>),fr_eq_array)</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Applied current $I_</span><span class="sc">{app}</span><span class="st">$'</span>)</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Firing rate $f(hz)$'</span>) </span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>_<span class="op">=</span>plt.title(<span class="st">'$I_</span><span class="sc">{app}</span><span class="st">$ vs firing rate $f$'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-stderr">
-<pre><code>/var/folders/kw/935d153j3_g5t28ymwfzbg680000gn/T/ipykernel_41746/581400408.py:4: RuntimeWarning: invalid value encountered in log
-  value = tau_m * np.log(I * R_m + E_L - V_reset) - tau_m * np.log(I*R_m + E_L-V_th)</code></pre>
-</div>
 <div class="cell-output cell-output-display">
-<p><img src="cns_files/figure-html/cell-5-output-2.png" width="583" height="428"></p>
+<p><img src="cns_files/figure-html/cell-5-output-1.png" width="595" height="446"></p>
 </div>
 </div>
+<p>Add a noise term for each time step.</p>
 <div class="cell" data-execution_count="5">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>V_4 <span class="op">=</span> np.copy(V)</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>noises_fn <span class="op">=</span> <span class="kw">lambda</span> sigma_I:  np.random.normal(size<span class="op">=</span>times.shape) <span class="op">*</span> sigma_I <span class="op">*</span> np.sqrt(dt)</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> sigma_I <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, <span class="dv">5</span>,):</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    fr_array <span class="op">=</span> []</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> I <span class="kw">in</span> np.arange(<span class="fl">4e-10</span>, <span class="fl">4e-8</span>, <span class="fl">1e-9</span>):</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>        V_4 <span class="op">=</span> np.copy(V)</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>        fr <span class="op">=</span> simulate(V_4, np.ones_like(times) <span class="op">*</span> I, noises_fn(sigma_I))</span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>        fr_array.append(fr)</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    plt.figure()</span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    plt.plot(np.arange(<span class="fl">4e-10</span>, <span class="fl">4e-8</span>, <span class="fl">1e-9</span>), fr_array)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>V_4 <span class="op">=</span> np.copy(V)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>noises_fn <span class="op">=</span> <span class="kw">lambda</span> sigma_I:  np.random.normal(size<span class="op">=</span>times.shape) <span class="op">*</span> sigma_I <span class="op">*</span> np.sqrt(dt)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>plt.figure()</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> sigma_I <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, <span class="dv">5</span>,):</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    fr_array <span class="op">=</span> []</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> I <span class="kw">in</span> np.arange(<span class="fl">4e-10</span>, <span class="fl">1e-8</span>, <span class="fl">1e-9</span>):</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>        V_4 <span class="op">=</span> np.copy(V)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>        fr <span class="op">=</span> simulate(V_4, np.ones_like(times) <span class="op">*</span> I, noises_fn(sigma_I))</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>        fr_array.append(fr)</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    plt.plot(np.arange(<span class="fl">4e-10</span>, <span class="fl">1e-8</span>, <span class="fl">1e-9</span>), fr_array)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-display">
-<p><img src="cns_files/figure-html/cell-6-output-1.png" width="583" height="428"></p>
-</div>
-<div class="cell-output cell-output-display">
-<p><img src="cns_files/figure-html/cell-6-output-2.png" width="583" height="428"></p>
-</div>
-<div class="cell-output cell-output-display">
-<p><img src="cns_files/figure-html/cell-6-output-3.png" width="583" height="428"></p>
-</div>
-<div class="cell-output cell-output-display">
-<p><img src="cns_files/figure-html/cell-6-output-4.png" width="583" height="428"></p>
-</div>
-<div class="cell-output cell-output-display">
-<p><img src="cns_files/figure-html/cell-6-output-5.png" width="583" height="428"></p>
+<p><img src="cns_files/figure-html/cell-6-output-1.png" width="575" height="421"></p>
 </div>
 </div>
-<p>Looks like as <code>sigma_I</code> increases the fr curve’s slope decreases.</p>
+<p>Looks like as <code>sigma_I</code> increases the f-r curve slope is decreased, also the curve is less smooth.</p>
 </section>
 </section>
 <section id="tutorial-2.2" class="level2">
@@ -467,78 +465,78 @@ div.csl-indent {
 <div class="cell" data-execution_count="6">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>C_m <span class="op">=</span> <span class="fl">0.1e-9</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>E_L <span class="op">=</span> <span class="op">-</span><span class="fl">70.e-3</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>R_m <span class="op">=</span> <span class="fl">100.e6</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>G_L <span class="op">=</span> <span class="fl">1.</span><span class="op">/</span>R_m</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>V_th <span class="op">=</span> <span class="op">-</span><span class="fl">50e-3</span></span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>V_reset <span class="op">=</span> <span class="op">-</span><span class="fl">65.e-3</span></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>tau_m <span class="op">=</span> C_m<span class="op">/</span>G_L</span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>I_th <span class="op">=</span> G_L<span class="op">*</span>(V_th <span class="op">-</span> E_L)</span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>fr_array_1 <span class="op">=</span> [] <span class="co"># Forced voltage clamp method</span></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>mean_V_1 <span class="op">=</span> []</span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>fr_array_2 <span class="op">=</span> [] <span class="co"># Threshold increase</span></span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>mean_V_2 <span class="op">=</span> []</span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>fr_array_3 <span class="op">=</span> [] <span class="co"># Threshold increase</span></span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>mean_V_3 <span class="op">=</span> []</span>
-<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>I_array <span class="op">=</span> np.arange(<span class="fl">100e-12</span>, <span class="fl">600e-12</span>, <span class="fl">50e-12</span>)</span>
-<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> I <span class="kw">in</span> I_array:</span>
-<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    V_1 <span class="op">=</span> np.copy(V)</span>
-<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    fr_1 <span class="op">=</span> simulate(V_1, np.ones_like(times) <span class="op">*</span> I, tau_ref<span class="op">=</span><span class="fl">2.5e-3</span>)</span>
-<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>    fr_array_1.append(fr_1)</span>
-<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>    mean_V_1.append(np.mean(V_1))</span>
-<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>    V_2 <span class="op">=</span> np.copy(V)</span>
-<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>    V_th_array <span class="op">=</span> np.zeros_like(times)</span>
-<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>    V_th_array[<span class="dv">0</span>] <span class="op">=</span> V_th</span>
-<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>    fr_2,dvthdt_array <span class="op">=</span> simulate(V_2, np.ones_like(times) <span class="op">*</span> I, tau_vth<span class="op">=</span><span class="fl">1e-3</span>, V_th_array<span class="op">=</span>V_th_array)</span>
-<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>    fr_array_2.append(fr_2)</span>
-<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>    mean_V_2.append(np.mean(V_2))</span>
-<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>    V_3 <span class="op">=</span> np.copy(V)</span>
-<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>    V_th_array <span class="op">=</span> np.zeros_like(times)</span>
-<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>    G_ref <span class="op">=</span> np.zeros_like(times)</span>
-<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>    V_th_array[<span class="dv">0</span>] <span class="op">=</span> V_th</span>
-<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a>    G_ref[<span class="dv">0</span>] <span class="op">=</span> <span class="fl">0.</span></span>
-<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a>    fr_3,_ <span class="op">=</span> simulate(V_3, np.ones_like(times) <span class="op">*</span> I, tau_vth<span class="op">=</span><span class="fl">1e-3</span>, V_th_array<span class="op">=</span>V_th_array, G_ref<span class="op">=</span>G_ref, tau_Gref<span class="op">=</span><span class="fl">0.2e-3</span>)</span>
-<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(fr_3)</span>
-<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a>    fr_array_3.append(fr_3)</span>
-<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a>    mean_V_3.append(np.mean(V_3))</span>
-<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> plt.figure().suptitle(<span class="st">'current vs fr'</span>)</span>
-<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a>plt.plot(I_array, fr_array_1, label<span class="op">=</span><span class="st">'forced voltage clamp'</span>)</span>
-<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a>plt.plot(I_array, fr_array_2, label<span class="op">=</span><span class="st">'threshold increase'</span>)</span>
-<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a>plt.plot(I_array, fr_array_3, label<span class="op">=</span><span class="st">'refractory conductance'</span>)</span>
-<span id="cb9-49"><a href="#cb9-49" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'I'</span>)</span>
-<span id="cb9-50"><a href="#cb9-50" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'fr'</span>)</span>
-<span id="cb9-51"><a href="#cb9-51" aria-hidden="true" tabindex="-1"></a>plt.legend(loc<span class="op">=</span><span class="st">'lower right'</span>)</span>
-<span id="cb9-52"><a href="#cb9-52" aria-hidden="true" tabindex="-1"></a>plt.figure().suptitle(<span class="st">'current vs mean V'</span>)</span>
-<span id="cb9-53"><a href="#cb9-53" aria-hidden="true" tabindex="-1"></a>plt.plot(I_array, mean_V_1,  label<span class="op">=</span><span class="st">'forced voltage clamp'</span>)</span>
-<span id="cb9-54"><a href="#cb9-54" aria-hidden="true" tabindex="-1"></a>plt.plot(I_array, mean_V_2, label<span class="op">=</span><span class="st">'threshold increase'</span>)</span>
-<span id="cb9-55"><a href="#cb9-55" aria-hidden="true" tabindex="-1"></a>plt.plot(I_array, mean_V_3, label<span class="op">=</span><span class="st">'refractory'</span>)</span>
-<span id="cb9-56"><a href="#cb9-56" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'I'</span>)</span>
-<span id="cb9-57"><a href="#cb9-57" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Mean V'</span>)</span>
-<span id="cb9-58"><a href="#cb9-58" aria-hidden="true" tabindex="-1"></a>plt.legend(loc<span class="op">=</span><span class="st">'lower right'</span>)</span>
-<span id="cb9-59"><a href="#cb9-59" aria-hidden="true" tabindex="-1"></a>plt.figure().suptitle(<span class="st">'  fr vs mean V'</span>)</span>
-<span id="cb9-60"><a href="#cb9-60" aria-hidden="true" tabindex="-1"></a>plt.plot( fr_array_1,mean_V_1, label<span class="op">=</span><span class="st">'forced voltage clamp'</span>)</span>
-<span id="cb9-61"><a href="#cb9-61" aria-hidden="true" tabindex="-1"></a>plt.plot( fr_array_2,mean_V_2,label<span class="op">=</span><span class="st">'threshold increase'</span>)</span>
-<span id="cb9-62"><a href="#cb9-62" aria-hidden="true" tabindex="-1"></a>plt.plot( fr_array_3,mean_V_3,label<span class="op">=</span><span class="st">'refractory'</span>)</span>
-<span id="cb9-63"><a href="#cb9-63" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'fr'</span>)</span>
-<span id="cb9-64"><a href="#cb9-64" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Mean V'</span>)</span>
-<span id="cb9-65"><a href="#cb9-65" aria-hidden="true" tabindex="-1"></a>plt.legend(loc<span class="op">=</span><span class="st">'lower right'</span>)</span>
-<span id="cb9-66"><a href="#cb9-66" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-67"><a href="#cb9-67" aria-hidden="true" tabindex="-1"></a>plt.figure().suptitle(<span class="st">'  V vst '</span>)</span>
-<span id="cb9-68"><a href="#cb9-68" aria-hidden="true" tabindex="-1"></a>plt.plot( times,V_1, label<span class="op">=</span><span class="st">'forced voltage clamp'</span>)</span>
-<span id="cb9-69"><a href="#cb9-69" aria-hidden="true" tabindex="-1"></a><span class="co">#plt.plot( times,V_2,label='threshold increase')</span></span>
-<span id="cb9-70"><a href="#cb9-70" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'fr'</span>)</span>
-<span id="cb9-71"><a href="#cb9-71" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Mean V'</span>)</span>
-<span id="cb9-72"><a href="#cb9-72" aria-hidden="true" tabindex="-1"></a>plt.legend(loc<span class="op">=</span><span class="st">'lower right'</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>C_m <span class="op">=</span> <span class="fl">0.1e-9</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>E_L <span class="op">=</span> <span class="op">-</span><span class="fl">70.e-3</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>R_m <span class="op">=</span> <span class="fl">100.e6</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>G_L <span class="op">=</span> <span class="fl">1.</span><span class="op">/</span>R_m</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>V_th <span class="op">=</span> <span class="op">-</span><span class="fl">50e-3</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>V_reset <span class="op">=</span> <span class="op">-</span><span class="fl">65.e-3</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>tau_m <span class="op">=</span> C_m<span class="op">/</span>G_L</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>I_th <span class="op">=</span> G_L<span class="op">*</span>(V_th <span class="op">-</span> E_L)</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>fr_array_1 <span class="op">=</span> [] <span class="co"># Forced voltage clamp method</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>mean_V_1 <span class="op">=</span> []</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>fr_array_2 <span class="op">=</span> [] <span class="co"># Threshold increase</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>mean_V_2 <span class="op">=</span> []</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>fr_array_3 <span class="op">=</span> [] <span class="co"># Threshold increase</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>mean_V_3 <span class="op">=</span> []</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>I_array <span class="op">=</span> np.arange(<span class="fl">100e-12</span>, <span class="fl">600e-12</span>, <span class="fl">50e-12</span>)</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> I <span class="kw">in</span> I_array:</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    V_1 <span class="op">=</span> np.copy(V)</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    fr_1 <span class="op">=</span> simulate(V_1, np.ones_like(times) <span class="op">*</span> I, tau_ref<span class="op">=</span><span class="fl">2.5e-3</span>)</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>    fr_array_1.append(fr_1)</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>    mean_V_1.append(np.mean(V_1))</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>    V_2 <span class="op">=</span> np.copy(V)</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>    V_th_array <span class="op">=</span> np.zeros_like(times)</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>    V_th_array[<span class="dv">0</span>] <span class="op">=</span> V_th</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>    fr_2,dvthdt_array <span class="op">=</span> simulate(V_2, np.ones_like(times) <span class="op">*</span> I, tau_vth<span class="op">=</span><span class="fl">1e-3</span>, V_th_array<span class="op">=</span>V_th_array)</span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>    fr_array_2.append(fr_2)</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>    mean_V_2.append(np.mean(V_2))</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>    V_3 <span class="op">=</span> np.copy(V)</span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>    V_th_array <span class="op">=</span> np.zeros_like(times)</span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>    G_ref <span class="op">=</span> np.zeros_like(times)</span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>    V_th_array[<span class="dv">0</span>] <span class="op">=</span> V_th</span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>    G_ref[<span class="dv">0</span>] <span class="op">=</span> <span class="fl">0.</span></span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>    fr_3,_ <span class="op">=</span> simulate(V_3, np.ones_like(times) <span class="op">*</span> I, tau_vth<span class="op">=</span><span class="fl">1e-3</span>, V_th_array<span class="op">=</span>V_th_array, G_ref<span class="op">=</span>G_ref, tau_Gref<span class="op">=</span><span class="fl">0.2e-3</span>)</span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(fr_3)</span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>    fr_array_3.append(fr_3)</span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>    mean_V_3.append(np.mean(V_3))</span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> plt.figure().suptitle(<span class="st">'current vs fr'</span>)</span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>plt.plot(I_array, fr_array_1, label<span class="op">=</span><span class="st">'forced voltage clamp'</span>)</span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>plt.plot(I_array, fr_array_2, label<span class="op">=</span><span class="st">'threshold increase'</span>)</span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>plt.plot(I_array, fr_array_3, label<span class="op">=</span><span class="st">'refractory conductance'</span>)</span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'I'</span>)</span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'fr'</span>)</span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a>plt.legend(loc<span class="op">=</span><span class="st">'lower right'</span>)</span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a>plt.figure().suptitle(<span class="st">'current vs mean V'</span>)</span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a>plt.plot(I_array, mean_V_1,  label<span class="op">=</span><span class="st">'forced voltage clamp'</span>)</span>
+<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a>plt.plot(I_array, mean_V_2, label<span class="op">=</span><span class="st">'threshold increase'</span>)</span>
+<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a>plt.plot(I_array, mean_V_3, label<span class="op">=</span><span class="st">'refractory'</span>)</span>
+<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'I'</span>)</span>
+<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Mean V'</span>)</span>
+<span id="cb8-58"><a href="#cb8-58" aria-hidden="true" tabindex="-1"></a>plt.legend(loc<span class="op">=</span><span class="st">'lower right'</span>)</span>
+<span id="cb8-59"><a href="#cb8-59" aria-hidden="true" tabindex="-1"></a>plt.figure().suptitle(<span class="st">'  fr vs mean V'</span>)</span>
+<span id="cb8-60"><a href="#cb8-60" aria-hidden="true" tabindex="-1"></a>plt.plot( fr_array_1,mean_V_1, label<span class="op">=</span><span class="st">'forced voltage clamp'</span>)</span>
+<span id="cb8-61"><a href="#cb8-61" aria-hidden="true" tabindex="-1"></a>plt.plot( fr_array_2,mean_V_2,label<span class="op">=</span><span class="st">'threshold increase'</span>)</span>
+<span id="cb8-62"><a href="#cb8-62" aria-hidden="true" tabindex="-1"></a>plt.plot( fr_array_3,mean_V_3,label<span class="op">=</span><span class="st">'refractory'</span>)</span>
+<span id="cb8-63"><a href="#cb8-63" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'fr'</span>)</span>
+<span id="cb8-64"><a href="#cb8-64" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Mean V'</span>)</span>
+<span id="cb8-65"><a href="#cb8-65" aria-hidden="true" tabindex="-1"></a>plt.legend(loc<span class="op">=</span><span class="st">'lower right'</span>)</span>
+<span id="cb8-66"><a href="#cb8-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-67"><a href="#cb8-67" aria-hidden="true" tabindex="-1"></a>plt.figure().suptitle(<span class="st">'  V vst '</span>)</span>
+<span id="cb8-68"><a href="#cb8-68" aria-hidden="true" tabindex="-1"></a>plt.plot( times,V_1, label<span class="op">=</span><span class="st">'forced voltage clamp'</span>)</span>
+<span id="cb8-69"><a href="#cb8-69" aria-hidden="true" tabindex="-1"></a><span class="co">#plt.plot( times,V_2,label='threshold increase')</span></span>
+<span id="cb8-70"><a href="#cb8-70" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'fr'</span>)</span>
+<span id="cb8-71"><a href="#cb8-71" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Mean V'</span>)</span>
+<span id="cb8-72"><a href="#cb8-72" aria-hidden="true" tabindex="-1"></a>plt.legend(loc<span class="op">=</span><span class="st">'lower right'</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>0.0
@@ -553,19 +551,19 @@ div.csl-indent {
 155.0775387693847</code></pre>
 </div>
 <div class="cell-output cell-output-display" data-execution_count="6">
-<pre><code>&lt;matplotlib.legend.Legend at 0x10ff30880&gt;</code></pre>
+<pre><code>&lt;matplotlib.legend.Legend at 0x11ce453a0&gt;</code></pre>
 </div>
 <div class="cell-output cell-output-display">
-<p><img src="cns_files/figure-html/cell-7-output-3.png" width="593" height="477"></p>
+<p><img src="cns_files/figure-html/cell-7-output-3.png" width="593" height="470"></p>
 </div>
 <div class="cell-output cell-output-display">
-<p><img src="cns_files/figure-html/cell-7-output-4.png" width="617" height="477"></p>
+<p><img src="cns_files/figure-html/cell-7-output-4.png" width="617" height="470"></p>
 </div>
 <div class="cell-output cell-output-display">
-<p><img src="cns_files/figure-html/cell-7-output-5.png" width="617" height="477"></p>
+<p><img src="cns_files/figure-html/cell-7-output-5.png" width="617" height="470"></p>
 </div>
 <div class="cell-output cell-output-display">
-<p><img src="cns_files/figure-html/cell-7-output-6.png" width="625" height="477"></p>
+<p><img src="cns_files/figure-html/cell-7-output-6.png" width="625" height="470"></p>
 </div>
 </div>
 
