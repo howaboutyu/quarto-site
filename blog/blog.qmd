@@ -4,6 +4,11 @@ format: html
 reference-location: margin
 jupyter: python3
 html-math-method: katex
+listing:
+  contents: posts
+  sort: "date desc"
+  type: default
+  categories: true
 editor:
   render-on-save: true
 
@@ -15,11 +20,13 @@ comments:
 ---
 
 
-
+# sec A
 ## Nerf with jax 
-Github: \
-Blog: \
+Github: https://github.com/higgsboost/nerf-jax \
+Blog: [nerf(WIP)](nerf/nerf.qmd)
 
 [example](https://google.com){.external target="_blank"}
 
-[blog](nerf/nerf.qmd)
+# sec B
+## a
+a

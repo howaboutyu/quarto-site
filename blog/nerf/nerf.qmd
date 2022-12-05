@@ -1,5 +1,4 @@
 ---
-title: NeRF with Jax 
 format: html
 reference-location: margin
 jupyter: python3
@@ -7,8 +6,11 @@ bibliography: ../../references.bib
 html-math-method: katex
 editor:
   render-on-save: true
----
 
+title: NeRF - Jax -- WIP
+
+---
+In this blog
 The NeRF paper [@Mildenhall2020], gives 
 
 
