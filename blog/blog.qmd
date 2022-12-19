@@ -22,7 +22,8 @@ comments:
 
 # sec A
 ## Nerf with jax 
-Github: https://github.com/higgsboost/nerf-jax \
+Links:
+* Github: https://github.com/higgsboost/nerf-jax \
 Blog: [nerf(WIP)](nerf/nerf.qmd)
 
 [example](https://google.com){.external target="_blank"}

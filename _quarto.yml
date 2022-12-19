@@ -7,15 +7,15 @@ website:
     style: "docked"
     search: true
 
-    contents:
-      - section: "Projects"
-        contents:
-          - blog/blog.qmd
-      - section: "Notes and exercises"
-        contents:
-          - base/probability/probability.qmd
-          - base/CompNeuro/cns.qmd
-  
+#    contents:
+#      - section: "Projects"
+#        contents:
+#          - blog/blog.qmd
+#      - section: "Notes and exercises"
+#        contents:
+#          - base/probability/probability.qmd
+#          - base/CompNeuro/cns.qmd
+#  
   #navbar:
   #  left:
   #    - href: index.qmd

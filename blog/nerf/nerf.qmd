@@ -13,7 +13,29 @@ title: NeRF - Jax -- WIP
 In this blog
 The NeRF paper [@Mildenhall2020], gives 
 
+```{python}
+from pythreejs import *
+from IPython.display import display
 
+mesh1 = Mesh(SphereBufferGeometry(20, 16, 16), MeshPhysicalMaterial(color='red'), position=[-20, 0, 0])
+mesh2 = Mesh(SphereBufferGeometry(20, 16, 16), MeshPhysicalMaterial(color='green'), position=[20, 0, 0])
+
+view_width = 600
+view_height = 400
+camera = CombinedCamera(position=[0, 0, 60], width=view_width, height=view_height)
+
+key_light = PointLight(position=[-100, 100, 100])
+ambient_light = AmbientLight(intensity=0.4)
+scene = Scene(children=[mesh1, mesh2, key_light, ambient_light, camera])
+renderer = Renderer(scene=scene, camera=camera, controls=[OrbitControls(controlling=camera)],
+                    width=view_width, height=view_height)
+display(renderer)
+
+
+#camera.mode = 'orthographic'
+camera.mode = 'perspective'
+
+```
 
 ### Dataset
 Get the tiny blender nerf dataset
@@ -180,7 +202,7 @@ $$
 
 ## Hierarchical volume sampling
 
-This method is used to sampling points closer to the surface of the objects. They first sample $N_c$ locations using stratified sampling, then they sample a second set $N_f$ using inverse transform sampling of the $\text{PDF}$ created using $w_i = T_i(1-\exp(-\sigma_i \delta_i))$, or
+This method is used to sample points closer to the surface of the objects. They first sample $N_c$ locations using stratified sampling, then they sample a second set $N_f$ using inverse transform sampling of the $\text{PDF}$ created using $w_i = T_i(1-\exp(-\sigma_i \delta_i))$, or
 
 $$
 f_X(x) = \frac{T_x(1-\exp(-\sigma_x \delta_x))}{k} \quad 1 < x < N_c 
@@ -217,7 +239,7 @@ print(f'Area under the curve is :{area}')
 
 The idea behind inverse transform sampling is to use the inverse of the $\text{CDF}$ to generate random numbers for a probability distribution. The $\text{CDF}$ for a random variable $X$ is $F_X(x) = P(X\leq x)$. Then, generate random numbers from a uniform distribution  $Z \sim \text{uni}(0, 1)$, using this with the inverse $\text{CDF}$ (or  $F^{-1}_X(Z)$) to get samples from the original distribution.
 
-Let's plot the cdf and the inverse cdf.
+Let's plot the CDF and the inverse cdf.
 ```{python}
 #| code-fold: true
 cdf = np.cumsum(weights)
