@@ -196,7 +196,10 @@ div.csl-indent {
    
   <ul>
   <li><a href="#questions-from-bertsekas2000" id="toc-questions-from-bertsekas2000" class="nav-link active" data-scroll-target="#questions-from-bertsekas2000">Questions from <span class="citation" data-cites="Bertsekas2000">Bertsekas and Tsitsiklis (2000)</span></a></li>
+  <li><a href="#simulations" id="toc-simulations" class="nav-link" data-scroll-target="#simulations">Simulations</a>
+  <ul class="collapse">
   <li><a href="#monte-hall-simulation" id="toc-monte-hall-simulation" class="nav-link" data-scroll-target="#monte-hall-simulation">Monte Hall simulation</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -219,13 +222,41 @@ div.csl-indent {
 
 </header>
 
-<section id="questions-from-bertsekas2000" class="level3 page-columns page-full">
-<h3 class="anchored" data-anchor-id="questions-from-bertsekas2000">Questions from <span class="citation" data-cites="Bertsekas2000">Bertsekas and Tsitsiklis (<a href="#ref-Bertsekas2000" role="doc-biblioref">2000</a>)</span></h3>
-<div class="border">
-<p><strong>Example 1.11</strong> A class consisting of 4 graduate and 12 undergraduate students is randomly divided into 4 groups of 4. What is the probability that each group includes a graduate student? We interpret randomly to mean that given the assignment of some students to certain slots, any of the remaining students is equally likely to be assigned to any of the remaining slots.</p>
+<section id="questions-from-bertsekas2000" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="questions-from-bertsekas2000">Questions from <span class="citation" data-cites="Bertsekas2000">Bertsekas and Tsitsiklis (<a href="#ref-Bertsekas2000" role="doc-biblioref">2000</a>)</span></h2>
+<div class="callout-tip callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="true" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
 </div>
-<p><strong>Solution</strong>:</p>
-<p>At the beginning we have 16 different slots, where each group takes up 4 slots. Let <span class="math inline">G</span> be the event that every group has one grad student. <span class="math display">
+<div class="callout-caption-container flex-fill">
+Axioms
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse show">
+<div class="callout-body-container callout-body">
+<p>Additivity axiom : for disjoint sets <span class="math inline">P(A_1 ∪ A_2 ∪···) = P(A_1) + P(A_2) + ···</span></p>
+<p>For independence, we need <span class="math inline">P(A\cap B) = P(A)P(B)</span></p>
+</div>
+</div>
+</div>
+<div class="border">
+<p><strong>Example 1.11</strong> A class consisting of 4 graduate and 12 undergraduate students is randomly divided into 4 groups of 4. What is the probability that each group includes a graduate student? We interpret randomly to mean that given the assignment of some students to certain slots, any of the remaining students are equally likely to be assigned to any of the remaining slots.</p>
+</div>
+<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+<strong>Solution</strong>
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>In the beginning, we have 16 different slots, where each group takes up 4 slots. Let <span class="math inline">G</span> be the event that every group has one grad student. <span class="math display">
 \begin{align}
 A_0 = \text{\{Grad student 1 is in different groups, but $P(A_0)=1$\}}  \nonumber \\
 A_1 = \text{\{Grad student 1 and 2 are in different groups\}}  \nonumber \\
@@ -233,7 +264,7 @@ A_2 = \text{\{Grad student 1, 2 and 3 are in different groups\}} \nonumber \\
 A_3 = \text{\{Grad student 1, 2, 3, 4 are in different groups\}} \nonumber
 \end{align}
 </span></p>
-<p>After grad student 1 has been picked only 15 people will be left, and since the available slots left is 3 we have 12 possible locations (3*4=12). Thus:</p>
+<p>After grad student 1 has been picked only 15 people will be left, and since the available slots left are 3 we have 12 possible locations (3*4=12). Thus:</p>
 <p><span class="math display">
 P(A_1) = P(A_0 \cap A_1)=P(A_0)P(A_1|A_0)=P(A_1|A_0)=12/15
 </span></p>
@@ -251,7 +282,7 @@ P(A_3) = P(A_2)P(A_3|A_2)=P(A_2)*4/13=0.1406
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> random</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tqdm <span class="im">import</span> tqdm</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>valid_array <span class="op">=</span> []</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>num_sim <span class="op">=</span> <span class="dv">1000</span> <span class="co"># </span><span class="al">NOTE</span><span class="co"> : remember to set high for better results</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>num_sim <span class="op">=</span> <span class="dv">1000</span> <span class="co"># </span><span class="al">NOTE</span><span class="co">: remember to set high for better results</span></span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(num_sim):</span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  student_id <span class="op">=</span> np.arange(<span class="dv">1</span>, <span class="dv">17</span>)</span>
@@ -281,15 +312,29 @@ P(A_3) = P(A_2)P(A_3|A_2)=P(A_2)*4/13=0.1406
 <span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Probability is </span><span class="sc">{</span>np<span class="sc">.</span><span class="bu">sum</span>(valid_array)<span class="op">/</span><span class="bu">float</span>(num_sim)<span class="sc">}</span><span class="ss"> after </span><span class="sc">{</span>num_sim<span class="sc">}</span><span class="ss"> trials.'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>Probability is 0.118 after 1000 trials.</code></pre>
+<pre><code>Probability is 0.13 after 1000 trials.</code></pre>
+</div>
+</div>
+</div>
 </div>
 </div>
 <div class="border">
 <p><strong>Example 1.14.</strong> Alice is taking a probability class and at the end of each week she can be either up-to-date or she may have fallen behind. If she is up-to-date in a given week, the probability that she will be up-to-date (or behind) in the next week is 0.8 (or 0.2, respectively). If she is behind in a given week, the probability that she will be up-to-date (or behind) in the next week is 0.6 (or 0.4, respectively). Alice is (by default) up-to-date when she starts the class. What is the probability that she is up-to-date after three weeks?</p>
 </div>
-<p><strong>Solution</strong></p>
+<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+<strong>Solution</strong>
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
 <p>Let <span class="math inline">U_i</span> be the event that Alice is up-to-date at the end of week <span class="math inline">i</span> and <span class="math inline">\overline{U}_i</span> be not up-to-date, the goal is the find <span class="math inline">P(U_3)</span>.</p>
-<div class="page-columns page-full"><p>Starting with <span class="math inline">P(U_2)=P(U_2\cap U_1)\bigcup P(U_2\cap\overline{U}_1)</span> which becomes <span class="math inline">P(U_2) = P(U_1)P(U_2|U_1)+ P(\overline{U}_1)P(U_2|\overline{U}_1)</span><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. Since she starts the week up-to-date, then <span class="math inline">P(U_1)=0.8, P(\overline{U}_1) = 0.2</span>.</p><div class="no-row-height column-margin column-container"><li id="fn1"><p><sup>1</sup>&nbsp;Additivity axiom: for disjoint sets <span class="math inline">P(A_1 ∪ A_2 ∪···) = P(A_1) + P(A_2) + ···</span></p></li></div></div>
+<p>Starting with <span class="math inline">P(U_2)=P(U_2\cap U_1)\bigcup P(U_2\cap\overline{U}_1)</span> which becomes <span class="math inline">P(U_2) = P(U_1)P(U_2|U_1)+ P(\overline{U}_1)P(U_2|\overline{U}_1)</span>. Since she starts the week up-to-date, then <span class="math inline">P(U_1)=0.8, P(\overline{U}_1) = 0.2</span>.</p>
 <p>Thus, <span class="math inline">P(U_2) = 0.8 * 0.8 + 0.2 * 0.4=0.72</span>. Similarily: <span class="math display">
 P(\overline{U}_2) = P(U_1)P(\overline{U}_2|U_1)+ P(\overline{U}_1)P(\overline{U}_2|\overline{U}_1) \\
 =0.8 * 0.2 + 0.2 * 0.6 = 0.28
@@ -302,17 +347,45 @@ P(U_3) &amp;= P(U_2)P(U_3|U_2)+ P(\overline{U}_2)P(U_3|\overline{U}_2) \\
 &amp;=0.688
 \end{align}
 </span></p>
+</div>
+</div>
+</div>
 <div class="border">
-<p><strong>Example 1.17.</strong> Consider an experiment involving two successive rolls of a 4-sided die in which all 16 possible outcomes are equally likely and have probability 1/16.</p>
+<p><strong>Example 1.17.</strong> Consider an experiment involving two successive rolls of a 4-sided die in which all 16 possible outcomes are equally likely and have a probability of 1/16.</p>
 <p>Are the events <span class="math inline">A = \text{\{maximum of the two rolls is 2\}}, B = \text{\{minimum of the two rolls is 2}\}</span> independent?</p>
 </div>
-<p><strong>Solution</strong></p>
-<div class="page-columns page-full"><p>They are not independent because <span class="math inline">P(A) = 3/16, P(B) = 5/16, P(A\cap B) = 1/16 \neq 15/(16*16)</span>. <a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p><div class="no-row-height column-margin column-container"><li id="fn2"><p><sup>2</sup>&nbsp;For independence, we need <span class="math inline">P(A\cap B) = P(A)P(B)</span></p></li></div></div>
+<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+<strong>Solution</strong>
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>They are not independent because <span class="math inline">P(A) = 3/16, P(B) = 5/16, P(A\cap B) = 1/16 \neq 15/(16*16)</span>.</p>
+</div>
+</div>
+</div>
 <div class="border">
-<p><strong>Example 1.22.</strong> Network connectivity. A computer network connects two nodes A and B through intermediate nodes C, D, E, F. For every pair of directly connected nodes, say i and j, there is a given probability pij that the link from i to j is up. We assume that link failures are independent of each other. What is the probability that there is a path connecting A and B in which all links are up?</p>
+<p><strong>Example 1.22.</strong> Network connectivity. A computer network connects two nodes A and B through intermediate nodes C, D, E, and F. For every pair of directly connected nodes, say i and j, there is a given probability <span class="math inline">p_{ij}</span> that the link from <span class="math inline">i</span> to <span class="math inline">j</span> is up. We assume that link failures are independent of each other. What is the probability that there is a path connecting A and B in which all links are up?</p>
 <p><img src="images/Example1.22.jpg" class="img-fluid"></p>
 </div>
-<p><strong>Solution</strong></p>
+<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+<strong>Solution</strong>
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
 <p><span class="math display">
 \begin{align}
 P(l_1:= A\rightarrow D \rightarrow B) = 0.75 * 0.95 =0.7125\\
@@ -320,11 +393,14 @@ P(l_2:=C\rightarrow E \rightarrow B) = 0.8 * 0.9 =0.72\\
 P(l_3:=C\rightarrow F \rightarrow B) = 0.95 * 0.85=0.8075 \\
 \end{align}
 </span></p>
-<p>The probability that <span class="math inline">l_4 : C\rightarrow B</span> has at least one successful path is :</p>
+<p>The probability that <span class="math inline">l_4: C\rightarrow B</span> has at least one successful path is :</p>
 <p><span class="math display">P(l_2 \cap l_3)\cup P(l_2 \cap \overline{l_3}) \cup P(\overline{l_2} \cap l_3) = 0.9461</span></p>
 <p><span class="math display">P(l_5 : A\rightarrow l_4) = 0.9 * 0.9461  = 0.85149 </span> Finally, <span class="math display">P(l_f) = P(l_1 \cap l_5)\cup P(l_1 \cap \overline{l_5}) \cup P(\overline{l_1} \cap l_5) </span> <span class="math display">P(l_f) = 0.7125 * 0.85149 + 0.7125 * (1- 0.85149) + (1-0.7125 ) * 0.85149=0.9573</span></p>
-<div class="border">
-<p><strong>Example 2.1.</strong> Let <span class="math inline">Y = |X|</span> and let us apply the preceding formula for the PMF <span class="math inline">p_Y</span> to the case where</p>
+</div>
+</div>
+</div>
+<div class="border page-columns page-full">
+<div class="page-columns page-full"><p><strong>Example 2.1.</strong> Let <span class="math inline">Y = |X|</span> and let us apply the formula<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> for the PMF <span class="math inline">p_Y</span> to the case where</p><div class="no-row-height column-margin column-container"><li id="fn1"><p><sup>1</sup>&nbsp;Suppose we have a transformation <span class="math inline">Y=g(X)</span>. The PMF for Y is <span class="math inline">p_Y(y) = \sum_{\{x| g(x) = y\}} p_X(x)</span></p></li></div></div>
 <p><span class="math display">
 p_X(x) =
 \begin{cases}
@@ -351,18 +427,18 @@ p_Y(y) =
 0, &amp;\text{else} \\
 \end{cases}
 </span></p>
-<div class="page-columns page-full"><p>The mean<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> is then</p><div class="no-row-height column-margin column-container"><li id="fn3"><p><sup>3</sup>&nbsp;<span class="math inline">\bold{E}[X]=\sum_x x p_X (x)</span></p></li></div></div>
+<div class="page-columns page-full"><p>The mean<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> is then</p><div class="no-row-height column-margin column-container"><li id="fn2"><p><sup>2</sup>&nbsp;<span class="math inline">\bold{E}[X]=\sum_x x p_X (x)</span></p></li></div></div>
 <p><span class="math display">
 \bold{E}[Y]=0 * 1/9 + 2/9 + 2*2/9 + 3*2/9 + 4*2/9=20/9
 </span></p>
-<div class="page-columns page-full"><p>The variance<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>, let <span class="math inline">Z=(Y-\bold{E}(Y))^2</span> <span class="math display">
+<div class="page-columns page-full"><p>The variance<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>, let <span class="math inline">Z=(Y-\bold{E}(Y))^2</span> <span class="math display">
 p_Z(z) =
 \begin{cases}
 (20/9-1/9)^2, &amp;\text{If $y=0$} \\
 (20/9-2/9)^2, &amp;\text{If $y=1,2,3,4$} \\
 0, &amp;\text{else} \\
 \end{cases}
-</span></p><div class="no-row-height column-margin column-container"><li id="fn4"><p><sup>4</sup>&nbsp;<span class="math inline">var(X) = \bold{E}((X-\bold{E}(X))^2)</span></p></li></div></div>
+</span></p><div class="no-row-height column-margin column-container"><li id="fn3"><p><sup>3</sup>&nbsp;<span class="math inline">var(X) = \bold{E}((X-\bold{E}(X))^2)</span></p></li></div></div>
 <p>Thus</p>
 <p><span class="math display">
 var(Y) = (18/9)^2  +  2*(18/9)^2 +3*(18/9)^2 +4*(18/9)^2
@@ -383,10 +459,10 @@ E[T] = 0.6*2/5 + 0.4*2/30
 </span></p>
 <p>But using <span class="math inline">E[V]</span> to find <span class="math inline">E[T]</span> using <span class="math inline">E[T] = E[1/V] =1/E[V]</span> doesn’t work. Because <span class="math inline">1/x</span> is not linear.</p>
 <div class="border">
-<p><strong>Example 2.11.</strong> Professor May B. Right often has her facts wrong, and answers each of her students’ questions incorrectly with probability 1/4, independently of other questions. In each lecture May is asked 0, 1, or 2 questions with equal probability 1/3. Let X and Y be the number of questions May is asked and the number of questions she answers wrong in a given lecture, respectively. Construct the joint PMF <span class="math inline">p_{X,Y} (x, y)</span></p>
+<p><strong>Example 2.11.</strong> Professor May B. Right often has her facts wrong, and answers each of her students’ questions incorrectly with probability 1/4, independently of other questions. In each lecture, May is asked 0, 1, or 2 questions with an equal probability of 1/3. Let X and Y be the number of questions May is asked and the number of questions she answers wrong in a given lecture, respectively. Construct the joint PMF <span class="math inline">p_{X,Y} (x, y)</span></p>
 </div>
 <p><strong>Solution</strong></p>
-<div class="page-columns page-full"><p>The PMF <span class="math inline">p_{X,Y} (x, y)</span><a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a> can be found by using the multiplication rule<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>:</p><div class="no-row-height column-margin column-container"><li id="fn5"><p><sup>5</sup>&nbsp;Defined as <span class="math inline">p_{X,Y} (x, y) = P(X=x, Y=y)</span></p></li><li id="fn6"><p><sup>6</sup>&nbsp;<span class="math inline">p_{X,Y}(x,y) = p_X(x)p_{Y|X}(y|x)</span></p></li></div></div>
+<div class="page-columns page-full"><p>The PMF <span class="math inline">p_{X,Y} (x, y)</span><a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> can be found by using the multiplication rule<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>:</p><div class="no-row-height column-margin column-container"><li id="fn4"><p><sup>4</sup>&nbsp;Defined as <span class="math inline">p_{X,Y} (x, y) = P(X=x, Y=y)</span></p></li><li id="fn5"><p><sup>5</sup>&nbsp;<span class="math inline">p_{X,Y}(x,y) = p_X(x)p_{Y|X}(y|x)</span></p></li></div></div>
 <table class="table">
 <tbody>
 <tr class="odd">
@@ -428,15 +504,62 @@ p_{Y|X}(y|x) =  \dbinom{4-x}{y} \left( \frac{1}{5} \right) ^y \left( \frac{4}{5}
 </span></p>
 <p>Thus:</p>
 <p><span class="math display">
-p_{X|Y}(x,y) =
+p_{X,Y}(x,y) =
 \begin{cases}
 \dbinom{4}{x} \left( \frac{1}{6} \right) ^x \left( \frac{5}{6}\right) ^ {4-x}  \dbinom{4-x}{y} \left( \frac{1}{5} \right) ^y \left( \frac{4}{5}\right) ^ {4-x-y} &amp;\text{If $0\leq x+y\leq 4$} \\
 0 &amp;\text{else}
 \end{cases}
 </span></p>
 <div class="border">
+<p><strong>Example 2.13.</strong> Consider a transmitter that is sending messages over a computer network.</p>
+</div>
+<p>Let us have two random variables:</p>
+<p><span class="math display">
+X = \text{the travel time of the message}, Y=\text{the length of the message}
+</span></p>
+<p>We are given:</p>
+<ul>
+<li>The length of a message can take two possible values: <span class="math inline">y = 10^2</span> bytes with probability 5/6, and <span class="math inline">y = 10^4</span> bytes with probability 1/6. This is the PMF of <span class="math inline">X</span> - <span class="math inline">p_X(x)</span>.</li>
+<li>We know that the travel time of the message depends on the length, i.e.&nbsp;<span class="math inline">p_{X|Y}(x|y)</span>. In particular, travel time is <span class="math inline">10^{−4}Y</span> secs with probability 1/2, <span class="math inline">10^{−3}Y</span> secs with probability 1/3, and <span class="math inline">10^{−2}Y</span> secs with probability 1/6.</li>
+</ul>
+<p>So, <span class="math display">
+p_Y(y) =
+\begin{cases}
+5/6 &amp; \text{if } y=10^2 \\
+1/6 &amp; \text{if } y=10^4
+\end{cases}
+</span></p>
+<p><span class="math display">
+p_{X|Y}(x|y=10^2) =
+\begin{cases}
+1/2  &amp;\text{if }  x=10^{-2} \\
+1/3  &amp;\text{if }  x=10^{-1} \\
+1/6  &amp;\text{if }  x=1 \\
+\end{cases}
+</span></p>
+<p><span class="math display">
+p_{X|Y}(x|y=10^4) =
+\begin{cases}
+1/2  &amp;\text{if }  x=1 \\
+1/3  &amp;\text{if }  x=10 \\
+1/6  &amp;\text{if }  x=10^2 \\
+\end{cases}
+</span></p>
+<div class="page-columns page-full"><p>Using the <strong>Total probability theorem</strong><a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a></p><div class="no-row-height column-margin column-container"><li id="fn6"><p><sup>6</sup>&nbsp;<span class="math inline">p_X(x) =\sum_y p_{X|Y}(x|y) * p_Y(y)</span></p></li></div></div>
+<p><span class="math display">
+\begin{align}
+p_X(x) &amp;= \sum_{y=\{10^2, 10^4\}} p_{X|Y}(x|y) * p_Y(y) \nonumber \\
+&amp;=  p_{X|Y}(x|y=10^2)  p_Y(y=10^2) + p_{X|Y}(x|y=10^4)  p_Y(y=10^4) \nonumber
+\end{align}
+</span></p>
+<p>For instance, to find the probability of the travel time of the message being 1 sec,</p>
+<p><span class="math display">
+p_X(x=1) = 1/6 * 5*6 + 1/2*1/6   
+</span></p>
+<p><em>Very cool!</em></p>
+<div class="border">
 <p><strong>Example 2.15.</strong> <em>Mean and Variance of the Geometric Random Variable.</em></p>
-<p>You write a software program over and over, and each time there is probability <span class="math inline">p</span> that it works correctly, independently from previous attempts. What is the mean and variance of <span class="math inline">X</span>, the number of tries until the program works correctly?</p>
+<p>You write a software program over and over, and each time there is a probability <span class="math inline">p</span> that it works correctly, independently from previous attempts. What is the mean and variance of <span class="math inline">X</span>, the number of tries until the program works correctly?</p>
 </div>
 <p><strong>Solution</strong></p>
 <p><span class="math inline">X</span> is a geometric random variable with PMF: <span class="math display">
@@ -446,25 +569,26 @@ p_X(k) = (1-p)^{k-1} p  \quad k = 1,2,3,\dots
 E[X] = \sum_{k=1}^{\infty} k   (1-p)^{k-1} p
 </span></p>
 <p>The variance is</p>
-<p><span class="math display">
-\begin{align}
-var(X) &amp;= E[(X-E[X])^2] \nonumber \\
-       &amp;= \sum_{k=1}^{\infty} (k - E[X])   (1-p)^{k-1}  \nonumber \\
-\end{align}
-</span></p>
-<div class="page-columns page-full"><p>Using the total expectation theroem<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a>. Let <span class="math inline">A_1 = \{\text{first try is a success}\}</span>, and <span class="math inline">A_2 = \{\text{the first try is a failure}\}</span>.</p><div class="no-row-height column-margin column-container"><li id="fn7"><p><sup>7</sup>&nbsp;The conditional expectation of <span class="math inline">X</span> given <span class="math inline">y</span> from <span class="math inline">Y</span> is <span class="math inline">E[X|Y=y] = \sum_x x p_{X|Y}(x | y)</span>. The <strong>Total expectation theroem</strong> is then <span class="math inline">E[X] = \sum_y p_Y(y) E[X|Y=y]</span></p></li></div></div>
-<p>Then <span class="math inline">E[X| X=1] = \sum_x x P(X = x | X=1) = \sum_x x P(X = x \cap X = 1)/P(X=1) = p/p + 0 + 0 + \dots = 1</span>, since only the first value would contribute.</p>
-<p>Similarily,</p>
-<p><span class="math display">
-\begin{align}
-E[X| \{X&gt;1 \}] &amp;= \sum_x x P(X=x \cap X &gt; 1)/P(X &gt; 1)  \\
-&amp;=  1 * P(X=1 \cap X &gt; 1)/P(X &gt; 1) + \\
-&amp;\sum_{x=2}^{\inf} x P(X=x \cap X &gt; 1)/P(X &gt; 1) \\
-&amp;=(1-p)/(1-p) + \\
-&amp;\sum_{x=2}^{\inf} x P(X=x) P(X &gt; 1)/P(X &gt; 1)   \\
-\end{align}
-</span></p>
+<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Note that there are five types of callouts, including: <code>note</code>, <code>tip</code>, <code>warning</code>, <code>caution</code>, and <code>important</code>.</p>
+</div>
+</div>
+<div class="border">
+<p>This content can be styled with a border</p>
+</div>
+<div style="page-break-after: always;"></div>
 </section>
+<section id="simulations" class="level2">
+<h2 class="anchored" data-anchor-id="simulations">Simulations</h2>
 <section id="monte-hall-simulation" class="level3">
 <h3 class="anchored" data-anchor-id="monte-hall-simulation">Monte Hall simulation</h3>
 <div class="cell" data-execution_count="2">
@@ -511,13 +635,14 @@ E[X| \{X&gt;1 \}] &amp;= \sum_x x P(X=x \cap X &gt; 1)/P(X &gt; 1)  \\
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>After 1000 games
-Probability of winning the car with switching is 0.695 
-Probability of winning the car without switching is 0.332 </code></pre>
+Probability of winning the car with switching is 0.673 
+Probability of winning the car without switching is 0.364 </code></pre>
 </div>
 </div>
 
 
 
+</section>
 </section>
 
 

@@ -13,18 +13,27 @@ execute:
 ---
 
 
-### Questions from @Bertsekas2000
+## Questions from @Bertsekas2000
+
+::: {.callout-tip collapse="false"}
+# Axioms
+Additivity axiom : for disjoint sets $P(A_1 ∪ A_2 ∪···) = P(A_1) + P(A_2) + ···$
+
+For independence, we need $P(A\cap B) = P(A)P(B)$
+:::
 ::: {.border} 
 **Example 1.11**
 A class consisting of 4 graduate and 12 undergraduate students
 is randomly divided into 4 groups of 4. What is the probability that each group
-includes a graduate student? We interpret randomly to mean that given the assignment of some students to certain slots, any of the remaining students is equally
+includes a graduate student? We interpret randomly to mean that given the assignment of some students to certain slots, any of the remaining students are equally
 likely to be assigned to any of the remaining slots. 
 :::
 
-**Solution**:
 
-At the beginning we have 16 different slots, where each group takes up 4 slots. Let $G$ be the event that every group has one grad student. 
+::: {.callout-note collapse="true"}
+# **Solution**
+
+In the beginning, we have 16 different slots, where each group takes up 4 slots. Let $G$ be the event that every group has one grad student. 
 $$
 \begin{align}
 A_0 = \text{\{Grad student 1 is in different groups, but $P(A_0)=1$\}}  \nonumber \\
@@ -34,7 +43,7 @@ A_3 = \text{\{Grad student 1, 2, 3, 4 are in different groups\}} \nonumber
 \end{align}
 $$
 
-After grad student 1 has been picked only 15 people will be left, and since the available slots left is 3 we have 12 possible locations (3*4=12). Thus:
+After grad student 1 has been picked only 15 people will be left, and since the available slots left are 3 we have 12 possible locations (3*4=12). Thus:
 
 
 $$
@@ -59,7 +68,7 @@ import numpy as np
 import random
 from tqdm import tqdm
 valid_array = []
-num_sim = 1000 # NOTE : remember to set high for better results
+num_sim = 1000 # NOTE: remember to set high for better results
 
 for _ in range(num_sim):
   student_id = np.arange(1, 17)
@@ -90,6 +99,8 @@ print(f'Probability is {np.sum(valid_array)/float(num_sim)} after {num_sim} tria
 
 ```
 
+:::
+
 
 ::: {.border} 
 **Example 1.14.** Alice is taking a probability class and at the end of each week
@@ -101,13 +112,14 @@ Alice is (by default) up-to-date when she starts the class. What is the probabil
 that she is up-to-date after three weeks?
 :::
 
-
-**Solution**
+::: {.callout-note collapse="true"}
+# **Solution**
 
 Let $U_i$ be the event that Alice is up-to-date at the end of week $i$ and $\overline{U}_i$ be not up-to-date, the goal is the find $P(U_3)$. 
 
 Starting with 
-$P(U_2)=P(U_2\cap U_1)\bigcup P(U_2\cap\overline{U}_1)$ which becomes $P(U_2) = P(U_1)P(U_2|U_1)+ P(\overline{U}_1)P(U_2|\overline{U}_1)$^[Additivity axiom: for disjoint sets $P(A_1 ∪ A_2 ∪···) = P(A_1) + P(A_2) + ···$]. Since she starts the week up-to-date, then $P(U_1)=0.8, P(\overline{U}_1) = 0.2$.  
+$P(U_2)=P(U_2\cap U_1)\bigcup P(U_2\cap\overline{U}_1)$ which becomes $P(U_2) = P(U_1)P(U_2|U_1)+ P(\overline{U}_1)P(U_2|\overline{U}_1)$. Since she starts the week up-to-date, then $P(U_1)=0.8, P(\overline{U}_1) = 0.2$.  
+
 
 Thus, $P(U_2) = 0.8 * 0.8 + 0.2 * 0.4=0.72$. 
 Similarily: 
@@ -125,31 +137,35 @@ P(U_3) &= P(U_2)P(U_3|U_2)+ P(\overline{U}_2)P(U_3|\overline{U}_2) \\
 &=0.688
 \end{align}
 $$
-
-
+:::
 
 ::: {.border} 
 **Example 1.17.** Consider an experiment involving two successive rolls of a 4-sided
-die in which all 16 possible outcomes are equally likely and have probability 1/16.
+die in which all 16 possible outcomes are equally likely and have a probability of 1/16.
 
  Are the events $A = \text{\{maximum of the two rolls is 2\}}, B = \text{\{minimum of the two rolls is 2}\}$ independent?
 ::: 
 
-**Solution** 
+::: {.callout-note collapse="true"}
+# **Solution** 
 
-They are not independent because $P(A) = 3/16, P(B) = 5/16, P(A\cap B) = 1/16 \neq 15/(16*16)$. ^[For independence, we need $P(A\cap B) = P(A)P(B)$]
+They are not independent because $P(A) = 3/16, P(B) = 5/16, P(A\cap B) = 1/16 \neq 15/(16*16)$. 
 
-
+:::
 ::: {.border} 
 **Example 1.22.** Network connectivity. A computer network connects two
-nodes A and B through intermediate nodes C, D, E, F.
+nodes A and B through intermediate nodes C, D, E, and F.
 For every pair of directly connected nodes, say i and j, there is a given probability
-pij that the link from i to j is up. We assume that link failures are independent of each other. What is the probability that there is a path connecting A and B in
+$p_{ij}$ that the link from $i$ to $j$ is up. We assume that link failures are independent of each other. What is the probability that there is a path connecting A and B in
 which all links are up?
 
 ![](images/Example1.22.jpg)
+
 ::: 
-**Solution** 
+
+
+::: {.callout-note collapse="true"}
+# **Solution** 
 
 $$
 \begin{align}
@@ -159,7 +175,7 @@ P(l_3:=C\rightarrow F \rightarrow B) = 0.95 * 0.85=0.8075 \\
 \end{align} 
 $$
 
-The probability that $l_4 : C\rightarrow B$ has at least one successful path is : 
+The probability that $l_4: C\rightarrow B$ has at least one successful path is : 
 
 $$P(l_2 \cap l_3)\cup P(l_2 \cap \overline{l_3}) \cup P(\overline{l_2} \cap l_3) = 0.9461$$ 
 
@@ -167,9 +183,11 @@ $$P(l_5 : A\rightarrow l_4) = 0.9 * 0.9461  = 0.85149 $$
 Finally,
 $$P(l_f) = P(l_1 \cap l_5)\cup P(l_1 \cap \overline{l_5}) \cup P(\overline{l_1} \cap l_5) $$ 
 $$P(l_f) = 0.7125 * 0.85149 + 0.7125 * (1- 0.85149) + (1-0.7125 ) * 0.85149=0.9573$$ 
+:::
+
 
 ::: {.border}
-**Example 2.1.** Let $Y = |X|$ and let us apply the preceding formula for the PMF
+**Example 2.1.** Let $Y = |X|$ and let us apply the formula^[Suppose we have a transformation $Y=g(X)$. The PMF for Y is $p_Y(y) = \sum_{\{x| g(x) = y\}} p_X(x)$] for the PMF
 $p_Y$ to the case where
 
 $$
@@ -258,7 +276,7 @@ But using $E[V]$ to find $E[T]$ using $E[T] = E[1/V] =1/E[V]$ doesn't work. Beca
 
 **Example 2.11.** Professor May B. Right often has her facts wrong, and answers
 each of her students’ questions incorrectly with probability 1/4, independently of
-other questions. In each lecture May is asked 0, 1, or 2 questions with equal probability 1/3. Let X and Y be the number of questions May is asked and the number of
+other questions. In each lecture, May is asked 0, 1, or 2 questions with an equal probability of 1/3. Let X and Y be the number of questions May is asked and the number of
 questions she answers wrong in a given lecture, respectively. Construct the joint
 PMF $p_{X,Y} (x, y)$
 
@@ -297,7 +315,7 @@ $$
 Thus:
 
 $$
-p_{X|Y}(x,y) = 
+p_{X,Y}(x,y) = 
 \begin{cases}
  \dbinom{4}{x} \left( \frac{1}{6} \right) ^x \left( \frac{5}{6}\right) ^ {4-x}  \dbinom{4-x}{y} \left( \frac{1}{5} \right) ^y \left( \frac{4}{5}\right) ^ {4-x-y} &\text{If $0\leq x+y\leq 4$} \\
  0 &\text{else}
@@ -305,9 +323,74 @@ p_{X|Y}(x,y) =
 $$
 
 ::: {.border}
+**Example 2.13.** Consider a transmitter that is sending messages over a computer
+network. 
+:::
+
+
+Let us have two random variables:
+
+$$
+X = \text{the travel time of the message}, Y=\text{the length of the message}
+$$
+
+We are given:
+
+* The length of a message can take two possible values: $y = 10^2$
+bytes with probability 5/6, and $y = 10^4$ bytes with probability 1/6. This is the PMF of $X$ - $p_X(x)$.
+* We know that the travel time of the message depends on the length, i.e. $p_{X|Y}(x|y)$. In particular,
+  travel time is $10^{−4}Y$ secs with probability 1/2, $10^{−3}Y$ secs with probability 1/3, and $10^{−2}Y$ secs with probability 1/6.
+
+So, 
+$$
+p_Y(y) = 
+\begin{cases}
+5/6 & \text{if } y=10^2 \\
+1/6 & \text{if } y=10^4
+\end{cases}
+$$
+
+$$
+p_{X|Y}(x|y=10^2) =
+\begin{cases}
+ 1/2  &\text{if }  x=10^{-2} \\
+ 1/3  &\text{if }  x=10^{-1} \\
+ 1/6  &\text{if }  x=1 \\
+\end{cases}
+$$
+
+$$
+p_{X|Y}(x|y=10^4) =
+\begin{cases}
+ 1/2  &\text{if }  x=1 \\
+ 1/3  &\text{if }  x=10 \\
+ 1/6  &\text{if }  x=10^2 \\
+\end{cases}
+$$
+
+Using the **Total probability theorem**^[$p_X(x) =\sum_y p_{X|Y}(x|y) * p_Y(y)$]
+
+$$
+\begin{align}
+p_X(x) &= \sum_{y=\{10^2, 10^4\}} p_{X|Y}(x|y) * p_Y(y) \nonumber \\ 
+&=  p_{X|Y}(x|y=10^2)  p_Y(y=10^2) + p_{X|Y}(x|y=10^4)  p_Y(y=10^4) \nonumber
+\end{align}
+$$
+
+For instance, to find the probability of the travel time of the message being 1 sec, 
+
+$$
+p_X(x=1) = 1/6 * 5*6 + 1/2*1/6   
+$$
+
+*Very cool!*
+
+
+
+::: {.border}
 **Example 2.15.** *Mean and Variance of the Geometric Random Variable.*
 
-You write a software program over and over, and each time there is probability $p$
+You write a software program over and over, and each time there is a probability $p$
 that it works correctly, independently from previous attempts. What is the mean
 and variance of $X$, the number of tries until the program works correctly?
 :::
@@ -327,43 +410,25 @@ $$
 
 The variance is
 
-$$
-\begin{align}
-var(X) &= E[(X-E[X])^2] \nonumber \\
-       &= \sum_{k=1}^{\infty} (k - E[X])   (1-p)^{k-1}  \nonumber \\
-\end{align}
-$$
+:::{.callout-note}
+Note that there are five types of callouts, including: 
+`note`, `tip`, `warning`, `caution`, and `important`.
+:::
+::: {.border}
+This content can be styled with a border
+:::
 
-Using the total expectation theroem^[The conditional expectation of $X$ given $y$ from $Y$ is $E[X|Y=y] = \sum_x x p_{X|Y}(x | y)$. The **Total expectation theroem** is then $E[X] = \sum_y p_Y(y) E[X|Y=y]$]. Let $A_1 = \{\text{first try is a success}\}$, and $A_2 = \{\text{the first try is a failure}\}$. 
 
-Then $E[X| X=1] = \sum_x x P(X = x | X=1) = \sum_x x P(X = x \cap X = 1)/P(X=1) = p/p + 0 + 0 + \dots = 1$, since only the first value would contribute.
 
-Similarily, 
 
-$$
-\begin{align}
-E[X| \{X>1 \}] &= \sum_x x P(X=x \cap X > 1)/P(X > 1)  \\
-&=  1 * P(X=1 \cap X > 1)/P(X > 1) + \\ 
-&\sum_{x=2}^{\inf} x P(X=x \cap X > 1)/P(X > 1) \\
-&=(1-p)/(1-p) + \\
-&\sum_{x=2}^{\inf} x P(X=x) P(X > 1)/P(X > 1)   \\
-\end{align} 
-$$
+{{< pagebreak >}}
 
 
 
 
 
 
-
-
-
-
-
-
-
-
-
+## Simulations
 
 ### Monte Hall simulation
 ```{python}
