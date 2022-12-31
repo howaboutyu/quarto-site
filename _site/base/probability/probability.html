@@ -196,7 +196,7 @@ div.csl-indent {
    
   <ul>
   <li><a href="#questions-from-bertsekas2000" id="toc-questions-from-bertsekas2000" class="nav-link active" data-scroll-target="#questions-from-bertsekas2000">Questions from <span class="citation" data-cites="Bertsekas2000">Bertsekas and Tsitsiklis (2000)</span></a></li>
-  <li><a href="#simulations" id="toc-simulations" class="nav-link" data-scroll-target="#simulations">Simulations</a>
+  <li><a href="#cool-simulations" id="toc-cool-simulations" class="nav-link" data-scroll-target="#cool-simulations">Cool simulations</a>
   <ul class="collapse">
   <li><a href="#monte-hall-simulation" id="toc-monte-hall-simulation" class="nav-link" data-scroll-target="#monte-hall-simulation">Monte Hall simulation</a></li>
   </ul></li>
@@ -312,7 +312,7 @@ P(A_3) = P(A_2)P(A_3|A_2)=P(A_2)*4/13=0.1406
 <span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Probability is </span><span class="sc">{</span>np<span class="sc">.</span><span class="bu">sum</span>(valid_array)<span class="op">/</span><span class="bu">float</span>(num_sim)<span class="sc">}</span><span class="ss"> after </span><span class="sc">{</span>num_sim<span class="sc">}</span><span class="ss"> trials.'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>Probability is 0.13 after 1000 trials.</code></pre>
+<pre><code>Probability is 0.14 after 1000 trials.</code></pre>
 </div>
 </div>
 </div>
@@ -410,7 +410,19 @@ p_X(x) =
 </span></p>
 <p>The possible values of <span class="math inline">Y</span> are <span class="math inline">y = 0, 1, 2, 3, 4</span>.</p>
 </div>
-<p><strong>Solution</strong> <span class="math display">
+<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+<strong>Solution</strong>
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p><span class="math display">
 \begin{align}
 p_Y(0)&amp;= p_X(0) \nonumber \\
 p_Y(1)&amp;= p_X(-1)  + p_X(1) \nonumber \\
@@ -427,26 +439,41 @@ p_Y(y) =
 0, &amp;\text{else} \\
 \end{cases}
 </span></p>
-<div class="page-columns page-full"><p>The mean<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> is then</p><div class="no-row-height column-margin column-container"><li id="fn2"><p><sup>2</sup>&nbsp;<span class="math inline">\bold{E}[X]=\sum_x x p_X (x)</span></p></li></div></div>
+<p>The mean (<span class="math inline">\bold{E}[X]=\sum_x x p_X (x)</span>) is then</p>
 <p><span class="math display">
 \bold{E}[Y]=0 * 1/9 + 2/9 + 2*2/9 + 3*2/9 + 4*2/9=20/9
 </span></p>
-<div class="page-columns page-full"><p>The variance<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>, let <span class="math inline">Z=(Y-\bold{E}(Y))^2</span> <span class="math display">
+<p>The variance (<span class="math inline">var(X) = \bold{E}((X-\bold{E}(X))^2)</span>), let <span class="math inline">Z=(Y-\bold{E}(Y))^2</span> <span class="math display">
 p_Z(z) =
 \begin{cases}
 (20/9-1/9)^2, &amp;\text{If $y=0$} \\
 (20/9-2/9)^2, &amp;\text{If $y=1,2,3,4$} \\
 0, &amp;\text{else} \\
 \end{cases}
-</span></p><div class="no-row-height column-margin column-container"><li id="fn3"><p><sup>3</sup>&nbsp;<span class="math inline">var(X) = \bold{E}((X-\bold{E}(X))^2)</span></p></li></div></div>
+</span></p>
 <p>Thus</p>
 <p><span class="math display">
 var(Y) = (18/9)^2  +  2*(18/9)^2 +3*(18/9)^2 +4*(18/9)^2
 </span></p>
+</div>
+</div>
+</div>
 <div class="border">
 <p><strong>Example 2.8.</strong> Average Speed Versus Average Time. If the weather is good (which happens with probability 0.6), Alice walks the 2 miles to class at a speed of V = 5 miles per hour, and otherwise drives her motorcycle at a speed of V = 30 miles per hour. What is the mean of the time T to get to class?</p>
 </div>
-<p><strong>Solution</strong> <span class="math display">
+<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+<strong>Solution</strong>
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-7" class="callout-7-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p><span class="math display">
 p_T(t) =
 \begin{cases}
 0.6 &amp; \text{if $t = 2/5$} \\
@@ -458,11 +485,25 @@ p_T(t) =
 E[T] = 0.6*2/5 + 0.4*2/30
 </span></p>
 <p>But using <span class="math inline">E[V]</span> to find <span class="math inline">E[T]</span> using <span class="math inline">E[T] = E[1/V] =1/E[V]</span> doesn’t work. Because <span class="math inline">1/x</span> is not linear.</p>
+</div>
+</div>
+</div>
 <div class="border">
 <p><strong>Example 2.11.</strong> Professor May B. Right often has her facts wrong, and answers each of her students’ questions incorrectly with probability 1/4, independently of other questions. In each lecture, May is asked 0, 1, or 2 questions with an equal probability of 1/3. Let X and Y be the number of questions May is asked and the number of questions she answers wrong in a given lecture, respectively. Construct the joint PMF <span class="math inline">p_{X,Y} (x, y)</span></p>
 </div>
-<p><strong>Solution</strong></p>
-<div class="page-columns page-full"><p>The PMF <span class="math inline">p_{X,Y} (x, y)</span><a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> can be found by using the multiplication rule<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>:</p><div class="no-row-height column-margin column-container"><li id="fn4"><p><sup>4</sup>&nbsp;Defined as <span class="math inline">p_{X,Y} (x, y) = P(X=x, Y=y)</span></p></li><li id="fn5"><p><sup>5</sup>&nbsp;<span class="math inline">p_{X,Y}(x,y) = p_X(x)p_{Y|X}(y|x)</span></p></li></div></div>
+<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+<strong>Solution</strong>
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-8" class="callout-8-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>The PMF <span class="math inline">p_{X,Y} (x, y)</span> - defined as <span class="math inline">p_{X,Y} (x, y) = P(X=x, Y=y)</span> - can be found by using the multiplication rule; <span class="math inline">p_{X,Y}(x,y) = p_X(x)p_{Y|X}(y|x)</span>:</p>
 <table class="table">
 <tbody>
 <tr class="odd">
@@ -491,15 +532,29 @@ E[T] = 0.6*2/5 + 0.4*2/30
 </tr>
 </tbody>
 </table>
+</div>
+</div>
+</div>
 <div class="border">
 <p><strong>Example 2.12.</strong> Consider four independent rolls of a 6-sided die. Let <span class="math inline">X</span> be the number of 1’s and let <span class="math inline">Y</span> be the number of 2’s obtained. What is the joint PMF of <span class="math inline">X</span> and <span class="math inline">Y</span> ?</p>
 </div>
-<p><strong>Solution</strong></p>
+<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-9-contents" aria-controls="callout-9" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+<strong>Solution</strong>
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-9" class="callout-9-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
 <p>The PMF of <span class="math inline">X</span> is:</p>
 <p><span class="math display">
 p_X(x) =  \dbinom{4}{x} \left( \frac{1}{6} \right) ^x \left( \frac{5}{6}\right) ^ {4-x}
 </span></p>
-<p><span class="math inline">Y</span> is the number 2’s, so conditioned on <span class="math inline">x</span> (the number of 1’s), the possible choices is limited to <span class="math inline">2,3,4,5,6</span>, and the number of 2’s required becomes <span class="math inline">4-x</span> <span class="math display">
+<p><span class="math inline">Y</span> is the number 2’s, so conditioned on <span class="math inline">x</span> (the number of 1’s), the possible choices are limited to <span class="math inline">2,3,4,5,6</span>, and the number of 2’s required becomes <span class="math inline">4-x</span> <span class="math display">
 p_{Y|X}(y|x) =  \dbinom{4-x}{y} \left( \frac{1}{5} \right) ^y \left( \frac{4}{5}\right) ^ {4-x-y}
 </span></p>
 <p>Thus:</p>
@@ -510,9 +565,24 @@ p_{X,Y}(x,y) =
 0 &amp;\text{else}
 \end{cases}
 </span></p>
+</div>
+</div>
+</div>
 <div class="border">
 <p><strong>Example 2.13.</strong> Consider a transmitter that is sending messages over a computer network.</p>
 </div>
+<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-10-contents" aria-controls="callout-10" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Example
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-10" class="callout-10-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
 <p>Let us have two random variables:</p>
 <p><span class="math display">
 X = \text{the travel time of the message}, Y=\text{the length of the message}
@@ -545,7 +615,7 @@ p_{X|Y}(x|y=10^4) =
 1/6  &amp;\text{if }  x=10^2 \\
 \end{cases}
 </span></p>
-<div class="page-columns page-full"><p>Using the <strong>Total probability theorem</strong><a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a></p><div class="no-row-height column-margin column-container"><li id="fn6"><p><sup>6</sup>&nbsp;<span class="math inline">p_X(x) =\sum_y p_{X|Y}(x|y) * p_Y(y)</span></p></li></div></div>
+<p>Using the <strong>Total probability theorem</strong>-<span class="math inline">p_X(x) =\sum_y p_{X|Y}(x|y) * p_Y(y)</span></p>
 <p><span class="math display">
 \begin{align}
 p_X(x) &amp;= \sum_{y=\{10^2, 10^4\}} p_{X|Y}(x|y) * p_Y(y) \nonumber \\
@@ -557,86 +627,188 @@ p_X(x) &amp;= \sum_{y=\{10^2, 10^4\}} p_{X|Y}(x|y) * p_Y(y) \nonumber \\
 p_X(x=1) = 1/6 * 5*6 + 1/2*1/6   
 </span></p>
 <p><em>Very cool!</em></p>
+</div>
+</div>
+</div>
 <div class="border">
 <p><strong>Example 2.15.</strong> <em>Mean and Variance of the Geometric Random Variable.</em></p>
 <p>You write a software program over and over, and each time there is a probability <span class="math inline">p</span> that it works correctly, independently from previous attempts. What is the mean and variance of <span class="math inline">X</span>, the number of tries until the program works correctly?</p>
 </div>
-<p><strong>Solution</strong></p>
+<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-11-contents" aria-controls="callout-11" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+<strong>Solution</strong>
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-11" class="callout-11-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
 <p><span class="math inline">X</span> is a geometric random variable with PMF: <span class="math display">
 p_X(k) = (1-p)^{k-1} p  \quad k = 1,2,3,\dots
 </span></p>
 <p>The mean is <span class="math display">
 E[X] = \sum_{k=1}^{\infty} k   (1-p)^{k-1} p
 </span></p>
-<p>The variance is</p>
+<p>The variance is <span class="math inline">var(X) = E((X-E(X))^2) = \sum_{k=1}^{\infty} (k - E(X))(1-p)^{k-1} p</span>.</p>
+<p>Let’s define <span class="math inline">P(A_1 = \{X=1\})</span> and <span class="math inline">P(A_2 = \{X&gt;1\})</span> - meaning the first time works and the first time didn’t work, respectively.</p>
+<p>The conditional expectation of <span class="math inline">A_1</span>: <span class="math display">
+\begin{align}
+E[X| A_1 = \{X=1\}] &amp;= 1
+\end{align}
+</span></p>
+<p>The conditional expectation of <span class="math inline">A_2</span>: <span class="math display">
+\begin{align}
+E[X| A_2 = \{X&gt;1\}] &amp;= 1 + E[X]
+\end{align}
+</span></p>
+<p>This is because the first try was a failure. Thus, using the <strong>Total Expectation Theorem</strong> - <span class="math inline">E[X] = \sum_y p_Y(y) E[X|Y=y]</span> - we have:</p>
+<p><span class="math display">
+\begin{align}
+E[X] &amp;= P(X=1) E[X|X=1] + P(X&gt;1) E[X|X&gt;1] \nonumber \\
+&amp;= p + (1-p)(1+E[X]) = 1/p
+\end{align}
+</span></p>
+</div>
+</div>
+</div>
+<div class="border">
+<p><strong>Example 3.5.</strong> The time until a small meteorite first lands anywhere in the Sahara desert is modeled as an exponential random variable with a mean of 10 days. The time is currently midnight. What is the probability that a meteorite first lands some time between 6am and 6pm of the first day? And, on any day?</p>
+</div>
+<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-12-contents" aria-controls="callout-12" aria-expanded="true" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+<strong>Solution</strong>
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-12" class="callout-12-contents callout-collapse collapse show">
+<div class="callout-body-container callout-body">
+<p>The exponential random variable has the PDF of the form:</p>
+<p><span class="math display">
+f_X(x) =
+\begin{cases}
+\lambda e ^{-\lambda x} &amp;\quad \text{if x &gt; 0} \\
+0 &amp;\quad \text{else}
+\end{cases}
+</span></p>
+<p>Since the mean is <span class="math inline">E[X] = 1/\lambda</span>, then <span class="math inline">\lambda = 1/10</span>. The unit is in days, so 6 am to 6 pm is <span class="math inline">1/4</span> and <span class="math inline">3/4</span>, respectively.</p>
+<p><span class="math display">
+P(1/4 &lt; X &lt; 3/4 ) = \int_{1/4}^{3/4} \lambda e ^{-\lambda x} dx
+</span></p>
+<p>For any day, we need to sum all of the probabilities for each day.</p>
+<p><span class="math display">
+P(\text{6am-6pm}) = \sum_{k=1}^{\infty} P(k - 3/4 &lt; X &lt; k-1/4)
+</span></p>
+</div>
+</div>
+</div>
+<div class="border">
+<p><strong>Example 3.6.</strong> The Geometric and Exponential CDFs.</p>
+</div>
 <div class="callout-note callout callout-style-default callout-captioned">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-caption-container flex-fill">
-Note
+Comparing geometric and exponential CDF
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Note that there are five types of callouts, including: <code>note</code>, <code>tip</code>, <code>warning</code>, <code>caution</code>, and <code>important</code>.</p>
-</div>
-</div>
-<div class="border">
-<p>This content can be styled with a border</p>
-</div>
-<div style="page-break-after: always;"></div>
-</section>
-<section id="simulations" class="level2">
-<h2 class="anchored" data-anchor-id="simulations">Simulations</h2>
-<section id="monte-hall-simulation" class="level3">
-<h3 class="anchored" data-anchor-id="monte-hall-simulation">Monte Hall simulation</h3>
+<p>The CDF is defined as <span class="math inline">F(x) = P(X\leq x) \quad \forall x</span> <span class="math display">
+F^{geo}(n) = \sum_{k=1}^{n}p(1-p) ^{k-1}
+</span></p>
+<p>Using <span class="math inline">r = (1-p)</span>, the geometric sum is then</p>
+<p><span class="math display">
+F^{geo}(n) = p \frac{1-(1-p)^n}{1-(1-p)} = 1-(1-p)^n
+</span></p>
+<p>For exponential,</p>
+<p><span class="math display">
+\begin{align}
+F^{exp}(x) &amp;= \int_{-\infty}^{x}  \lambda e^{-\lambda z} dz \\
+          &amp;=1 - e ^{-\lambda x} \quad \forall x &gt;0
+\end{align}
+</span></p>
 <div class="cell" data-execution_count="2">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> random</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tqdm <span class="im">import</span> tqdm</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mt(switch):</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  win_array <span class="op">=</span> []</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(num_sim):</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 1 - car</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    prizes <span class="op">=</span> np.arange(<span class="dv">1</span>, <span class="dv">4</span>)</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    random.shuffle(prizes)</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    pick_id <span class="op">=</span> np.random.randint(<span class="dv">0</span>, <span class="dv">3</span>)</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    car_id,  <span class="op">=</span> np.where(prizes <span class="op">==</span> <span class="dv">1</span>) </span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    allowed <span class="op">=</span> [<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">2</span>]</span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    allowed.remove(pick_id)</span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    host_allowed <span class="op">=</span> allowed.copy()</span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> prizes[pick_id] <span class="op">!=</span> <span class="dv">1</span>:</span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>      host_allowed.remove(car_id[<span class="dv">0</span>])</span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    allowed.remove(host_allowed[<span class="dv">0</span>])</span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> switch:</span>
-<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> prizes[allowed[<span class="dv">0</span>]] <span class="op">==</span> <span class="dv">1</span>: </span>
-<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>        win_array.append(<span class="dv">1</span>) </span>
-<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>      <span class="cf">else</span>:</span>
-<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>        win_array.append(<span class="dv">0</span>)</span>
-<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
-<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> prizes[pick_id] <span class="op">==</span> <span class="dv">1</span>: </span>
-<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>        win_array.append(<span class="dv">1</span>) </span>
-<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>      <span class="cf">else</span>:</span>
-<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>        win_array.append(<span class="dv">0</span>)</span>
-<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> np.<span class="bu">sum</span>(win_array)<span class="op">/</span><span class="bu">float</span>(num_sim)</span>
-<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'After </span><span class="sc">{</span>num_sim<span class="sc">}</span><span class="ss"> games'</span>)</span>
-<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Probability of winning the car with switching is </span><span class="sc">{</span>mt(<span class="dv">1</span>)<span class="sc">}</span><span class="ss"> '</span>)</span>
-<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Probability of winning the car without switching is </span><span class="sc">{</span>mt(<span class="dv">0</span>)<span class="sc">}</span><span class="ss"> '</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> np.linspace(<span class="fl">0.</span>, <span class="fl">50.</span>, <span class="dv">100</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>F_geo <span class="op">=</span> <span class="kw">lambda</span> p, n: <span class="dv">1</span> <span class="op">-</span> np.power((<span class="dv">1</span><span class="op">-</span>p),np.floor(n))</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>F_exp <span class="op">=</span> <span class="kw">lambda</span> l, x: <span class="dv">1</span> <span class="op">-</span> np.exp(<span class="op">-</span>l<span class="op">*</span> x)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> <span class="fl">0.11</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>l <span class="op">=</span> <span class="dv">1</span><span class="op">/</span>p</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>f_geo <span class="op">=</span> F_geo(p, n)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>sigma <span class="op">=</span> <span class="op">-</span>np.log(<span class="dv">1</span> <span class="op">-</span> p)<span class="op">/</span>l</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>f_lambda <span class="op">=</span> F_exp(l, n<span class="op">*</span>sigma)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>plt.plot(n, f_geo, n, f_lambda)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>_ <span class="op">=</span> plt.title(<span class="st">'$F_</span><span class="sc">{geo}</span><span class="st">(\sigma n)$ vs $F_</span><span class="sc">{exp}</span><span class="st">(n)$ where $\sigma = -ln(1-p)/\lambda$'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<p><img src="probability_files/figure-html/cell-3-output-1.png" width="571" height="432"></p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="cool-simulations" class="level2">
+<h2 class="anchored" data-anchor-id="cool-simulations">Cool simulations</h2>
+<section id="monte-hall-simulation" class="level3">
+<h3 class="anchored" data-anchor-id="monte-hall-simulation">Monte Hall simulation</h3>
+<div class="cell" data-execution_count="3">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> random</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tqdm <span class="im">import</span> tqdm</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mt(switch):</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  win_array <span class="op">=</span> []</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(num_sim):</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 1 - car</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    prizes <span class="op">=</span> np.arange(<span class="dv">1</span>, <span class="dv">4</span>)</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    random.shuffle(prizes)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    pick_id <span class="op">=</span> np.random.randint(<span class="dv">0</span>, <span class="dv">3</span>)</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    car_id,  <span class="op">=</span> np.where(prizes <span class="op">==</span> <span class="dv">1</span>) </span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    allowed <span class="op">=</span> [<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">2</span>]</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    allowed.remove(pick_id)</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    host_allowed <span class="op">=</span> allowed.copy()</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> prizes[pick_id] <span class="op">!=</span> <span class="dv">1</span>:</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>      host_allowed.remove(car_id[<span class="dv">0</span>])</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    allowed.remove(host_allowed[<span class="dv">0</span>])</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> switch:</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> prizes[allowed[<span class="dv">0</span>]] <span class="op">==</span> <span class="dv">1</span>: </span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>        win_array.append(<span class="dv">1</span>) </span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>      <span class="cf">else</span>:</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>        win_array.append(<span class="dv">0</span>)</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> prizes[pick_id] <span class="op">==</span> <span class="dv">1</span>: </span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>        win_array.append(<span class="dv">1</span>) </span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>      <span class="cf">else</span>:</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>        win_array.append(<span class="dv">0</span>)</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> np.<span class="bu">sum</span>(win_array)<span class="op">/</span><span class="bu">float</span>(num_sim)</span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'After </span><span class="sc">{</span>num_sim<span class="sc">}</span><span class="ss"> games'</span>)</span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Probability of winning the car with switching is </span><span class="sc">{</span>mt(<span class="dv">1</span>)<span class="sc">}</span><span class="ss"> '</span>)</span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'Probability of winning the car without switching is </span><span class="sc">{</span>mt(<span class="dv">0</span>)<span class="sc">}</span><span class="ss"> '</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>After 1000 games
 Probability of winning the car with switching is 0.673 
-Probability of winning the car without switching is 0.364 </code></pre>
+Probability of winning the car without switching is 0.36 </code></pre>
 </div>
 </div>
 

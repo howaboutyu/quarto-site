@@ -202,7 +202,9 @@ $$
 The possible values of $Y$ are $y = 0, 1, 2, 3, 4$.
 :::
 
-**Solution**
+
+::: {.callout-note collapse="true"}
+# **Solution**
 $$
 \begin{align}
 p_Y(0)&= p_X(0) \nonumber \\
@@ -224,13 +226,13 @@ p_Y(y) =
 \end{cases}
 $$
 
-The mean^[$\bold{E}[X]=\sum_x x p_X (x)$] is then
+The mean ($\bold{E}[X]=\sum_x x p_X (x)$) is then
 
 $$
 \bold{E}[Y]=0 * 1/9 + 2/9 + 2*2/9 + 3*2/9 + 4*2/9=20/9
 $$
 
-The variance^[$var(X) = \bold{E}((X-\bold{E}(X))^2)$], let $Z=(Y-\bold{E}(Y))^2$
+The variance ($var(X) = \bold{E}((X-\bold{E}(X))^2)$), let $Z=(Y-\bold{E}(Y))^2$
 $$
 p_Z(z) = 
 \begin{cases}
@@ -245,7 +247,7 @@ Thus
 $$
 var(Y) = (18/9)^2  +  2*(18/9)^2 +3*(18/9)^2 +4*(18/9)^2
 $$
-
+:::
 
 ::: {.border}
 **Example 2.8.** Average Speed Versus Average Time. If the weather is good
@@ -254,7 +256,8 @@ V = 5 miles per hour, and otherwise drives her motorcycle at a speed of V = 30
 miles per hour. What is the mean of the time T to get to class?
 :::
 
-**Solution**
+::: {.callout-note collapse="true"}
+# **Solution**
 $$
 p_T(t) = 
 \begin{cases}
@@ -270,7 +273,7 @@ E[T] = 0.6*2/5 + 0.4*2/30
 $$
 
 But using $E[V]$ to find $E[T]$ using $E[T] = E[1/V] =1/E[V]$ doesn't work. Because $1/x$ is not linear.
-
+:::
 
 ::: {.border}
 
@@ -281,10 +284,12 @@ questions she answers wrong in a given lecture, respectively. Construct the join
 PMF $p_{X,Y} (x, y)$
 
 :::
-**Solution**
+
+::: {.callout-note collapse="true"}
+# **Solution**
 
 
-The PMF $p_{X,Y} (x, y)$^[Defined as $p_{X,Y} (x, y) = P(X=x, Y=y)$] can be found by using the multiplication rule^[$p_{X,Y}(x,y) = p_X(x)p_{Y|X}(y|x)$]:
+The PMF $p_{X,Y} (x, y)$ - defined as $p_{X,Y} (x, y) = P(X=x, Y=y)$ - can be found by using the multiplication rule; $p_{X,Y}(x,y) = p_X(x)p_{Y|X}(y|x)$:
 
 |     	|     	|      	|      	|
 |-----	|-----	|------	|------	|
@@ -292,6 +297,8 @@ The PMF $p_{X,Y} (x, y)$^[Defined as $p_{X,Y} (x, y) = P(X=x, Y=y)$] can be foun
 | y=1 	| 0   	| 1/12 	| 6/48 	|
 | y=0 	| 1/3   	| 3/12 	| 9/48 	|
 |     	| x=0 	| x=1  	| x=2  	|
+:::
+
 
 ::: {.border}
 **Example 2.12.** Consider four independent rolls of a 6-sided die. Let $X$ be the
@@ -299,7 +306,8 @@ number of 1’s and let $Y$ be the number of 2’s obtained. What is the joint P
 $X$ and $Y$ ?
 :::
 
-**Solution**
+::: {.callout-note collapse="true"}
+# **Solution**
 
 The PMF of $X$ is:
 
@@ -307,7 +315,7 @@ $$
 p_X(x) =  \dbinom{4}{x} \left( \frac{1}{6} \right) ^x \left( \frac{5}{6}\right) ^ {4-x}
 $$
 
-$Y$  is the number 2's, so conditioned on $x$  (the number of 1's), the possible choices is limited to $2,3,4,5,6$, and the number of 2's required becomes $4-x$
+$Y$  is the number 2's, so conditioned on $x$  (the number of 1's), the possible choices are limited to $2,3,4,5,6$, and the number of 2's required becomes $4-x$
 $$
 p_{Y|X}(y|x) =  \dbinom{4-x}{y} \left( \frac{1}{5} \right) ^y \left( \frac{4}{5}\right) ^ {4-x-y}
 $$
@@ -321,13 +329,15 @@ p_{X,Y}(x,y) =
  0 &\text{else}
 \end{cases}
 $$
+:::
 
 ::: {.border}
 **Example 2.13.** Consider a transmitter that is sending messages over a computer
 network. 
 :::
 
-
+::: {.callout-note collapse="true"}
+# Example
 Let us have two random variables:
 
 $$
@@ -368,7 +378,7 @@ p_{X|Y}(x|y=10^4) =
 \end{cases}
 $$
 
-Using the **Total probability theorem**^[$p_X(x) =\sum_y p_{X|Y}(x|y) * p_Y(y)$]
+Using the **Total probability theorem**-$p_X(x) =\sum_y p_{X|Y}(x|y) * p_Y(y)$
 
 $$
 \begin{align}
@@ -384,7 +394,7 @@ p_X(x=1) = 1/6 * 5*6 + 1/2*1/6
 $$
 
 *Very cool!*
-
+:::
 
 
 ::: {.border}
@@ -395,8 +405,8 @@ that it works correctly, independently from previous attempts. What is the mean
 and variance of $X$, the number of tries until the program works correctly?
 :::
 
-
-**Solution**
+::: {.callout-note collapse="true"}
+# **Solution**
 
 $X$ is a geometric random variable with PMF:
 $$
@@ -408,27 +418,118 @@ $$
 E[X] = \sum_{k=1}^{\infty} k   (1-p)^{k-1} p
 $$
 
-The variance is
+The variance is  $var(X) = E((X-E(X))^2) = \sum_{k=1}^{\infty} (k - E(X))(1-p)^{k-1} p$.
 
-:::{.callout-note}
-Note that there are five types of callouts, including: 
-`note`, `tip`, `warning`, `caution`, and `important`.
+Let's define $P(A_1 = \{X=1\})$ and $P(A_2 = \{X>1\})$ - meaning the first time works and the first time didn't work, respectively.
+
+The conditional expectation of $A_1$:
+$$
+\begin{align}
+E[X| A_1 = \{X=1\}] &= 1 
+\end{align}
+$$ 
+
+
+The conditional expectation of $A_2$:
+$$
+\begin{align}
+E[X| A_2 = \{X>1\}] &= 1 + E[X] 
+\end{align}
+$$ 
+
+This is because the first try was a failure. Thus, using the **Total Expectation Theorem** - $E[X] = \sum_y p_Y(y) E[X|Y=y]$ - we have:
+
+$$
+\begin{align}
+E[X] &= P(X=1) E[X|X=1] + P(X>1) E[X|X>1] \nonumber \\
+&= p + (1-p)(1+E[X]) = 1/p
+\end{align}
+$$
+
+::: 
+
+
+::: {.border}
+**Example 3.5.** The time until a small meteorite first lands anywhere in the Sahara
+desert is modeled as an exponential random variable with a mean of 10 days. The
+time is currently midnight. What is the probability that a meteorite first lands
+some time between 6am and 6pm of the first day? And, on any day?
+:::
+
+::: {.callout-note collapse="false"}
+# **Solution**
+
+The exponential random variable has the PDF of the form:
+
+$$
+f_X(x) = 
+\begin{cases}
+\lambda e ^{-\lambda x} &\quad \text{if x > 0} \\
+0 &\quad \text{else}
+\end{cases}
+$$
+
+
+Since the mean is $E[X] = 1/\lambda$, then $\lambda = 1/10$. The unit is in days, so 6 am to 6 pm is $1/4$ and $3/4$, respectively.
+
+$$
+P(1/4 < X < 3/4 ) = \int_{1/4}^{3/4} \lambda e ^{-\lambda x} dx 
+$$
+
+For any day, we need to sum all of the probabilities for each day.
+
+$$
+P(\text{6am-6pm}) = \sum_{k=1}^{\infty} P(k - 3/4 < X < k-1/4) 
+$$
+
 :::
 ::: {.border}
-This content can be styled with a border
+**Example 3.6.** The Geometric and Exponential CDFs.
 :::
 
+::: {.callout-note }
+# Comparing geometric and exponential CDF
+
+The CDF is defined as $F(x) = P(X\leq x) \quad \forall x$
+$$
+F^{geo}(n) = \sum_{k=1}^{n}p(1-p) ^{k-1} 
+$$
+
+Using $r = (1-p)$, the geometric sum is then
+
+$$
+F^{geo}(n) = p \frac{1-(1-p)^n}{1-(1-p)} = 1-(1-p)^n
+$$
 
 
+For exponential,
 
-{{< pagebreak >}}
+$$
+\begin{align}
+F^{exp}(x) &= \int_{-\infty}^{x}  \lambda e^{-\lambda z} dz \\
+          &=1 - e ^{-\lambda x} \quad \forall x >0
+\end{align}
+$$
 
+```{python code-fold="true"}
+#| code-fold: true
+import numpy as np
+import matplotlib.pyplot as plt
+n = np.linspace(0., 50., 100)
+F_geo = lambda p, n: 1 - np.power((1-p),np.floor(n))
+F_exp = lambda l, x: 1 - np.exp(-l* x)
 
+p = 0.11
+l = 1/p
+f_geo = F_geo(p, n)
+sigma = -np.log(1 - p)/l
+f_lambda = F_exp(l, n*sigma)
+plt.plot(n, f_geo, n, f_lambda)
+_ = plt.title('$F_{geo}(\sigma n)$ vs $F_{exp}(n)$ where $\sigma = -ln(1-p)/\lambda$')
+```
+:::
 
-
-
-
-## Simulations
+## Cool simulations
 
 ### Monte Hall simulation
 ```{python}
