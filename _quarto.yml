@@ -24,8 +24,8 @@ website:
   #    - about.qmd
   #    - about.qmd
   #    - about.qmd
-  page-footer: 
-    center: "Copyright 2022, David Yu, made with [Quarto](https://quarto.org/)" 
+  #page-footer: 
+  #  center: "Copyright 2022, David Yu, made with [Quarto](https://quarto.org/)" 
 format:
   html:
     theme: cosmo
