@@ -1,0 +1,26 @@
+---
+title: Flashcard Links 
+format: html
+reference-location: margin
+jupyter: python3
+html-math-method: katex
+listing:
+  contents: posts
+  sort: "date desc"
+  type: default
+  categories: true
+editor:
+  render-on-save: true
+
+execute: 
+  freeze: true 
+
+comments:
+  hypothesis: true
+---
+
+### Notes and exercises
+
+
+
+# [probability](probability/probability.qmd)

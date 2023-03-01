@@ -1,0 +1,149 @@
+---
+title: Computation neural science 
+format: html
+reference-location: margin
+jupyter: python3
+bibliography: ../../references.bib
+html-math-method: katex
+editor:
+  render-on-save: true
+
+execute: 
+  freeze: false 
+---
+
+
+## HTM School
+
+This is a collection of notes - with some python demos - presented by Matt Taylor. The videos are available on YouTube and are a great way to learn about HTM. 
+
+
+
+
+
+
+
+[Video playlist](https://www.youtube.com/watch?v=XMB0ri4qgwc&list=PL3yXMgtrZmDqhsFQzwUC9V8MeeVOQ7eZ9&index=2&ab_channel=Numenta)
+
+# Introduction
+#### Bit Arrays 
+
+A bit array is a collection of bits, each of which can be either 0 or 1. 
+
+::: {.callout-note collapse="true"}
+# Hamming weight
+
+The number of 1s in a bit array is called the Hamming weight.
+:::
+
+
+For a bit array with 256 places, the capacity is $2^{256}$, which is a very large number. Sparsity is the fraction of 1s in the array. HTM deals with the sparsity of around 2%.
+
+#### Sparse Distributed Representation (SDR)
+The SDR capacity is defined as #bits!/(#number on bits)!(#number off bits)!
+
+```{python}
+import math
+
+def sdr_capacity(num_bits, on_bits):
+  print(f'sparsity : {on_bits*100./num_bits} %')
+  return math.factorial(num_bits) / (math.factorial(on_bits) * math.factorial(num_bits - on_bits))
+
+
+n=256
+on_bits = 5
+print(f'Capcity for SDR with n={16} #onbits={on_bits}: {sdr_capacity(n, on_bits)}')
+
+n=256
+on_bits = 10
+print(f'Capcity for SDR with n={16} #onbits={on_bits}: {sdr_capacity(n, on_bits)}')
+
+
+```
+The capcity of a SDR is very large, and grows very fast with the number of on bits.
+
+### Overlap
+If we have an SDR with 2048 bits and 41 on bits, and we apply noise to it, we can still find the overlap between the original SDR and the noisy SDR.
+```{python}
+#| code-fold: true
+import numpy as np
+def random_sdr(num_bits, on_bits):
+  print(f'Creating random sdr with sparsity: {on_bits/num_bits}')
+  sdr = [0]*num_bits
+  for i in range(on_bits):
+    sdr[np.random.randint(0,num_bits)] = 1
+  return sdr
+
+def apply_noise(sdr, noise):
+  # each on bit has a change to be another bit
+  sdr_copy = sdr.copy()
+  for i in range(len(sdr)):
+    if sdr[i] == 1 and np.random.random() < noise:
+      sdr_copy[i] = 0
+      sdr_copy[np.random.randint(0,len(sdr))] = 1
+  return sdr_copy
+
+def find_overlap(sdr1, sdr2):
+  overlap = 0
+  for i in range(len(sdr1)):
+    if sdr1[i] == 1 and sdr2[i] == 1:
+      overlap += 1
+  return overlap
+sdr = random_sdr(2048, 41)
+sdr_noise = apply_noise(sdr, 0.30)
+
+print(f'Hamming weight of sdr: {sum(sdr)}')
+print(f'Hamming weight of sdr_noise: {sum(sdr_noise)}')
+
+print(f'Overlap of sdr and sdr_noise: {find_overlap(sdr, sdr_noise)}')
+
+```
+
+Theta $\theta$ is the threshold for the overlap. If the overlap is greater than $\theta$, then the SDRs are considered to be similar.
+
+The overlap is 30, and the chance of a false positive is extremely low. Thus SDR can handle noise very well.
+
+#### SDR compression
+The SDR can be compressed by simply returning the indices of the on bits.
+
+```{python}
+def sdr_to_indices(sdr):
+  indices = np.where(np.array(sdr) == 1)[0]
+  return indices
+
+def indices_to_sdr(indices, num_bits):
+  sdr = np.zeros(num_bits)
+  sdr[indices] = 1
+  return sdr
+
+sdr = random_sdr(16, 3)
+indices = sdr_to_indices(sdr)
+print(f'SDR: {sdr}')
+print(f'Indices: {indices}')
+```
+
+### Overlap set
+
+The overlap set $\Omega(n, w, b)$ is the set of all SDRs between SDR with $n$ bits, $w_x$ on bits, and $w$ on bits with $b$ required overlap bits. The length of the overlap set is $C(w_x, b)C(n-w_x, w-b)$.
+
+```{python}
+def combination(n, k):
+  return math.factorial(n) / (math.factorial(k) * math.factorial(n - k))
+
+def len_overlap_set(n, wx, w, b):
+  len_set = combination(wx, b) * combination(n-wx, w-b) 
+  chance_of_false_positive = len_set / combination(n, w)
+  print(f'Chance of false positive: {chance_of_false_positive}')
+  return len_set 
+
+n=2048
+wx=40
+w=40
+b=30
+print(f'n={n}, wx={wx}, w={w}, b={b}')
+print(f'Overlap set length: {len_overlap_set(n, wx, w, b)} ')
+```
+
+### SDR subsampling
+
+Since SDRs are so tolerant to noise, it is possible to take only a subset of the SDRs and still have a high chance of finding the correct SDR.
