@@ -1,206 +1,178 @@
 ---
+title: My document
 format: html
 reference-location: margin
 jupyter: python3
 bibliography: ../../references.bib
+
 html-math-method: katex
+
+
 editor:
   render-on-save: true
-
-title: NeRF - Jax -- WIP
-
+#
+# can have png banner : https://quarto.org/docs/authoring/title-blocks.html
 ---
-In this blog
-The NeRF paper [@Mildenhall2020], gives 
-
-```{python}
-from pythreejs import *
-from IPython.display import display
-
-mesh1 = Mesh(SphereBufferGeometry(20, 16, 16), MeshPhysicalMaterial(color='red'), position=[-20, 0, 0])
-mesh2 = Mesh(SphereBufferGeometry(20, 16, 16), MeshPhysicalMaterial(color='green'), position=[20, 0, 0])
-
-view_width = 600
-view_height = 400
-camera = CombinedCamera(position=[0, 0, 60], width=view_width, height=view_height)
-
-key_light = PointLight(position=[-100, 100, 100])
-ambient_light = AmbientLight(intensity=0.4)
-scene = Scene(children=[mesh1, mesh2, key_light, ambient_light, camera])
-renderer = Renderer(scene=scene, camera=camera, controls=[OrbitControls(controlling=camera)],
-                    width=view_width, height=view_height)
-display(renderer)
 
 
-#camera.mode = 'orthographic'
-camera.mode = 'perspective'
 
-```
 
-### Dataset
-Get the tiny blender nerf dataset
-<!-- ```{python}
+## Introductiosn
+Given a set of images for a scene, we can construct a representation of the scene using a neural network through integration - how awesomely cool is that! The NeRF model [@Mildenhall2020] is a neural network which integrates many different rays coming towards the camera that forms an image. It uses a multi-layered perception (or MLP),  that can be trained to represent a scene from a set of images, and after training we can synthesis an image taken from a new angle.
 
-#| code-fold: true
-import os 
-#if not os.path.exists('tiny_nerf_data.npz'):
-#    !wget http://cseweb.ucsd.edu/~viscomp/projects/LF/papers/ECCV20/nerf/tiny_nerf_data.npz 
-```
-What does the data look like?
-```{python}
-import numpy as np
-data = np.load('tiny_nerf_data.npz') # , allow_pickle=True)
-images = data['images']
-poses = data['poses']
-focal = data['focal']
+When I first read the NeRF paper, I was quite excited about it. I was thinking that this is a great way to learn about 3D reconstruction, and also learn about how neural networks are used for scene reconstruction. I was also thinking that this is a great way to learn about JAX, since I have only been using Tensorflow and PyTorch.
 
-print(f'Images size : {images.shape}')
-print(f'Pose : {poses[0]}')
-print(f'Focal length: {focal}')
-```
+Before coding up NeRF, understanding the paper is important. The paper is quite short, and it is easy to understand. I would recommend reading the paper first, and then come back to this blog. I've also listed all of the reference materials I've used for this project.
 
-The pose includes the extrinsic parameters - rotation and translation matrices - $[R | T]$. And the focal length is the intrinsic property. Using this we can find the camera ray:
+## The Network 
+
+The NeRF model represents a scene as a neural network, where at each 3D poisition $\vec{x} \in \mathbb{R}^3$ and viewing direction $\vec{d} \in \mathbb{R}^3$,  and the output of the model is the color (RGB) $\vec{c}$ and the density $\sigma$ for that point in space. Thus we have: 
 
 $$
-\vec{r} = \vec{o} + t\vec{d}
-$$ {#eq-camera-ray}
+F_\Theta : ( \vec{x}, \vec{d}) \rightarrow (\vec{c}, \sigma)
+$$
 
-The vector $\vec{d}$, can be thought of as $\vec{d}= R\vec{d}_o$, where $\vec{d}_o$ is the direction vector of a standard pinhole camera without rotation - which can be found by using the focal length: $\vec{d}_o = f[x/f, y/f, -1]$
+The network $F_\Theta$ is an Multi-Layer Perceptron (MLP); the network is super simple illustrated in @fig-nerf-model, it is just a bunch of linear layers with ReLU activations. But, the authors' designed the network to ensured that the volume density $\sigma$ is view independent ($\partial{\sigma} / \partial{\vec{d}} = 0$) by setting the directional input $\vec{d}$ after the $\sigma$ output.
 
-
-The cones in the below plot shows the direction of camera ray. The original is shown where $z=0$, and two additional poses are also plotted.
-```{python}
-#| code-fold: true
-import plotly.graph_objects as go
-#xv, yv = np.meshgrid(0, 500, indexing='xy')
-H = 100
-W = 100
-x, y, z = np.mgrid[0:W:10, 0:H:10, 0:H:10]
-x = x.flatten() - W/2
-y = y.flatten() - H/2
-z = z.flatten()*0
-
-u = x/focal 
-v = y/focal
-
-w = -np.ones_like(x)
-print(u[0], v[0], w[0])
-
-fig = go.Figure()
-fig.add_trace(go.Cone(
-    x=x,
-    y=y,
-    z=z,
-    u=u,
-    v=v,
-    w=w,
-    ))
-
-for i in range(0, 40,30):
-    rot = poses[i][:3,:3]
-    t = poses[i][:3,3]
-    t= t[..., np.newaxis]
-    p = np.stack([x, y, z]) 
-    d = np.stack([u, v, w]) 
-    p = rot @ p 
-    d = rot @ d 
-    nx, ny, nz = p 
-    nu, nv, nw = d 
-    fig.add_trace(go.Cone(
-        x=nx,
-        y=ny,
-        z=nz,
-        u=nu,
-        v=nv,
-        w=nw*2,
-        ))
-
-fig.show()
-
-```
---->
-
-```{python}
-import jax
-import jax.numpy as jnp
-
-def get_ray(H, W, focal, pose):
-    x, y = jnp.mgrid[0:W, 0:H]
-    x = x - W/2
-    y = y - H/2
-    y = -y 
-
-    x = x.flatten()
-    y = y.flatten()
-
-    direction = jnp.stack([x, y, -jnp.ones_like(x)])
-    # Normalize direction
-    direction_norm = jnp.linalg.norm(direction, ord=2, axis=0)
-    direction = direction/direction_norm
-
-    rot = pose[:3, :3] 
-    direction = jnp.matmul(rot, direction)
-
-    translation = pose[:3, 3]
-    translation = translation[..., jnp.newaxis]
-    origin = jnp.broadcast_to(translation, direction.shape)
-    return origin, direction 
-
-def get_ray_concrete(x):
-    return get_ray(H, W, focal, x)
-
-get_ray_batched = jax.vmap(get_ray_concrete, in_axes=(0))
-``` 
+![
+The NeRF model @Mildenhall2020. The blue blocks represents MLP layers. Black arrows indicates ReLU activation layer, orange arrow indicates no activation and dashed black line indicates sigmoid activiation.
+](nerf_model.png "Title: An elephant"){#fig-nerf-model}
 
 
 ### Camera ray and position encoding
-Let's construct the function @eq-camera-ray.
+
+
+#### Camera ray 
+
+Before we can train the network, we need to generate the rays that will be used to train the network. The rays are generated from the camera, and the camera is defined by the extrinsic parameters - rotation and translation matrices - $[R | T]$, the focal length, and the near/far distances. The origin $\vec{o}$ would be the camera translation vector for that image.
+
+The vector $\vec{d}$, can be thought of as $\vec{d}= R\vec{d}_o$, where $\vec{d}_o$ is the direction vector $\vec{d}_o = [x, y, -f]$ using the pin-hole camera model [cite],  the magnitude doesn't maktter so $\vec{d}_o = [x/f, y/f, -1]$
+
+
+#### Positional encoding
+
+The positional encoding is a simple way to encode the 3D position $\vec{x}$ into a vector. The authors used a sine and cosine function to encode the position to enable the MLP to capture higher frequencey functions. The encoding is given by:
+
+$$
+\gamma(x) = (sin(2^0\pi x), cos(2^0 x), \dots, sin(2^{L-1}\pi x), cos(2^{L-1} x))
+$$
+
+where $x$ can be either the position or the direction, and $L$ is the number of frequencies. The authors used $L_{position}=10$  and $L_{direction}=4$.
+
+
+
+#### Model in JAX
+
+Using [Flax](https://github.com/google/flax), we can easily define the model in JAX. The code is shown below:
 
 ```{python}
-near = 2.
-far = 6.
-num_samples = 64
+# code-fold: true
+import jax
+import flax.linen as nn
+import jax.numpy as jnp
 
-def r_func(o, d, t):
-    r = o + t*d
-    return r
 
-t = jnp.linspace(near, far, num_samples)
+class Model(nn.Module):
 
-get_ray_batched_jit = jax.jit(get_ray_batched)
-origin, direction = get_ray_batched_jit(poses)
-r = r_func(origin, direction, num_samples)
-print(r.shape)
+  @nn.compact
+  def __call__(self, position, direction):
+    x =  position
+
+    for i in range(7):
+        x = nn.Dense(256, name=f'fc{i + 1}')(x)
+        x = nn.relu(x)
+
+        # Concat x with original input 
+        if i == 4:
+            x = jnp.concatenate([x, position], -1)
+
+    x = nn.Dense(256, name=f'fc{8}_linear')(x)
+
+    vol_density = nn.Dense(1, name=f'fc{8}_sigmoid')(x)
+
+    # Create an output for the volume density that is view independent
+    # and > 0 by using a relu activation function 
+    vol_density = jax.nn.relu(vol_density)
+
+    # Concat direction information after the volume density
+    x = jnp.concatenate([x, direction], -1)
+    x = nn.Dense(128, name='fc_128')(x)
+    x = nn.relu(x)
+    x = nn.Dense(3, name='fc_f')(x)
+
+    # rgb color is between 0 and 1
+    rgb = nn.sigmoid(x)
+    return rgb, vol_density
+
+
+L_position = 10 
+L_direction = 4 
+random_position = jnp.ones((1, L_position * 6 + 3))
+random_direction = jnp.ones((1, L_direction * 6 + 3))
+
+
 ```
 
-In **Section 5.1** the position encoding $\gamma$ is a mapping from $\mathbb{R}$ to $\mathbb{R}^{2L}$, where $L=10$ for the coordinate values $x$ and $l=4$ the direction vector :
-
-$$
-\gamma(p) = (sin(2^0\pi p), cos(2^0 p), \dots, sin(2^{L-1}\pi p), cos(2^{L-1} p))
-$$
-
-
-```{python}
-def encoding_func(x, L):
-    encoded_array = []
-    for i in range(L):
-        encoded_array.extend([jnp.sin(jnp.power(2, i) * jnp.pi * x), jnp.cos(jnp.power(2,i) * jnp.pi * x)])
-    return jnp.array(encoded_array)
-
-encoding_func_batched = jax.vmap(encoding_func, (0, None))
-r_encoded = encoding_func_batched(r, 10)
-print(f'Position before encoding shape {r.shape}')
-print(f'Position after encoding shape {r_encoded.shape}')
+::: {.callout-tip}
+Use the code below to print the model architecture
+```python
+print(Model().tabulate(jax.random.PRNGKey(0), random_position, random_direction))
 ```
-### The render function
+:::
 
-Equation (3) in the paper is:
+
+### How does the network work?
+
+Imagine a line or ray pointed towards the camera, with equation $\vec{r}(t) = \vec{o} +t \vec{d}$; where $\vec{o}$ is the origin point on the ray and $t$ is a parameter controls how far along the ray we are at. The authors split the ray into $N$ segments, where each segment will have length equaled to $\delta_i = t_{i+1}-t_i$. At each segment along the ray, we can find the color and density of segment $i$ approximated by the neural network $F_\Theta(\vec{r}(t_i), \vec{d_i}) \rightarrow (\vec{c}_i, \sigma_i)$. We can get the expected color that would appear on our image by using a set of approximation equations, outlined below:
 
 $$
-\hat{C} \vec(r) = \sum_{i=1}^{N} T_i (1- \text{exp}(-\sigma_i \delta_i))\vec{c}_i, \text{where}, T_i=\text{exp}\left( \sum_{j=1}^{i-1} \sigma_j \delta_j \right)
+\hat{C}(\vec{r}) = \sum_{i=1}^{N} T_i a_i \vec{c}_i 
 $$
+
+where, 
+
+$$
+a_i = (1- \text{exp}(-\sigma_i \delta_i))
+$$
+
+
+and,
+$$
+T_i=\text{exp}\left( -\sum_{j=1}^{i-1} \sigma_j \delta_j \right)
+$$
+
+$T_i$ for a segment, is the accumulated transmittance upto that point, which can be thought of as the the probability that the ray has not hit anything up to that point, so every point before a solid object along the ray, $T_i$ should be $1$. If the ray encounters some solid object, then $T_i$ would start to decrease because the volume density $\sigma$ starts to increase.  We can see that the alpha values $a_i$ for low volume density becomes $0$ which ignores that colour in the integral. What an interesting relationship!
+
+
+
+The above equations can be written with `jnp`, a JAX version of `numpy` as:
+
+```python
+
+...
+# get the accumulated transmittance
+T_i = jnp.cumsum(jnp.squeeze(sigma) * t_delta + 1e-10, -1)
+T_i = jnp.insert(T_i, 0, jnp.zeros_like(T_i[...,0]),-1)
+T_i = jnp.exp(-T_i)[..., :-1]
+
+# get the alpha values
+alpha = (1.-jnp.exp(-sigma*t_delta[..., jnp.newaxis]))
+
+weights = T_i[..., jnp.newaxis] * alpha
+c_array = weights * rgb
+c_sum =jnp.sum(c_array, -2)
+return c_sum
+```
+
 
 ## Hierarchical volume sampling
+
+Free space and solid objects don't contribute to the final color, so we can sample the volume more densely around points along the ray that have a larger weight - this is called hierarchical volume sampling.
+
+
+First sample a coarse set of points, then they sample a fine set of points around the coarse set. 
+
+
 
 This method is used to sample points closer to the surface of the objects. They first sample $N_c$ locations using stratified sampling, then they sample a second set $N_f$ using inverse transform sampling of the $\text{PDF}$ created using $w_i = T_i(1-\exp(-\sigma_i \delta_i))$, or
 
@@ -213,6 +185,7 @@ where $k=\sum_j^{N_c} w_j$ is the normalizing factor, this is the ensure that th
 
 ```{python}
 #| code-fold: true
+import numpy as np
 weights = np.squeeze(np.load('weights.npy'))
 
 k = np.sum(weights) 
@@ -289,3 +262,7 @@ print(t.shape)
 fig = px.histogram(x=t[50,50])
 fig.show()
 ```
+
+## Training
+
+

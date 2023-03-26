@@ -21,6 +21,4 @@ comments:
 
 ### Notes and exercises
 
-
-
 # [probability](probability/probability.qmd)

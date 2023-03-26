@@ -8,9 +8,10 @@ website:
     search: true
 
     contents:
-      #- section: "Projects"
-      #  contents:
-      #    - blog/blog.qmd
+      - section: "Projects"
+        contents:
+          #- blog/blog.qmd
+          - blog/nerf/nerf.qmd 
       - section: "Notes and exercises"
         contents:
           - base/probability/probability.qmd
