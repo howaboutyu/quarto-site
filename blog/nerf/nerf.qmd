@@ -1,6 +1,6 @@
 ---
 title: "Learning: NeRF + JAX "
-date: 03 March 2023
+date: 03 April 2023
 author: [Hao Bo Yu]
 title-block-banner: true
 #title-block-style: plain

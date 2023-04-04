@@ -1,5 +1,5 @@
 ---
-title: My blog 
+title: Projects 
 format: html
 reference-location: margin
 jupyter: python3
