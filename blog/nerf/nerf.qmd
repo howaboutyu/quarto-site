@@ -11,18 +11,19 @@ reference-location: margin
 jupyter: python3
 bibliography: ../../references.bib
 html-math-method: katex
-editor:
-  render-on-save: true
-
-execute:
-  freeze: true
-
-comments:
-  hypothesis: true
 
 highlight-style: solarized 
 callout-appearance: simple
 
+comments:
+  giscus: 
+    repo: howaboutyu/quarto-site
+
+reading-time: true
+categories:
+  - machine learning 
+  - jax
+  - nerf 
 ---
 
 
@@ -30,19 +31,22 @@ callout-appearance: simple
 
 
 
-I've always been intrigued by the elegant NeRF algorithm [@Mildenhall2020]. In this artical, I will outline the NeRF algorithm [@Mildenhall2020] works under the hood and also explain some of the things I've learnt about Jax [@jax2018github] (that I wish I would remember).  In the video below, I've rendered a 5 second video using the NeRF algorithm, the model was trained on 35 sparse images.
 
 {{< video https://youtu.be/0puPLaTeO60  >}}
 
-NeRF achieves this by integrating rays of light that emanate from the camera and intersect the object. In other words, NeRF can use a bunch of rays to create an image of the object from different viewpoints. NeRF uses a multi-layered perception (MLP) that can be trained to represent a scene from a set of 2D images, and can then generate images taken from new angles. That is how it was done!
-
-When I first read the NeRF paper, I was amazed by its elegance and and its potential for scene representation using neural networks. I also saw it as an opportunity to learn more about JAX. In this article, I will outline the NeRF algorithm and explain some of the things I've learnt about Jax.  
+In the 5-second video above, you can see the output of the NeRF algorithm [@Mildenhall2020] that I implemented in Jax [@jax2018github], which was trained on 35 sparse images. But how was this achieved?
 
 ::: {.callout-note }
-Checkout the accompanying code
+Check out the accompanying code
 [here](https://github.com/higgsboost/nerf-jax)
 
 :::
+
+NeRF achieves this by integrating rays of light that emanate from the camera and intersect the object. In other words, NeRF can use a bunch of rays to create an image of the object from different viewpoints. NeRF uses a multi-layered perception (MLP) that can be trained to represent a scene from a set of 2D images, and can then generate images taken from new angles. That is how it was done!
+
+When I first read the NeRF paper, I was amazed by its elegance and its potential for scene representation using neural networks. I also saw it as an opportunity to learn more about JAX. In this article, I will outline the NeRF algorithm and explain some of the things I've learned about Jax.  
+
+
 
 
 ## The NeRF Neural Network 
@@ -56,7 +60,7 @@ $$
 The network $F_\Theta$ is a Multi-Layer Perceptron (MLP); the network is quite simple, as illustrated in Figure 1. It consists of a series of linear layers with ReLU activations.
 
 ![
-The NeRF model figure taken from @Mildenhall2020. The blue blocks represents MLP layers. Black arrows indicate ReLU activation layer, the orange arrow indicates no activation, and dashed black line indicates sigmoid activiation.
+The NeRF model figure is taken from @Mildenhall2020. The blue blocks represent MLP layers. Black arrows indicate the ReLU activation layer, the orange arrow indicates no activation and the dashed black line indicates sigmoid activation.
 ](nerf_model.png "Title: The NeRF model"){#fig-nerf-model}
 
 
@@ -84,6 +88,13 @@ Here, $x$ can be either the position or the direction, and $L$ is the number of 
 #### Model in JAX
 
 Using [Flax](https://github.com/google/flax), we can easily define the model in JAX. The code is shown below:
+
+::: {.callout-tip }
+
+Hover over the code annotations (like ① ) for further explanation.
+
+:::
+
 
 ```{python}
 import jax
@@ -145,18 +156,13 @@ print(
 ```
 
 1. We initialize the model with a  `PRNGKey` and dummy input data using the `init` method.
-2. We can use the `tabulate` method to see the model summary.
+2. We can use the `tabulate` method to see the model summary. [docs](https://flax.readthedocs.io/en/latest/api_reference/flax.linen.html)
 
-::: {.callout-tip }
-
-Hover over the code annotations (like ① ) for further explanation.
-
-:::
 
 
 ### The NeRF algorithm 
 
-Consider a line or ray directed toward the camera, with the equation $\vec{r}(t) = \vec{o} +t \vec{d}$, where $\vec{o}$ is the origin point on the ray, $t$ is a parameter that controls how far along the ray we are and $\vec{d}$ is the direction of the ray - pointing away from the camera. The authors split the ray into $N$ segments, with each segment having a length equal to $\delta_i = t_{i+1}-t_i$. At each segment along the ray, the color and density of segment $i$ can be approximated by the neural network $F_\Theta(\vec{r}(t_i), \vec{d_i}) \rightarrow (\vec{c}_i, \sigma_i)$. The expected color of that ray that would appear in our image, $\hat{C}(\vec{r})$, can be calculated using a set of approximation integral equations, as shown below:
+Consider a line or ray directed pointing away from the camera, with the equation $\vec{r}(t) = \vec{o} +t \vec{d}$, where $\vec{o}$ is the origin point on the ray, $t$ is a parameter that controls how far along the ray we are and $\vec{d}$ is the direction of the ray - a unit vector pointing away from the camera. The authors split the ray into $N$ segments, with each segment having a length equal to $\delta_i = t_{i+1}-t_i$. At each segment along the ray, the color and density of segment $i$ can be approximated by the neural network $F_\Theta(\vec{r}(t_i), \vec{d_i}) \rightarrow (\vec{c}_i, \sigma_i)$. The expected color of that ray that would appear in our image, $\hat{C}(\vec{r})$, can be calculated using a set of approximation integral equations, as shown below:
 
 $$
 \hat{C}(\vec{r}) = \sum_{i=1}^{N} T_i a_i \vec{c}_i 
@@ -200,9 +206,10 @@ c_array = weights * rgb # <1>
 c_sum = jnp.sum(c_array, -2) # <1>
 ```
 
+
 1. @eq-nerf-color
-2. @eq-nerf-transmittance
-3. @eq-nerf-alpha
+2. @eq-nerf-alpha
+3. @eq-nerf-transmittance
 
 ## Hierarchical volume sampling (HVS)
 
@@ -212,7 +219,7 @@ $$
 \hat{C}(\vec{r}) = \sum_{i=1}^{N} w_i \vec{c}_i
 $$
 
-The authors employs a two-step approach for processing the model. First, it uses a coarse set of points with $N_c$ points. Subsequently, it employs a finer set of $N_f$ points to sample the relevant parts of the volume with denser sampling. To sample these points, the method uses inverse transform sampling based on a probability density function (PDF) created using the expression $w_i = T_i(1-\exp(-\sigma_i \delta_i))$. 
+The authors employ a two-step approach for processing the model. First, it uses a coarse set of points with $N_c$ points. Subsequently, it employs a finer set of $N_f$ points to sample the relevant parts of the volume with denser sampling. To sample these points, the method uses inverse transform sampling based on a probability density function (PDF) created using the expression $w_i = T_i(1-\exp(-\sigma_i \delta_i))$. 
 
 In essence, this method involves the use of a random variable $X$ that represents the element along the ray that is the first surface the ray hits. To ensure correct sampling distribution, the PDF is normalized as follows:
 
@@ -366,17 +373,17 @@ learning_rate_schedule = optax.cosine_decay_schedule( # <1>
 tx = optax.adam(learning_rate=learning_rate_schedule) # <2>
 state = train_state.TrainState.create(apply_fn=model, params=params, tx=tx) # <2>
 
-# we need to replicate the state to all devices
+# replicate the state to all devices 
 state = flax.jax_utils.replicate(state) # <3> 
 ```
 
 1. Define the learning rate schedule, [see more](https://optax.readthedocs.io/en/latest/api.html).
 2. Create the train state object with `train_state.TrainState.create`, specifying the model, parameters, and optimizer.
-3. Use `flax.jax_utils.replicate` to replicate the state to multiple devices. Use the opposite `flax.jax_utils.unreplicate` to get the state for a single device. 
+3. If we are using multiple devices for training, use `flax.jax_utils.replicate` to replicate the state to multiple devices. Use the opposite `flax.jax_utils.unreplicate` to get the state for a single device. 
 
 
 
-#### The train step 
+#### The training step 
 
 The following code implements the training step for NeRF using the single-program, multiple-data (SPMD) technique, which allows for parallel computation of the forward pass of a neural network on different input data across different devices (e.g., TPUs).
 
@@ -437,12 +444,21 @@ p_train_step = jax.pmap( # <3>
     axis_name="batch", # <3>
 ) # <3>
 
+state = flax.jax_utils.replicate(state) # <4>
 
+...
+
+state, loss, rgb_pred, weights, ts = p_train_step( # <5>
+    state, key, origins, directions, rgbs
+) # <5>
 ```
 0. The loss is computed by comparing the predicted rgb values with the ground truth rgb values for both the coarse and fine renderings. 
 1. Use `jax.pmean` to combine the loss and gradients from all devices
 2. Update the state by computing gradients and applying them using the `state.apply_gradients()` method.
 3. Use `jax.pmap` to parallelize the training step across devices  
+4. If we are using multiple devices for training, use `flax.jax_utils.replicate` to replicate the state to multiple devices. Use the opposite `flax.jax_utils.unreplicate` to get the state for a single device.  
+5. Run the training step 
+
 
 ::: {.callout-tip}
 # Breakpoints 
@@ -461,7 +477,7 @@ The training was using the same hyperparameters as the original NeRF paper. The 
 
 
 ### The training images
-Below are the training images used for training the model, in total there are 35 images, 33 of which are used for training and 2 for validation. The images were taken from an IPhone video of a Ramen restaurant lego set.  
+Below are the training images used for training the model, in total there are 35 images, 33 of which are used for training and 2 for validation. The images were taken from an iPhone video of a Ramen restaurant Lego set.  
 
 ::: {#fig-train }
 ![Training images](images/training_img.png){#fig-train-img}
@@ -488,7 +504,7 @@ The following figure shows the ground truth images, the predicted images, and th
 
 ![Video of rendered validation images](training.mp4){#fig-rendered} 
 
-Ground truth images, predicted images, predicted depth maps, and rendered validation images.
+Ground truth images, predicted images, predicted depth maps and rendered validation images.
 
 :::
 
@@ -503,6 +519,9 @@ Here are some of the extensions that I found interesting:
 * [NeuS](https://lingjie0206.github.io/papers/NeuS/): This paper introduces NeuS, a novel neural surface reconstruction method that represents the surface as the zero-level set of a signed distance function (SDF).  
 
 For more papers and implementations, check out the [awesome NeRF list](https://github.com/awesome-NeRF/awesome-NeRF).
+
+In this project, I implemented NeRF using Jax and Flax. I also trained a NeRF model on a custom set of images and rendered a custom 5-second video using NeRF. Very cool!
+
 
 ## Other NeRF implementations 
 

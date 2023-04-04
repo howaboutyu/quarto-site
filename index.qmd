@@ -11,16 +11,18 @@ about:
 
     - icon: github 
       text: github 
-      href: https://github.com/higgsboost
+      href: https://github.com/howaboutyu
 
 ---
 
 :::{#hero-heading}
 
-Hi, I'm David Yu, a machine learning engineer. I'm passionate about using machine learning to solve problems and I like to make things. In my spare time, I enjoy riding motorcycles, travelling and playing the guitar.
+My name is Hao Bo Yu (pronounced as "how about you"). 
+
+I'm interested in machine learning, robotics and the brain. 
 
 
-## Education
+<!-- ## Education
 
 **University of Auckland** | New Zealand 
 Master of Engineering | 2016 - 2017 
@@ -33,7 +35,7 @@ Bachelors of Engineering (Hon) | 2012 - 2015
 **Imagr Ltd** | Machine Learning Engineer | September 2018 - September 2022
 
 **Auckland Bioengineering Institute** | Research Assistant |  Mar 2017 – Aug 2018
-
+ -->
 :::
 
 

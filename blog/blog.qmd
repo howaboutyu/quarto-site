@@ -1,33 +1,12 @@
 ---
-title: Blogs yo 
+title: My blog 
 format: html
 reference-location: margin
 jupyter: python3
 html-math-method: katex
 listing:
-  contents: posts
-  sort: "date desc"
-  type: default
   categories: true
-editor:
-  render-on-save: true
-
-execute: 
-  freeze: true 
-
-comments:
-  hypothesis: true
+  contents:
+    - "nerf/nerf.qmd" 
 ---
 
-
-# sec A
-## Nerf with jax 
-Links:
-* Github: https://github.com/higgsboost/nerf-jax \
-Blog: [nerf(WIP)](nerf/nerf.qmd)
-
-[example](https://google.com){.external target="_blank"}
-
-# sec B
-## a
-a

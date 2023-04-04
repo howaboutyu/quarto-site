@@ -1,7 +1,9 @@
 [
   {
     "listing": "/blog/blog.html",
-    "items": []
+    "items": [
+      "/blog/nerf/nerf.html"
+    ]
   },
   {
     "listing": "/base/base.html",
