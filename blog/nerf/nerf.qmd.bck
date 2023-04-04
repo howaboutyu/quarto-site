@@ -1,0 +1,397 @@
+---
+title: Basic Probability
+date: 03 March 2023
+author: [Hao Bo Yu]
+#title-block-banner: true
+title-block-style: plain
+
+format: html
+reference-location: margin
+jupyter: python3
+bibliography: ../../references.bib
+html-math-method: katex
+editor:
+  render-on-save: true
+
+execute:
+  freeze: true
+
+comments:
+  hypothesis: true
+
+highlight-style: solarized 
+
+---
+
+
+## What is NeRF!? 
+
+Ok, imagine yourself walking around a statue, and you can see the statue from different angles and can imagine the statue from different angles. NeRF is a neural network that can do that! 
+
+Imagine a bunch of rays coming towards the camera, and each ray is a line that starts from the camera and goes towards the object. The NeRF model is a neural network that can integrate all of the rays to form an image. 
+
+
+
+Given a set of images for a scene, we can construct a representation of the scene using a neural network through integration - how awesomely cool is that! The NeRF model [@Mildenhall2020] is a neural network which integrates many different rays coming towards the camera that forms an image. It uses a multi-layered perception (or MLP),  that can be trained to represent a scene from a set of images, and after training we can synthesis an image taken from a new angle.
+
+When I first read the NeRF paper, I was quite excited about it. I was thinking that this is a great way to learn about 3D reconstruction, and also learn about how neural networks are used for scene reconstruction. I was also thinking that this is a great way to learn about JAX, since I have only been using Tensorflow and PyTorch.
+
+Before coding up NeRF, understanding the paper is important. The paper is quite short, and it is easy to understand. I would recommend reading the paper first, and then come back to this blog. I've also listed all of the reference materials I've used for this project.
+
+## The Network 
+
+The NeRF model represents a scene as a neural network, where at each 3D poisition $\vec{x} \in \mathbb{R}^3$ and viewing direction $\vec{d} \in \mathbb{R}^3$,  and the output of the model is the color (RGB) $\vec{c}$ and the density $\sigma$ for that point in space. Thus we have: 
+
+$$
+F_\Theta : ( \vec{x}, \vec{d}) \rightarrow (\vec{c}, \sigma)
+$$
+
+The network $F_\Theta$ is an Multi-Layer Perceptron (MLP); the network is super simple illustrated in @fig-nerf-model, it is just a bunch of linear layers with ReLU activations. 
+
+![
+The NeRF model @Mildenhall2020. The blue blocks represents MLP layers. Black arrows indicates ReLU activation layer, orange arrow indicates no activation and dashed black line indicates sigmoid activiation.
+](nerf_model.png "Title: An elephant"){#fig-nerf-model}
+
+
+### Camera ray and position encoding
+
+
+#### Camera ray 
+
+Before we can train the network, we need to generate the rays that will be used to train the network. The rays are generated from the camera, and the camera is defined by the extrinsic parameters - rotation and translation matrices - $[R | T]$, the focal length, and the near/far distances. The origin $\vec{o}$ would be the camera translation vector for that image.
+
+The vector $\vec{d}$, can be thought of as $\vec{d}= R\vec{d}_o$, where $\vec{d}_o$ is the direction vector $\vec{d}_o = [x, y, -f]$ using the pin-hole camera model [cite],  the magnitude doesn't maktter so $\vec{d}_o = [x/f, y/f, -1]$
+
+
+#### Positional encoding
+
+The positional encoding is a simple way to encode the 3D position $\vec{x}$ into a vector. The authors used a sine and cosine function to encode the position to enable the MLP to capture higher frequencey functions. The encoding is given by:
+
+$$
+\gamma(x) = (sin(2^0\pi x), cos(2^0 x), \dots, sin(2^{L-1}\pi x), cos(2^{L-1} x))
+$$
+
+where $x$ can be either the position or the direction, and $L$ is the number of frequencies. The authors used $L_{position}=10$  and $L_{direction}=4$.
+
+
+
+#### Model in JAX
+
+Using [Flax](https://github.com/google/flax), we can easily define the model in JAX. The code is shown below:
+
+```{python}
+# code-fold: true
+import jax
+import flax.linen as nn
+import jax.numpy as jnp
+
+
+class Model(nn.Module):
+
+  @nn.compact
+  def __call__(self, position, direction):
+    x =  position
+
+    for i in range(7):
+        x = nn.Dense(256, name=f'fc{i + 1}')(x)
+        x = nn.relu(x)
+
+        # Concat x with original input 
+        if i == 4:
+            x = jnp.concatenate([x, position], -1)
+
+    x = nn.Dense(256, name=f'fc{8}_linear')(x)
+
+    vol_density = nn.Dense(1, name=f'fc{8}_sigmoid')(x)
+
+    # Create an output for the volume density that is view independent
+    # and > 0 by using a relu activation function 
+    vol_density = jax.nn.relu(vol_density)
+
+    # Concat direction information after the volume density
+    x = jnp.concatenate([x, direction], -1)
+    x = nn.Dense(128, name='fc_128')(x)
+    x = nn.relu(x)
+    x = nn.Dense(3, name='fc_f')(x)
+
+    # rgb color is between 0 and 1
+    rgb = nn.sigmoid(x)
+    return rgb, vol_density
+
+
+L_position = 10 
+L_direction = 4 
+random_position = jnp.ones((1, L_position * 6 + 3))
+random_direction = jnp.ones((1, L_direction * 6 + 3))
+
+
+```
+
+::: {.callout-tip}
+Use the code below to print the model architecture
+```python
+print(Model().tabulate(jax.random.PRNGKey(0), random_position, random_direction))
+```
+:::
+
+
+### How does the network work?
+
+Imagine a line or ray pointed towards the camera, with equation $\vec{r}(t) = \vec{o} +t \vec{d}$; where $\vec{o}$ is the origin point on the ray and $t$ is a parameter controls how far along the ray we are at. The authors split the ray into $N$ segments, where each segment will have length equaled to $\delta_i = t_{i+1}-t_i$. At each segment along the ray, we can find the color and density of segment $i$ approximated by the neural network $F_\Theta(\vec{r}(t_i), \vec{d_i}) \rightarrow (\vec{c}_i, \sigma_i)$. We can get the expected color that would appear on our image by using a set of approximation equations, outlined below:
+
+$$
+\hat{C}(\vec{r}) = \sum_{i=1}^{N} T_i a_i \vec{c}_i 
+$${#eq-nerf-color}
+
+where, 
+
+$$
+a_i = (1- \text{exp}(-\sigma_i \delta_i))
+$${#eq-nerf-alpha}
+
+
+and,
+$$
+T_i=\text{exp}\left( -\sum_{j=1}^{i-1} \sigma_j \delta_j \right)
+$${#eq-nerf-transmittance}
+
+$T_i$ is the accumulated transmittance upto that point, which can be thought of as the the probability that the ray has not hit anything up to that point, so every point before a solid object along the ray, $T_i$ should be $1$. If the ray encounters some solid object, then $T_i$ would start to decrease because the volume density $\sigma$ starts to increase.  We can see that the alpha values $a_i$ for low volume density becomes $0$ which ignores that colour in the integral. What an interesting relationship!
+
+
+::: {.callout-info}
+
+The authors' designed the network to ensured that $\sigma$ and $T_i$ the volume density $\sigma$ is view independent ($\partial{\sigma} / \partial{\vec{d}} = 0$) by setting the directional input $\vec{d}$ after the $\sigma$ output.
+
+:::
+
+
+The above equations can be written with `jax.numpy`, a JAX version of `numpy` as:
+
+```python
+
+# get the volume density and color
+sigma, rgb = model(position, direction)
+
+# sigma is the volume density, and rgb is the color
+# sigma has shape (batch_size, 1) and rgb has shape (batch_size, 3)
+
+# get the alpha values, a_i
+alpha = (1.-jnp.exp(-sigma*t_delta[..., jnp.newaxis])) 
+
+
+# get the accumulated transmittance 
+T_i = jnp.cumsum(jnp.squeeze(sigma) * t_delta, -1)
+T_i = jnp.insert(T_i, 0, jnp.zeros_like(T_i[...,0]),-1)
+T_i = jnp.exp(-T_i)[..., :-1]
+
+
+weights = T_i[..., jnp.newaxis] * alpha
+c_array = weights * rgb
+c_sum =jnp.sum(c_array, -2)
+```
+
+
+## Hierarchical volume sampling
+
+Free space and solid objects don't contribute to the final color, so we can sample the volume more densely around points along the ray that have a larger weight, the weight is defined as $w_i = T_i a_i$, rewriting @eq-nerf-color as:
+
+$$
+\hat{C}(\vec{r}) = \sum_{i=1}^{N} w_i \vec{c}_i
+$$
+
+First run the model through a course $N_c$ number of points, then a finner set $N_f$ is which is used to sampled near relevant parts of the volume. These points are sampled using inverse transform sampling of the $\text{PDF}$ created using $w_i = T_i(1-\exp(-\sigma_i \delta_i))$ and normalizing it.
+
+$$
+f_X(x) = \frac{w_x}{  \sum_j^{N_c} w_j } \quad 1 < x < N_c 
+$$
+
+### Inverse transform sampling example
+
+Consider a ray with 128 points for the LEGO dataset at the center of the image. The PDF,$f_X(x)$, and CDF^[The CDF of a random variable $X$ is $F_X(x) = P(X\leq x)$], $F_X(x)$, and the inverse CDF, $F^{-1}_X(x)$, are plotted below.
+
+The idea of inverse transform sampling is to sample from a uniform distribution $U(0,1)$, and then use the inverse CDF to find the corresponding value in the original distribution. Looking at the inverse CDF, if we $Z\sim U(0,1)$ then we can see that most values would be close to $i=50$, which does make sense by looking at the PDF which has the highest probability near that point along the ray. 
+
+```{python}
+#| code-fold: true
+
+''' 
+PDF, CDF, and inverse CDF of the weights
+'''
+import numpy as np
+import plotly.express as px
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
+
+
+weights = np.squeeze(np.load('weights.npy'))
+
+
+k = np.sum(weights) 
+# normalize
+weights = weights/k
+dx = 1. 
+x=np.arange(0, 128)
+
+cdf = np.cumsum(weights * dx)
+
+
+fig = make_subplots(rows=2, cols=2, subplot_titles=("PDF", "CDF", "Inverse CDF"),
+	specs=[[{}, {}],
+           [{"colspan": 2}, None]],
+)
+fig.add_trace(go.Scatter(x=x, y=weights, name='PDF'), row=1, col=1)
+fig.add_trace(go.Scatter(x=x, y=cdf, name='CDF'), row=1, col=2)
+
+# plot inverse CDF
+fig.add_trace(go.Scatter(x=cdf, y=x, name='inverse CDF'), row=2, col=1)
+
+
+# set x label to be i
+fig.update_xaxes(title_text="i", row=1, col=1)
+fig.update_xaxes(title_text="i", row=1, col=2)
+fig.update_xaxes(title_text="probability", row=2, col=1)
+
+
+# set y label to be probability
+fig.update_yaxes(title_text="probability", row=1, col=1)
+fig.update_yaxes(title_text="i", row=2, col=1)
+
+
+# remove legend
+fig.update_layout(showlegend=False)
+
+fig.show()
+
+# area
+area = np.sum(weights * dx)
+```
+
+#### Inverse transform sampling in JAX
+
+The inverse transform sampling method can be implemented in JAX. The `inverse_sample` function takes in a uniform distribution $U(0,1)$ and the CDF of the distribution to sample from. The function returns the sampled points from the distribution. The `inverse_sample` function first finds the closest probability of the CDF and then finds the corresponding value in the array to sample, which in this case is `jnp.arange(256)`. We can see that events are sampled centered around $i=50$ .
+$$
+$$
+
+```{python}
+#| code-fold: false 
+import jax.numpy as jnp 
+import jax
+
+Z = jax.random.uniform(key=jax.random.PRNGKey(0), shape=[64])
+t_to_sample = jnp.arange(128)
+cdf = jnp.array(cdf)
+
+def inverse_sample(Z, cdf, t_to_sample):
+    """
+    Samples from the inverse CDF using the inverse transform sampling method.
+    Inputs:
+        Z (jnp.ndarray): Random numbers from a uniform distribution U(0, 1). Shape: (batch_size, num_to_sample)
+        cdf (jnp.ndarray): The CDF of the distribution to sample from. Shape: (batch_size, num_samples)
+        t_to_sample (jnp.ndarray): The points to sample from the distribution. Shape: (batch_size, num_fine_samples)
+
+    Outputs:
+        sampled_t (jnp.ndarray): The sampled points from the distribution. Shape: (batch_size, num_to_sample)
+
+    Where num_to_sample = Z.shape[1]
+    """
+    abs_diff = jnp.abs(cdf[..., jnp.newaxis, :] - Z[..., jnp.newaxis])
+
+    argmin = jnp.argmin(abs_diff, 1)
+
+    sampled_t = jnp.take_along_axis(t_to_sample, argmin, 1)
+
+    return sampled_t
+
+
+X = inverse_sample(Z, cdf, t_to_sample)
+print(f'Sampled t shape: {X.shape}')
+ 
+fig = px.histogram(x=X, labels={'x':'i'})
+fig.show()
+```
+
+
+## Optimizers
+
+Using `flax`'s [`TrainState`](https://flax.readthedocs.io/en/latest/_modules/flax/training/train_state.html) class , we can easily create a training state object, that manages the parameter and optimizer (`optax`) states. 
+
+```python
+# create an Adam optimizer    
+tx = optax.adam(learning_rate=0.001)
+# create train state
+state = train_state.TrainState.create(apply_fn=model, params=params, tx=tx)
+    
+```
+
+`model` and `params` are the model and parameters, respectively outlined in the previous section [cite].
+
+
+
+## Parallel training   
+
+As detailed in [Jax docs](https://jax.readthedocs.io/en/latest/jax-101/06-parallelism.html), `jax.pmap` can be used to split the batch into sub-batches and have each individual device perform a sub-batch. On each device there is a copy of the model, using `pmean` 
+
+
+::: {.callout-tip}
+# Debugging tips 
+
+
+**Breakpoints**
+
+Usually in python, we can use `pdb.set_trace()` to debug to inspect the values of numpy array for instances, however, it won't work for jax. But we can use the following to inspect jnp arrays: 
+
+```python
+jax.debug.breakpoint()
+
+```
+
+
+**Multiple devices on CPU**
+
+
+To test multiple devices on CPU, we can set the environment variable to the number of devices we want to use:
+
+
+```python
+import os
+os.environ['XLA_FLAGS'] = '--xla_force_host_platform_device_count=8'
+```
+
+:::
+### Using your own data
+
+
+::: {.callout-tip}
+# Phones 
+
+:::
+
+
+### 
+
+
+Nerf has exploded in popularity in the last year, and there are many implementations of it. Here are some of the implementations that I found interesting:  
+
+* [KiloNeRF](https://arxiv.org/pdf/2103.13744.pdf) : In this paper, we
+demonstrate that real-time rendering is possible by utilizing
+thousands of tiny MLPs instead of one single large MLP.
+In our setting, each individual MLP only needs to represent
+parts of the scene, thus smaller and faster-to-evaluate MLPs
+can be used. B
+
+* [NeuS](https://lingjie0206.github.io/papers/NeuS/)
+### NeRF to mesh
+Open3D has a nice implementation of NeRF to mesh. 
+
+We can estimate normals using Open3D [docs](http://www.open3d.org/docs/release/tutorial/geometry/surface_reconstruction.html#Poisson-surface-reconstruction).
+
+
+If you see anything that is incorrect or missing, please open an issue or a pull request on the [github repo](). 
+Thanks for reading!
+
+
+```python
+```
+
+https://github.com/awesome-NeRF/awesome-NeRF
+
