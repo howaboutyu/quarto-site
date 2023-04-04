@@ -270,7 +270,7 @@
     "href": "blog/blog.html",
     "title": "My blog",
     "section": "",
-    "text": "Learning: NeRF + JAX\n\n\n\n\n\n\n\nmachine learning\n\n\njax\n\n\nnerf\n\n\n\n\n\n\n\n\n\n\n\nMar 3, 2023\n\n\nHao Bo Yu\n\n\n\n\n\n\nNo matching items"
+    "text": "Learning: NeRF + JAX\n\n\n\n\n\n\n\nmachine learning\n\n\njax\n\n\nnerf\n\n\n\n\nThis article discusses the implementation of the NeRF algorithm using the Jax programming language.\n\n\n\n\n\n\nMar 3, 2023\n\n\nHao Bo Yu\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "blog/nerf/nerf.html#hierarchical-volume-sampling",

@@ -2,8 +2,8 @@
 title: "Learning: NeRF + JAX "
 date: 03 March 2023
 author: [Hao Bo Yu]
-#title-block-banner: true
-title-block-style: plain
+title-block-banner: true
+#title-block-style: plain
 code-annotations: hover
 
 format: html
@@ -25,6 +25,8 @@ categories:
   - machine learning 
   - jax
   - nerf 
+
+description: "This article discusses the implementation of the NeRF algorithm using the Jax programming language."
 
 ---
 
