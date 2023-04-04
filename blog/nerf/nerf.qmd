@@ -527,8 +527,14 @@ For more papers and implementations, check out the [awesome NeRF list](https://g
 In this project, I implemented NeRF using Jax and Flax. I also trained a NeRF model on a custom set of images and rendered a custom 5-second video using NeRF. Very cool!
 
 
-## Other NeRF implementations 
+## Helpful resources 
 
-* [NeRF in tf](https://github.com/bmild/nerf) by `@bmild`
+Looking at other implementations of NeRF was very helpful:
+
+* [Original NeRF implementation in tf](https://github.com/bmild/nerf) by `@bmild`
 * [NeRF in Jax](https://github.com/google-research/google-research/tree/master/jaxnerf) by `@google-research`
+
+This ImageNet example was also very helpful for understanding how to use `Flax`:
+
+* [ImageNet example](https://github.com/google/flax/tree/main/examples/imagenet)
 

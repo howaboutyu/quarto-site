@@ -467,5 +467,33 @@
     "title": "Computation neural science",
     "section": "",
     "text": "1a Code LIF neuron using the equation\nC_m \\frac{dV_m}{dt} = (E_L - V_m)/R_m + I_{app}   \nwith the condition \\quad V_m &gt; V_{th} then V_m \\rightarrow V_{reset}\n\n\nCode\nimport numpy as np\n\n\nC_m = 2.e-9\nE_L = -70.e-3\nE_K = -80e-3\nR_m = 5.e6\nG_L = 1./R_m\nV_th = -50.e-3\nV_reset = -65.e-3\n\ntau_m = C_m/G_L\n\ndt = 0.1e-3\n\ntimes = np.arange(0, 200.e-3, dt)\nV = np.zeros_like(times)\n\nI_th = G_L*(V_th - E_L)\nI = np.ones_like(times) * I_th \n\nV[0] = E_L\n\ndef dvdt(V_m, I_app, G_ref=None):\n    value = (E_L - V_m)/R_m + I_app \n    if G_ref is not None:\n        value = value + G_ref* (E_K- V_m)\n    value = value/C_m\n    return value\n\n\ndef simulate(V, I, noises=None, tau_ref=None, tau_vth=None, V_th_array=None, G_ref=None, tau_Gref=None):\n    num_fire = 0\n    last_fire_time = -100\n\n    dvthdt_array = []\n    for i in range(1, len(times)):\n        if G_ref is None:\n            V_new = V[i-1] + dvdt(V[i-1], I[i-1]) * dt\n        else:\n            V_new = V[i-1] + dvdt(V[i-1], I[i-1], G_ref[i-1]) * dt\n                \n        if tau_vth is not None:\n            dvthdt = (-50e-3 - V_th_array[i-i]) / tau_vth\n            dvthdt_array.append(V_th_array[i-i])\n            V_th_array[i] = V_th_array[i-1] + dt*dvthdt\n        \n        if G_ref is not None:            \n            dG_refdt = -G_ref[i-1]/tau_Gref\n            G_ref[i] = G_ref[i-1] + dt * dG_refdt\n        if tau_vth is not None:\n            \n            if V_new &gt; V_th_array[i-1]:  # Fire\n                V_new = V_reset\n                num_fire += 1\n                \n                V_th_array[i-1] = 200e-3\n                \n                if G_ref is not None: \n                    \n                    G_ref[i] =G_ref[i]+ 2e-6\n                                   \n        else:\n            if V_new &gt; V_th: \n                V_new = V_reset\n                num_fire += 1\n                last_fire_time = times[i]\n        \n        if noises is not None:\n            V_new += noises[i]\n        \n        if tau_ref is not None:\n            if times[i] - last_fire_time &lt; tau_ref:\n                V_new = V_reset\n        \n        V[i] = V_new\n    \n    fire_rate = num_fire/(times[-1] - times[0])\n    \n    if tau_vth is not None:\n        return fire_rate, dvthdt_array\n    return fire_rate\n\n\n1b What is the minimum required applied current for a spike?\nThe equation for the current threshold is I_{th} = G_L(V_{th} - E_L)\n\n\nCode\nI_th = G_L * (V_th - E_L)\nprint(f'I_th : {I_th}')\n\n\nI_th : 4e-09\n\n\n\n\nCode\nimport matplotlib.pyplot as plt\n\nV_1 = np.copy(V)\nV_2 = np.copy(V)\nsimulate(V_1, np.ones_like(V_1) * I_th*.99)\nsimulate(V_2, np.ones_like(V_1) * I_th*1.01)\n\nplt.figure()\nplt.plot(times, V_1)\nplt.xlabel('Time (s) ')\nplt.ylabel('Voltage (V) ')\nplt.title('Applied current is : $0.99 * I_{th}$ ')\n\nplt.figure()\nplt.plot(times, V_2)\nplt.xlabel('Time (s) ')\nplt.ylabel('Voltage (V) ')\nplt.title('Applied current is : $1.01 * I_{th}$ ')\n\n\nText(0.5, 1.0, 'Applied current is : $1.01 * I_{th}$ ')\n\n\n\n\n\n\n\n\nBy plotting the voltage vs time plots the equation for the current threshold is validated; we can see that for slightly (1%) below the threshold current I_{th} no spikes are generated, but when increased to higher than the threshold current, many spikes can be seen.\n1c&d Change I_{app} and measure the average firing rate (f) varies in the range from 0 to 100Hz, and then verify the equation.\n\n\nCode\nfr_array = []\nfr_eq_array = []    \ndef fr_func(I):\n    value = tau_m * np.log(max(0.00001, I * R_m + E_L - V_reset)) - tau_m * np.log(max(0.000001, I*R_m + E_L-V_th))\n    value = 1./value\n    return value\n\n\nfor I in np.arange(4e-10, 1e-8, 1e-9):\n    V_3 = np.copy(V)\n    fr = simulate(V_3, np.ones_like(times) * I)\n    fr_array.append(fr)\n    fr_eq = fr_func(I)\n    fr_eq_array.append(fr_eq)\nfig = plt.figure()\n\nplt.plot(np.arange(4e-10, 1e-8, 1e-9),fr_array)\n\n\nplt.plot(np.arange(4e-10, 1e-8, 1e-9),fr_eq_array)\n\nplt.xlabel('Applied current $I_{app}$')\nplt.ylabel('Firing rate $f(hz)$') \n_=plt.title('$I_{app}$ vs firing rate $f$')\n\n\n\n\n\nAdd a noise term for each time step.\n\n\nCode\nV_4 = np.copy(V)\n\nnoises_fn = lambda sigma_I:  np.random.normal(size=times.shape) * sigma_I * np.sqrt(dt)\n\nplt.figure()\nfor sigma_I in range(0, 5,):\n    fr_array = []\n    for I in np.arange(4e-10, 1e-8, 1e-9):\n        V_4 = np.copy(V)\n        fr = simulate(V_4, np.ones_like(times) * I, noises_fn(sigma_I))\n        fr_array.append(fr)\n    \n        \n\n    plt.plot(np.arange(4e-10, 1e-8, 1e-9), fr_array)\n\n\n\n\n\nLooks like as sigma_I increases the f-r curve slope is decreased, also the curve is less smooth."
+  },
+  {
+    "objectID": "blog/nerf/nerf.html#other-resources-i-found-useful",
+    "href": "blog/nerf/nerf.html#other-resources-i-found-useful",
+    "title": "Learning: NeRF + JAX",
+    "section": "Other resources I found useful",
+    "text": "Other resources I found useful\nLooking at the code of other implementations of NeRF was very helpful:\n\nNeRF in tf by @bmild\nNeRF in Jax by @google-research\n\nThis ImageNet example was also very helpful for understanding how to use Flax:\n\nImageNet example"
+  },
+  {
+    "objectID": "blog/nerf/nerf.html#references",
+    "href": "blog/nerf/nerf.html#references",
+    "title": "Learning: NeRF + JAX",
+    "section": "References",
+    "text": "References\nLooking at the code of other implementations of NeRF was very helpful:\n\nNeRF in tf by @bmild\nNeRF in Jax by @google-research\n\nThis ImageNet example was also very helpful for understanding how to use Flax:\n\nImageNet example"
+  },
+  {
+    "objectID": "blog/nerf/nerf.html#code-and-resources",
+    "href": "blog/nerf/nerf.html#code-and-resources",
+    "title": "Learning: NeRF + JAX",
+    "section": "Code and resources",
+    "text": "Code and resources\nLooking at the code of other implementations of NeRF was very helpful:\n\nNeRF in tf by @bmild\nNeRF in Jax by @google-research\n\nThis ImageNet example was also very helpful for understanding how to use Flax:\n\nImageNet example"
+  },
+  {
+    "objectID": "blog/nerf/nerf.html#helpful-resources",
+    "href": "blog/nerf/nerf.html#helpful-resources",
+    "title": "Learning: NeRF + JAX",
+    "section": "Helpful resources",
+    "text": "Helpful resources\nLooking at other implementations of NeRF was very helpful:\n\nOriginal NeRF implementation in tf by @bmild\nNeRF in Jax by @google-research\n\nThis ImageNet example was also very helpful for understanding how to use Flax:\n\nImageNet example"
   }
 ]
