@@ -1,6 +1,6 @@
 
 ---
-title: "Home"
+title: "Hao Bo Yu "
 image: images/photo_by_pat.jpg
 about:
   template: trestles 
@@ -17,9 +17,10 @@ about:
 
 :::{#hero-heading}
 
-My name is Hao Bo Yu (pronounced as "how about you"). 
+👋 Hi, I'm Hao Bo Yu (pronounced as “how about you”).
 
-I'm interested in machine learning, robotics and the brain. 
+
+I'm passionate about machine learning, robotics 🤖 and the brain 🧠. 
 
 
 <!-- ## Education

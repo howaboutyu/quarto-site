@@ -20,10 +20,12 @@ comments:
     repo: howaboutyu/quarto-site
 
 reading-time: true
+
 categories:
   - machine learning 
   - jax
   - nerf 
+
 ---
 
 
