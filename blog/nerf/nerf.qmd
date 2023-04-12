@@ -33,6 +33,7 @@ description: "This article discusses the implementation of the NeRF algorithm us
 
 ## Introduction
 
+When I first read the NeRF paper, I was amazed by its elegance and its potential for scene representation using neural networks. I also saw it as an opportunity to learn more about JAX. In this article, I will outline the NeRF algorithm and explain some of the things I've learned about Jax.  
 
 
 

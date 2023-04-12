@@ -5,13 +5,14 @@ image: images/photo_by_pat.jpg
 about:
   template: trestles 
   links:
-    #- icon: twitter
-    #  text: Twitter
-    #  href: https://twitter.com/hyu754
+    - icon: twitter
+      text: Twitter
+      href: https://twitter.com/hyu754
 
     - icon: github 
       text: github 
       href: https://github.com/howaboutyu
+
 
 ---
 
