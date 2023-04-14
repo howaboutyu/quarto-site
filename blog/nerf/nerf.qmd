@@ -49,8 +49,6 @@ Check out the accompanying code
 
 NeRF achieves this by integrating rays of light that emanate from the camera and intersect the object. In other words, NeRF can use a bunch of rays to create an image of the object from different viewpoints. NeRF uses a multi-layered perception (MLP) that can be trained to represent a scene from a set of 2D images, and can then generate images taken from new angles. That is how it was done!
 
-When I first read the NeRF paper, I was amazed by its elegance and its potential for scene representation using neural networks. I also saw it as an opportunity to learn more about JAX. In this article, I will outline the NeRF algorithm and explain some of the things I've learned about Jax.  
-
 
 
 
