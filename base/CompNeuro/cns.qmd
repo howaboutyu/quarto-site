@@ -14,6 +14,61 @@ editor:
 
 ## Chapter 2: The neuron and minimal spiking models
 
+### Coding style
+
+#### Parameters
+In this tutorial, parameters of the model are stored in a class called `NeuronParameters` which is defined as follows:
+
+```{python}
+import dataclasses
+import numpy as np
+
+@dataclasses.dataclass
+class NeuronParameters:
+    C_m: float
+    E_L: float
+    E_K: float
+    R_m: float
+    V_th: float
+    V_reset: float
+
+    def __post_init__(self):
+        self.G_L = 1./self.R_m
+        self.tau_m = self.C_m/self.G_L
+        self.I_th = self.G_L*(self.V_th - self.E_L)
+```
+
+#### Simulation
+
+For simulation, we define a base class called `SimulatorBase` which is inherited by all the models. The base class defines the following attributes:
+
+```{python}
+
+
+@dataclasses.dataclass
+class SimulatorBase:
+    dt: float
+    times: np.ndarray
+    neuron_parameters: NeuronParameters
+    I: np.ndarray 
+
+    num_fire: int = 0
+    
+    def __post_init__(self):
+        self.V = np.zeros_like(self.times)
+        self.V[0] = self.neuron_parameters.E_L
+
+    @property
+    def fire_rate(self):
+        return self.num_fire/(self.times[-1] - self.times[0])
+
+    def dvdt(self):
+        raise NotImplementedError
+
+    def simulate(self):
+        raise NotImplementedError
+```
+
 ### Tutorial 2.1: The leaky integrate-and-fire neuron model
 
 ::: {.callout-note data-latex=""}
@@ -27,39 +82,59 @@ $$C_m \frac{dV_m}{dt} = (E_L - V_m)/R_m + I_{app}   $$
 
 with the condition $\quad V_m > V_{th}$ then $V_m \rightarrow V_{reset}$
 
-in this tutorial, we are using the following parameters: 
+
 
 ```{python}
-
-C_m = 2.e-9
+# | code-fold: true
+C_m = 2.e-9 # membrane capacitance
 E_L = -70.e-3 # leak reversal potential
-E_K = -80e-3
-R_m = 5.e6
-G_L = 1./R_m
-V_th = -50.e-3
-V_reset = -65.e-3
+E_K = -80e-3 # potassium reversal potential
+R_m = 5.e6 # membrane resistance
+G_L = 1./R_m # leak conductance 
+V_th = -50.e-3 # threshold potential
+V_reset = -65.e-3 # reset potential
+tau_m = C_m/G_L # membrane time constant
 
-tau_m = C_m/G_L
 
-dt = 0.1e-3
+params = NeuronParameters(C_m=C_m, E_L=E_L, E_K=E_K, R_m=R_m, V_th=V_th, V_reset=V_reset)
 ```
 
 
-
-
+We can define a class called `LIF` which inherits from `SimulatorBase` and implements the `dvdt` and `simulate` methods:
 ```{python}
+
+@dataclasses.dataclass
+class LIF(SimulatorBase):
+    noises: np.ndarray = None
+
+    def dvdt(self, V_m, I_app):
+        _dvdt = (self.neuron_parameters.E_L - V_m)/self.neuron_parameters.R_m + I_app
+        _dvdt = _dvdt/self.neuron_parameters.C_m
+        return _dvdt
+
+    def simulate(self):
+        for i in range(1, len(self.times)):
+            V_new = self.V[i-1] + self.dvdt(self.V[i-1], self.I[i-1]) * self.dt
+            if V_new > self.neuron_parameters.V_th:
+                V_new = self.neuron_parameters.V_reset
+                self.num_fire += 1
+                self.last_fire_time = self.times[i]
+
+            if isinstance(self.noises, np.ndarray):
+                V_new = V_new + self.noises[i]
+
+            self.V[i] = V_new
+```
+
+<!-- ```python
 #| code-fold: true
 
 import numpy as np
 
 
-
-
 times = np.arange(0, 200.e-3, dt)
 V = np.zeros_like(times)
 
-I_th = G_L*(V_th - E_L)
-I = np.ones_like(times) * I_th 
 
 V[0] = E_L
 
@@ -125,7 +200,7 @@ def simulate(V, I, noises=None, tau_ref=None, tau_vth=None, V_th_array=None, G_r
         return fire_rate, dvthdt_array
     return fire_rate
 
-```
+``` -->
 #### Threshold current
 We can find the threshold current $I_{th}$ by setting $dV/dt$ of *LLF* equation to $0$, giving the following equation: 
 $$I_{th} = G_L(V_{th} - E_L)$$
@@ -133,15 +208,14 @@ $$I_{th} = G_L(V_{th} - E_L)$$
 Which is 
 
 ```{python}
-#| code-fold: true
-I_th = G_L * (V_th - E_L)
-print(f'I_th : {I_th}')
+# | code-fold: true
+print(f'{params.I_th*1e9:.2f} nA')
 ```
 
 
 In the plots below, the equation for the current threshold is validated; we can see that for 1% below the threshold current $I_{th}$ no spikes are generated, but when increased to higher than the threshold current, spikes can be seen.
 
-```{python}    
+```{python}
 #| code-fold: true
 import matplotlib.pyplot as plt
 import numpy as np
@@ -149,20 +223,22 @@ import plotly.express as px
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 
-V_1 = np.copy(V)
-V_2 = np.copy(V)
-fr1 = simulate(V_1, np.ones_like(V_1) * I_th*.99)
-fr2 = simulate(V_2, np.ones_like(V_1) * I_th*1.01)
-print(f'Firing rate for 0.99 * I_th: {fr1}')
-print(f'Firing rate for 1.01 * I_th: {fr2}')
+
+dt = 0.1e-4
+times = np.arange(0, 200.e-3, dt)
+llf_below_th = LIF(dt, times, params, np.ones_like(times)*0.99*params.I_th) 
+llf_below_th.simulate()
+
+llf_above_th = LIF(dt, times, params, np.ones_like(times)*1.01*params.I_th)
+llf_above_th.simulate()
 
 # plot
 
 fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.02)
 
-fig.add_trace(go.Scatter(x=times, y=V_1, name='0.99 * I_th'), row=1, col=1)
+fig.add_trace(go.Scatter(x=times, y=llf_below_th.V, name='0.99 * I_th'), row=1, col=1)
 
-fig.add_trace(go.Scatter(x=times, y=V_2, name='1.01 * I_th'), row=2, col=1)
+fig.add_trace(go.Scatter(x=times, y=llf_above_th.V, name='1.01 * I_th'), row=2, col=1)
 
 fig.update_layout(height=600, width=800, title_text="Voltage vs time")
 
@@ -183,7 +259,7 @@ $$
 1/f = \tau_m \ln \left(\frac{I R_m + E_L - V_{reset}}{I R_m + E_L - V_{th}}\right)
 $$
 
-Below I  plot the equation for the firing rate of the neuron using the above equation and the firing rate of the neuron using the *LLF* equation. We can see that the firing rate of the neuron is very close to the firing rate of the neuron using the *LLF* equation. We can also see that the firing rate is 0 when the current is below the threshold current $I_{th}=4nA$.
+Below plotting the equation for the firing rate of the neuron using the above equation and the firing rate of the neuron using the *LLF* equation. We can see that the firing rate of the neuron is very close to the firing rate of the neuron using the *LLF* equation. We can also see that the firing rate is 0 when the current is below the threshold current $I_{th}=4nA$.
 
 
 ```{python}
@@ -191,18 +267,29 @@ Below I  plot the equation for the firing rate of the neuron using the above equ
 fr_array = []
 fr_eq_array = []    
 I_array = np.arange(2e-9, 1e-8, 1e-9)
+
+my_log = lambda x : np.where(x > 1e-1, 0, np.log(x))
+
 def fr_func(I):
-    value = tau_m * np.log(max(1e-7, I * R_m + E_L - V_reset)) - tau_m * np.log(max(1e-7, I*R_m + E_L-V_th))
-    value = 1./value
+    # The equation for the firing rate of the neuron
+    value = params.tau_m * np.log(I * params.R_m + params.E_L - params.V_reset) - params.tau_m * np.log(I*params.R_m + params.E_L-params.V_th)
+
+    if value < 0: 
+        return 0 
+    value = 1/value
     return value
 
 for I in I_array:
-    V_3 = np.copy(V)
-    fr = simulate(V_3, np.ones_like(times) * I)
-    #print(f'Firing rate for I = {I}: {fr}')
-    fr_array.append(fr)
-    fr_eq = fr_func(I)
-    fr_eq_array.append(fr_eq)
+    with np.errstate(divide='ignore', invalid='ignore'):
+        # from sim 
+        times = np.arange(0, 200.e-3, dt)
+        llf_model = LIF(dt, times, params, np.ones_like(times)*I)
+        llf_model.simulate()
+        fr_array.append(llf_model.fire_rate)
+
+        # From eq
+        fr_eq = fr_func(I)
+        fr_eq_array.append(fr_eq)
 
 
 # use plotly
@@ -220,39 +307,47 @@ fig.update_yaxes(title_text="f (Hz)", row=1, col=1)
 fig.show()
 ```
 
+Using the **Euler-Mayamara** method, we add random noise to the current by $\sigma w(t)$; where $w(t)$ is a white noise generator with zero mean and unit variance, and $\sigma$ scales the noise.
 
-Add a noise term for each time step.
+
 
 ```{python}
 #| code-fold: true
-V_4 = np.copy(V)
 
-noises_fn = lambda sigma_I:  np.random.normal(size=times.shape) * sigma_I * np.sqrt(dt)
-#| code-fold: true
+dt = 0.1e-3
+times = np.arange(0, 100.e-3, dt)
+noises_fn = lambda sigma_I, dt:  np.random.normal(size=times.shape) * sigma_I * np.sqrt(dt)
+
+
 fr_array_no_noise = []
 fr_array_noise1 = []
 fr_array_noise2 = []
-I_array = np.arange(1e-9, 1e-8, 1e-9)
 
+I_array = np.arange(1e-9, 9e-9, 2e-10)
+
+sigma_1 = 2e-3
+sigma_2 = 3e-3
 
 for I in I_array:
-    V_3 = np.copy(V)
-    noise = noises_fn(0)
-    fr = simulate(V_3, np.ones_like(times) * I, noises=noise)
-    fr_array_no_noise.append(fr)
-    noise = noises_fn(2e-3)
-    fr = simulate(V_3, np.ones_like(times) * I, noises=noise)
-    fr_array_noise1.append(fr)
-    noise = noises_fn(1e-2)
-    fr = simulate(V_3, np.ones_like(times) * I, noises=noise)
-    fr_array_noise2.append(fr)
+
+    llf_no_noise = LIF(dt, times, params, np.ones_like(times)*I)
+    llf_noise1 = LIF(dt, times, params, np.ones_like(times)*I, noises=noises_fn(sigma_1, dt))
+    llf_noise2 = LIF(dt, times, params, np.ones_like(times)*I, noises=noises_fn(sigma_2, dt))
+
+    llf_no_noise.simulate()
+    llf_noise1.simulate()
+    llf_noise2.simulate()
+
+    fr_array_no_noise.append(llf_no_noise.fire_rate)
+    fr_array_noise1.append(llf_noise1.fire_rate)
+    fr_array_noise2.append(llf_noise2.fire_rate)
 
 
 # use plotly
 fig = make_subplots(rows=1, cols=1, shared_xaxes=True, vertical_spacing=0.02)
 fig.add_trace(go.Scatter(x=I_array, y=fr_array_no_noise, name='sigma_I = 0'), row=1, col=1)
-fig.add_trace(go.Scatter(x=I_array, y=fr_array_noise1, name='sigma_I=2e-3'), row=1, col=1)
-fig.add_trace(go.Scatter(x=I_array, y=fr_array_noise2, name='sigma_I=1e-2'), row=1, col=1)
+fig.add_trace(go.Scatter(x=I_array, y=fr_array_noise1, name=f'sigma_I={sigma_1}'), row=1, col=1)
+fig.add_trace(go.Scatter(x=I_array, y=fr_array_noise2, name=f'sigma_I={sigma_2}'), row=1, col=1)
 
 fig.update_layout(height=600, width=800, title_text="f vs I")
 
@@ -264,11 +359,19 @@ fig.update_yaxes(title_text="f (Hz)", row=1, col=1)
 fig.show()
 ```
 
-As we increase $sigma_I$ - proportional to the voltage noise - the firing rate close to $I_{th}$ increases. I think this might be due to cases where the voltage is close to the threshold voltage and the noise pushes the voltage over the threshold voltage. This is a hypothesis and I am not sure if this is correct.
+In the above figure $\sigma_I$ takes the values $[0, 1e^{-2}, 3e^{-2}]$. It seems that by increasing the noise, the curve is smoothed out near the threshold current region. We can see that the blue curve (no noise) has a near verticle section near the threshold current, but as we increase the noise, the curve is more "smooth" around the threshold current $I_{th}$.  
+
+
+
 
 
 ### Tutorial 2.2
-```{python}
+
+
+
+
+
+```python
 #| code-fold: true
 C_m = 0.1e-9
 E_L = -70.e-3
@@ -343,3 +446,20 @@ plt.xlabel('fr')
 plt.ylabel('Mean V')
 plt.legend(loc='lower right') 
 ```
+
+
+#### Chapter flashcards
+
+
+:::{.callout-tip collapse=true}
+# Spike-rate adaptation
+
+A reduction in the firing rate of the neuron after a spike. Or, an increase in the interspike interval (ISI) after a spike.
+
+:::
+
+:::{.callout-tip collapse=true}
+# Refractory period
+
+Depolarization ion channels no longer open after a spike. This causes a delay in the next spike. This delay is called the refractory period.
+:::
