@@ -9,6 +9,8 @@ html-math-method: katex
 editor:
   render-on-save: true
 
+execute: 
+  enabled: false 
 ---
 
 ## Introduction 
@@ -31,8 +33,13 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 
+import plotly.express as px
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
 
-emoji_path = 'NCA/emoji_imgs/smile.png'
+
+
+emoji_path = 'NCA/emoji_imgs/skier.png'
 
 img = cv2.imread(emoji_path, -1)
 
@@ -113,19 +120,19 @@ rgb_random_update = rgb.copy()
 rgb_random_update[random_state < p] = (255, 0, 125)
 
 
-# just draw the random state ontop of the smiley
-
+# just draw the random state ontop of the smiley, plot it as columns
 fig, axs = plt.subplots(1, 2, figsize=(15, 15))
 axs[0].imshow(rgb)
 axs[1].imshow(rgb_random_update)
-axs[0].set_title('RGB')
-axs[1].set_title('RGB with random update p=0.5')
+axs[0].set_title('Original')
+axs[1].set_title('Random update')
 plt.show()
+
+
 
 ```
 
 
-#rgb_random_update[random_state > p] = (255, 0, 125)
 
 #### Living cell update
 
@@ -148,27 +155,43 @@ def max_pool(x, window_shape, strides):
 ```{python}
 # | code-fold: true
 
+alive_threshold = 0.1
 # create random living cell states
-random_living_states = np.random.uniform(0., 1., size=rgb.shape[:2]) 
-print(f'random_living_states : {random_living_states.shape}')
-#random_living_states_t = random_living_states.transpose(2,0,1)
-#
-#
-## apply max pooling to get the living cell states
-#living_states = max_pool(random_living_states_t, (1,3,3), (1,1,1))
-#living_states = living_states.transpose(1,2,0)
-#living_states = np.asarray(living_states).astype(np.uint8)
-#
-## plot it
-#fig, axs = plt.subplots(1, 2, figsize=(15, 15))
-#axs[0].imshow(random_living_states)
-#axs[1].imshow(living_states)
-#axs[0].set_title('Random living states')
-#axs[1].set_title('Max-pooled living states')
-#plt.show()
-#
+
+random_living_states = np.random.uniform(0., alive_threshold * 1.02, size=rgb.shape[:2]) 
+random_living_states = np.expand_dims(random_living_states, axis=-1)
+random_living_states_t = random_living_states.transpose(2,0,1) 
+print(random_living_states_t.shape)
+
+
+alive = nca.alive_masking(random_living_states_t, alive_threshold)
+alive = alive.transpose(1,2,0)
+
+alive = np.asarray(alive).copy()
+
+alive[random_living_states > alive_threshold] = 2 
+
+# subplot
+# left: random_living_states, right: alive,
+
+fig, axs = plt.subplots(1, 2, figsize=(15, 15))
+
+axs[0].imshow(random_living_states[:,:,0], cmap='gray')
+axs[1].imshow(alive[:,:,0], cmap='gray')
+
+axs[0].set_title('Example living states')
+axs[1].set_title('Alive')
+
+plt.show()
 
 ```
+
+
+In the above example of the living states, the plot on the left shows an example living state (most of the cells are dead). The plot on the right shows the different types of cells: "alive" - white, "developing" - gray,  and "dead" - black.
+ 
+  
+
+
 
 
 

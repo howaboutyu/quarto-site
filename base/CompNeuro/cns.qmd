@@ -12,14 +12,88 @@ editor:
 
 ---
 
-## Chapter 2: The neuron and minimal spiking models
+# Chapter 2: The neuron and minimal spiking models
 
-### Tutorial 2.1: The leaky integrate-and-fire neuron model
+## Coding style
 
-::: {.callout-note data-latex=""}
-# Tutorial goal
-To understand the basic properties of the leaky integrate-and-fire (LIF) neuron model and how noise causes the smoothing of f-I curves.
-:::
+#### Parameters
+In this tutorial, parameters of the model are stored in a class called `NeuronParameters` which is defined as follows:
+
+
+```{python}
+# | code-fold: true
+import dataclasses
+import numpy as np
+from typing import List, Tuple, Union
+```
+
+```{python}
+@dataclasses.dataclass
+class NeuronParameters:
+    C_m: float # membrane capacitance
+    E_L: float # leak reversal potential
+    E_K: float # potassium reversal potential
+    R_m: float # membrane resistance
+    V_th: float # threshold potential
+    V_reset: float # reset potential
+    V_peak: float = None # peak potential
+
+    # refractory period parameters
+    tau_vc: float = None # time constant for voltage clamp
+    tau_vth: float = None # time constant for voltage increase method 
+    V_th_max: float = None # maximum voltage for V inc method 
+    tau_G_ref: float = None # time constant for conductance increase method
+
+    # spike adaptation parameters
+    G_SRA: float = None # spike rate adaptation conductance
+    Delta_G_SRA: float = None # spike rate adaptation conductance delta 
+    tau_SRA: float = None # spike rate adaptation time constant
+    V_max: float = None # maximum voltage for spike adaptation
+    Delta_th: float = None # spike adaptation threshold delta
+    a: float = None # spike adaptation parameter
+    b: float = None # spike adaptation parameter
+
+
+    def __post_init__(self):
+        self.G_L = 1./self.R_m # leak conductance
+        self.tau_m = self.C_m/self.G_L # membrane time constant
+        self.I_th = self.G_L*(self.V_th - self.E_L) # threshold current 
+
+    
+```
+
+#### Simulation
+
+For simulation, we define a base class called `SimulatorBase` which is inherited by all the models. The base class defines the following attributes:
+
+```{python}
+
+
+@dataclasses.dataclass
+class SimulatorBase:
+    dt: float 
+    times: np.ndarray 
+    neuron_parameters: NeuronParameters 
+    I: np.ndarray 
+    num_fire: int = 0
+    
+    def __post_init__(self):
+        self.V = np.zeros_like(self.times)
+        self.V[0] = self.neuron_parameters.E_L
+
+    @property
+    def fire_rate(self):
+        return self.num_fire/(self.times[-1] - self.times[0])
+
+    def dvdt(self):
+        raise NotImplementedError
+
+    def simulate(self):
+        raise NotImplementedError
+```
+
+## Tutorial 2.1: The leaky integrate-and-fire neuron model
+
 
 The LIF model is given by the following equation: 
 
@@ -27,121 +101,72 @@ $$C_m \frac{dV_m}{dt} = (E_L - V_m)/R_m + I_{app}   $$
 
 with the condition $\quad V_m > V_{th}$ then $V_m \rightarrow V_{reset}$
 
-in this tutorial, we are using the following parameters: 
+
 
 ```{python}
-
-C_m = 2.e-9
+# | code-fold: true
+C_m = 2.e-9 # membrane capacitance
 E_L = -70.e-3 # leak reversal potential
-E_K = -80e-3
-R_m = 5.e6
-G_L = 1./R_m
-V_th = -50.e-3
-V_reset = -65.e-3
+E_K = -80e-3 # potassium reversal potential
+R_m = 5.e6 # membrane resistance
+G_L = 1./R_m # leak conductance 
+V_th = -50.e-3 # threshold potential
+V_reset = -65.e-3 # reset potential
+tau_m = C_m/G_L # membrane time constant
 
-tau_m = C_m/G_L
 
-dt = 0.1e-3
+params = NeuronParameters(C_m=C_m, E_L=E_L, E_K=E_K, R_m=R_m, V_th=V_th, V_reset=V_reset)
 ```
 
 
-
-
+We can define a class called `LIF` which inherits from `SimulatorBase` and implements the `dvdt` and `simulate` methods:
 ```{python}
-#| code-fold: true
 
-import numpy as np
+@dataclasses.dataclass
+class LIF(SimulatorBase):
+    noise_sigma: float = 0.
+    noises: np.ndarray = None
 
+    def __post_init__(self):
+        super().__post_init__()
+        self.noises = np.random.normal(size=self.times.shape) * self.noise_sigma * np.sqrt(self.dt) 
 
-
-
-times = np.arange(0, 200.e-3, dt)
-V = np.zeros_like(times)
-
-I_th = G_L*(V_th - E_L)
-I = np.ones_like(times) * I_th 
-
-V[0] = E_L
-
-def dvdt(V_m, I_app, G_ref=None):
-    value = (E_L - V_m)/R_m + I_app 
-    if G_ref is not None:
-        value = value + G_ref* (E_K- V_m)
-    value = value/C_m
-    return value
+    def dvdt(self, V_m, I_app):
+        _dvdt = (self.neuron_parameters.E_L - V_m)/self.neuron_parameters.R_m + I_app
+        _dvdt = _dvdt/self.neuron_parameters.C_m
+        return _dvdt
 
 
-def simulate(V, I, noises=None, tau_ref=None, tau_vth=None, V_th_array=None, G_ref=None, tau_Gref=None):
-    num_fire = 0
-    last_fire_time = -100
+    def simulate(self):
+        for i in range(1, len(self.times)):
+            V_new = self.V[i-1] + self.dvdt(self.V[i-1], self.I[i-1]) * self.dt
 
-    dvthdt_array = []
-    for i in range(1, len(times)):
-        if G_ref is None:
-            V_new = V[i-1] + dvdt(V[i-1], I[i-1]) * dt
-        else:
-            V_new = V[i-1] + dvdt(V[i-1], I[i-1], G_ref[i-1]) * dt
-                
-        if tau_vth is not None:
-            dvthdt = (-50e-3 - V_th_array[i-i]) / tau_vth
-            dvthdt_array.append(V_th_array[i-i])
-            V_th_array[i] = V_th_array[i-1] + dt*dvthdt
-        
-        if G_ref is not None:            
-            dG_refdt = -G_ref[i-1]/tau_Gref
-            G_ref[i] = G_ref[i-1] + dt * dG_refdt
+            if isinstance(self.noises, np.ndarray):
+                V_new = V_new + self.noises[i]
 
-        if tau_vth is not None:
-            
-            if V_new > V_th_array[i-1]:  # Fire
-                V_new = V_reset
-                num_fire += 1
-                
-                V_th_array[i-1] = 200e-3
-                
-                if G_ref is not None: 
-                    
-                    G_ref[i] =G_ref[i]+ 2e-6
-                                   
-        else:
-            if V_new > V_th: 
+            if V_new > self.neuron_parameters.V_th:
+                V_new = self.neuron_parameters.V_reset
+                self.num_fire += 1
+                self.last_fire_time = self.times[i]
 
-                V_new = V_reset
-                num_fire += 1
-                last_fire_time = times[i]
-        
-        if noises is not None:
-            V_new += noises[i]
-        
-        if tau_ref is not None:
-            if times[i] - last_fire_time < tau_ref:
-                V_new = V_reset
-        
-        V[i] = V_new
-    
-    fire_rate = num_fire/(times[-1] - times[0])
-    
-    if tau_vth is not None:
-        return fire_rate, dvthdt_array
-    return fire_rate
-
+            self.V[i] = V_new
 ```
+
 #### Threshold current
-We can find the threshold current $I_{th}$ by setting $dV/dt$ of *LLF* equation to $0$, giving the following equation: 
+We can find the threshold current $I_{th}$ by setting $dV/dt$ of *LIF* equation to $0$, giving the following equation: 
 $$I_{th} = G_L(V_{th} - E_L)$$
 
 Which is 
 
 ```{python}
-#| code-fold: true
-I_th = G_L * (V_th - E_L)
-print(f'I_th : {I_th}')
+# | code-fold: true
+print(f'{params.I_th*1e9:.2f} nA')
 ```
 
 
 In the plots below, the equation for the current threshold is validated; we can see that for 1% below the threshold current $I_{th}$ no spikes are generated, but when increased to higher than the threshold current, spikes can be seen.
 
-```{python}    
+```{python}
 #| code-fold: true
 import matplotlib.pyplot as plt
 import numpy as np
@@ -149,20 +174,22 @@ import plotly.express as px
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 
-V_1 = np.copy(V)
-V_2 = np.copy(V)
-fr1 = simulate(V_1, np.ones_like(V_1) * I_th*.99)
-fr2 = simulate(V_2, np.ones_like(V_1) * I_th*1.01)
-print(f'Firing rate for 0.99 * I_th: {fr1}')
-print(f'Firing rate for 1.01 * I_th: {fr2}')
+
+dt = 0.1e-4
+times = np.arange(0, 200.e-3, dt)
+LIF_below_th = LIF(dt, times, params, np.ones_like(times)*0.99*params.I_th) 
+LIF_below_th.simulate()
+
+LIF_above_th = LIF(dt, times, params, np.ones_like(times)*1.01*params.I_th)
+LIF_above_th.simulate()
 
 # plot
 
 fig = make_subplots(rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.02)
 
-fig.add_trace(go.Scatter(x=times, y=V_1, name='0.99 * I_th'), row=1, col=1)
+fig.add_trace(go.Scatter(x=times, y=LIF_below_th.V, name='0.99 * I_th'), row=1, col=1)
 
-fig.add_trace(go.Scatter(x=times, y=V_2, name='1.01 * I_th'), row=2, col=1)
+fig.add_trace(go.Scatter(x=times, y=LIF_above_th.V, name='1.01 * I_th'), row=2, col=1)
 
 fig.update_layout(height=600, width=800, title_text="Voltage vs time")
 
@@ -183,7 +210,7 @@ $$
 1/f = \tau_m \ln \left(\frac{I R_m + E_L - V_{reset}}{I R_m + E_L - V_{th}}\right)
 $$
 
-Below I  plot the equation for the firing rate of the neuron using the above equation and the firing rate of the neuron using the *LLF* equation. We can see that the firing rate of the neuron is very close to the firing rate of the neuron using the *LLF* equation. We can also see that the firing rate is 0 when the current is below the threshold current $I_{th}=4nA$.
+Below plotting the equation for the firing rate of the neuron using the above equation and the firing rate of the neuron using the *LIF* equation. We can see that the firing rate of the neuron is very close to the firing rate of the neuron using the *LIF* equation. We can also see that the firing rate is 0 when the current is below the threshold current $I_{th}=4nA$.
 
 
 ```{python}
@@ -191,23 +218,33 @@ Below I  plot the equation for the firing rate of the neuron using the above equ
 fr_array = []
 fr_eq_array = []    
 I_array = np.arange(2e-9, 1e-8, 1e-9)
+
+
 def fr_func(I):
-    value = tau_m * np.log(max(1e-7, I * R_m + E_L - V_reset)) - tau_m * np.log(max(1e-7, I*R_m + E_L-V_th))
-    value = 1./value
+    # The equation for the firing rate of the neuron
+    value = params.tau_m * np.log(I * params.R_m + params.E_L - params.V_reset) - params.tau_m * np.log(I*params.R_m + params.E_L-params.V_th)
+
+    if value < 0: 
+        return 0 
+    value = 1/value
     return value
 
 for I in I_array:
-    V_3 = np.copy(V)
-    fr = simulate(V_3, np.ones_like(times) * I)
-    #print(f'Firing rate for I = {I}: {fr}')
-    fr_array.append(fr)
-    fr_eq = fr_func(I)
-    fr_eq_array.append(fr_eq)
+    with np.errstate(divide='ignore', invalid='ignore'):
+        # from sim 
+        times = np.arange(0, 200.e-3, dt)
+        LIF_model = LIF(dt, times, params, np.ones_like(times)*I)
+        LIF_model.simulate()
+        fr_array.append(LIF_model.fire_rate)
+
+        # From eq
+        fr_eq = fr_func(I)
+        fr_eq_array.append(fr_eq)
 
 
 # use plotly
 fig = make_subplots(rows=1, cols=1, shared_xaxes=True, vertical_spacing=0.02)
-fig.add_trace(go.Scatter(x=I_array, y=fr_array, name='f LLF'), row=1, col=1)
+fig.add_trace(go.Scatter(x=I_array, y=fr_array, name='f LIF'), row=1, col=1)
 fig.add_trace(go.Scatter(x=I_array, y=fr_eq_array, name='f equation'), row=1, col=1)
 
 fig.update_layout(height=600, width=800, title_text="f vs I")
@@ -220,39 +257,47 @@ fig.update_yaxes(title_text="f (Hz)", row=1, col=1)
 fig.show()
 ```
 
+#### Effect of noise on the firing rate
 
-Add a noise term for each time step.
+Using the **Euler-Mayamara** method, we add random noise to the current by $\sigma w(t)$; where $w(t)$ is a white noise generator with zero mean and unit variance, and $\sigma$ scales the noise.
+
+
 
 ```{python}
 #| code-fold: true
-V_4 = np.copy(V)
 
-noises_fn = lambda sigma_I:  np.random.normal(size=times.shape) * sigma_I * np.sqrt(dt)
-#| code-fold: true
+dt = 0.1e-3
+times = np.arange(0, 150.e-3, dt)
+
+
 fr_array_no_noise = []
 fr_array_noise1 = []
 fr_array_noise2 = []
-I_array = np.arange(1e-9, 1e-8, 1e-9)
 
+I_array = np.arange(1e-9, 9e-9, 1e-10)
+
+sigma_1 = 1e-2
+sigma_2 = 3e-2
 
 for I in I_array:
-    V_3 = np.copy(V)
-    noise = noises_fn(0)
-    fr = simulate(V_3, np.ones_like(times) * I, noises=noise)
-    fr_array_no_noise.append(fr)
-    noise = noises_fn(2e-3)
-    fr = simulate(V_3, np.ones_like(times) * I, noises=noise)
-    fr_array_noise1.append(fr)
-    noise = noises_fn(1e-2)
-    fr = simulate(V_3, np.ones_like(times) * I, noises=noise)
-    fr_array_noise2.append(fr)
 
+    LIF_no_noise = LIF(dt, times, params, np.ones_like(times)*I)
+    LIF_noise1 = LIF(dt, times, params, np.ones_like(times)*I, noise_sigma=sigma_1)
+    LIF_noise2 = LIF(dt, times, params, np.ones_like(times)*I, noise_sigma=sigma_2)
+
+    LIF_no_noise.simulate()
+    LIF_noise1.simulate()
+    LIF_noise2.simulate()
+
+    fr_array_no_noise.append(LIF_no_noise.fire_rate)
+    fr_array_noise1.append(LIF_noise1.fire_rate)
+    fr_array_noise2.append(LIF_noise2.fire_rate)
 
 # use plotly
 fig = make_subplots(rows=1, cols=1, shared_xaxes=True, vertical_spacing=0.02)
 fig.add_trace(go.Scatter(x=I_array, y=fr_array_no_noise, name='sigma_I = 0'), row=1, col=1)
-fig.add_trace(go.Scatter(x=I_array, y=fr_array_noise1, name='sigma_I=2e-3'), row=1, col=1)
-fig.add_trace(go.Scatter(x=I_array, y=fr_array_noise2, name='sigma_I=1e-2'), row=1, col=1)
+fig.add_trace(go.Scatter(x=I_array, y=fr_array_noise1, name=f'sigma_I={sigma_1}'), row=1, col=1)
+fig.add_trace(go.Scatter(x=I_array, y=fr_array_noise2, name=f'sigma_I={sigma_2}'), row=1, col=1)
 
 fig.update_layout(height=600, width=800, title_text="f vs I")
 
@@ -264,82 +309,652 @@ fig.update_yaxes(title_text="f (Hz)", row=1, col=1)
 fig.show()
 ```
 
-As we increase $sigma_I$ - proportional to the voltage noise - the firing rate close to $I_{th}$ increases. I think this might be due to cases where the voltage is close to the threshold voltage and the noise pushes the voltage over the threshold voltage. This is a hypothesis and I am not sure if this is correct.
+In the above figure $\sigma_I$ takes the values $[0, 1e^{-2}, 3e^{-2}]$. It seems that by increasing the noise, the curve is smoothed out near the threshold current region. We can see that the blue curve (no noise) has a near verticle section near the threshold current, but as we increase the noise, the curve is more "smooth" around the threshold current $I_{th}$. I suppose this is because in real-life situations the rather sharp threshold current is not exactly the same as the threshold current in the model. This is because the model is a simplification of the real-life situation. 
 
 
-### Tutorial 2.2
+::: {.callout-note data-latex=""}
+
+I understand the basic properties of the leaky integrate-and-fire (LIF) neuron model and how noise causes the smoothing of f-I curves.
+:::
+
+
+
+## Tutorial 2.2: Refractory Period
+
+In this tutorial, I looked at 3 different ways to implement the refractory period in the LIF neuron model. 
+
+1. **Voltage Clamp** method
+2. **Threshold increase** method
+3. **Refractory conductance with threshold increase** method 
+
+### The python classes for the 3 methods
+
+#### Voltage Clamp method
 ```{python}
-#| code-fold: true
-C_m = 0.1e-9
-E_L = -70.e-3
-R_m = 100.e6
-G_L = 1./R_m
-V_th = -50e-3
-V_reset = -65.e-3
-
-tau_m = C_m/G_L
-I_th = G_L*(V_th - E_L)
-
-fr_array_1 = [] # Forced voltage clamp method
-mean_V_1 = []
-
-fr_array_2 = [] # Threshold increase
-mean_V_2 = []
-
-fr_array_3 = [] # Threshold increase
-mean_V_3 = []
-I_array = np.arange(100e-12, 600e-12, 50e-12)
-
-for I in I_array:
-    V_1 = np.copy(V)
-    fr_1 = simulate(V_1, np.ones_like(times) * I, tau_ref=2.5e-3)
-    fr_array_1.append(fr_1)
-    mean_V_1.append(np.mean(V_1))
-    
-    V_2 = np.copy(V)
-    V_th_array = np.zeros_like(times)
-    V_th_array[0] = V_th
-    fr_2,dvthdt_array = simulate(V_2, np.ones_like(times) * I, tau_vth=1e-3, V_th_array=V_th_array)
-    fr_array_2.append(fr_2)
-    mean_V_2.append(np.mean(V_2))
-    
-    
-    V_3 = np.copy(V)
-    V_th_array = np.zeros_like(times)
-    G_ref = np.zeros_like(times)
-    V_th_array[0] = V_th
-    G_ref[0] = 0.
-    fr_3,_ = simulate(V_3, np.ones_like(times) * I, tau_vth=1e-3, V_th_array=V_th_array, G_ref=G_ref, tau_Gref=0.2e-3)
-    print(fr_3)
-    fr_array_3.append(fr_3)
-    mean_V_3.append(np.mean(V_3))
-fig = plt.figure().suptitle('current vs fr')
-
-plt.plot(I_array, fr_array_1, label='forced voltage clamp')
-plt.plot(I_array, fr_array_2, label='threshold increase')
-plt.plot(I_array, fr_array_3, label='refractory conductance')
-plt.xlabel('I')
-plt.ylabel('fr')
-plt.legend(loc='lower right')
-plt.figure().suptitle('current vs mean V')
-plt.plot(I_array, mean_V_1,  label='forced voltage clamp')
-plt.plot(I_array, mean_V_2, label='threshold increase')
-plt.plot(I_array, mean_V_3, label='refractory')
-plt.xlabel('I')
-plt.ylabel('Mean V')
-plt.legend(loc='lower right')
-plt.figure().suptitle('  fr vs mean V')
-plt.plot( fr_array_1,mean_V_1, label='forced voltage clamp')
-plt.plot( fr_array_2,mean_V_2,label='threshold increase')
-plt.plot( fr_array_3,mean_V_3,label='refractory')
-plt.xlabel('fr')
-plt.ylabel('Mean V')
-plt.legend(loc='lower right')
-
-plt.figure().suptitle('  V vst ')
-plt.plot( times,V_1, label='forced voltage clamp')
-#plt.plot( times,V_2,label='threshold increase')
-plt.xlabel('fr')
-plt.ylabel('Mean V')
-plt.legend(loc='lower right') 
+# | code-fold: true
+params = NeuronParameters(
+    C_m=0.1e-9,
+    E_L=-70.e-3,
+    R_m=100.e6,
+    E_K=-80.e-3,
+    V_th=-50e-3,
+    V_reset=-65.e-3,
+    tau_vc=5.e-3,
+    V_peak=50.e-3,
+    tau_vth=1.e-3,
+    V_th_max=200.e-3,
+    tau_G_ref=0.2e-3,
+)
 ```
+
+
+```{python}
+@dataclasses.dataclass
+class LIF_Voltage_Clamp(LIF):
+    # LIF with voltage clamp 
+    last_spike_time: float = -np.inf # Last spike time
+    spike_locations: List[int] = dataclasses.field(default_factory=list) # Spike locations
+    
+    def simulate(self):
+        for i in range(1, len(self.times)): 
+            t = self.times[i]
+            if t - self.last_spike_time < self.neuron_parameters.tau_vc:
+                self.V[i] = self.neuron_parameters.V_reset
+                continue
+            
+            V_new = self.V[i-1] + self.dvdt(self.V[i-1], self.I[i-1]) * self.dt
+            V_new = V_new + self.noises[i]
+
+            if V_new > self.neuron_parameters.V_th:
+                self.num_fire += 1
+                self.V[i] = self.neuron_parameters.V_reset
+                self.last_spike_time = t
+                self.spike_locations.append(i)
+            else:
+                self.V[i] = V_new
+                
+        # set V_peak
+        self.V[self.spike_locations] = self.neuron_parameters.V_peak
+
+```
+
+
+#### Refractory conductance with threshold increase method
+
+This method is a combination of the voltage clamp method and the threshold increase method. The refractory conductance is added to the voltage clamp method.
+
+```{python}
+@dataclasses.dataclass
+class LIF_Threshold_Increase(LIF):
+    use_refractory_conductance: bool = False # Use refractory conductance
+    V_th_array: np.ndarray = None # Threshold voltage array
+    spike_locations: List[int] = dataclasses.field(default_factory=list) # Spike locations
+
+    # refractory conductance
+    G_ref_array: np.ndarray = None # Refractory conductance array
+
+    def __post_init__(self):
+        super().__post_init__()  
+        self.V_th_array = np.ones_like(self.times) * self.neuron_parameters.V_th
+        self.V_th_array[0] = self.neuron_parameters.V_th
+        self.G_ref_array = np.zeros_like(self.times)
+
+    def dv_thdt(self, V_th):
+        _dv_thdt = (self.V_th_array[0] - V_th) / self.neuron_parameters.tau_vth
+        return _dv_thdt
+
+    def dG_refdt(self, G_ref):
+        _dG_refdt = - G_ref / self.neuron_parameters.tau_G_ref
+        return _dG_refdt
+
+    def dvdt(self, V, I, time_index): 
+        _dvdt = super().dvdt(V, I)
+
+        if self.use_refractory_conductance:
+            # add refractory conductance
+            _dvdt = _dvdt + self.G_ref_array[time_index] * ( self.neuron_parameters.E_K - V) / self.neuron_parameters.C_m
+
+            self.G_ref_array[time_index+1] = self.G_ref_array[time_index] + self.dG_refdt(self.G_ref_array[time_index]) * self.dt
+
+        return _dvdt
+
+    def simulate(self):
+        for i in range(1, len(self.times)):
+            time = self.times[i]
+            V_new = self.V[i-1] + self.dvdt(self.V[i-1], self.I[i-1], i-1) * self.dt
+            V_new = V_new + self.noises[i]
+            self.V[i] = V_new
+
+            self.V_th_array[i] = self.V_th_array[i-1] + self.dv_thdt(self.V_th_array[i-1]) * self.dt
+
+            if V_new > self.V_th_array[i]:
+                self.spike_locations.append(i)
+                self.V_th_array[i] = self.neuron_parameters.V_th_max
+                self.num_fire += 1
+
+                if self.use_refractory_conductance:
+                    # add 2 micro Siemens to the refractory conductance
+                    self.G_ref_array[i] = self.G_ref_array[i] + 2.e-6
+
+                else:
+                    self.V[i] = self.neuron_parameters.V_reset
+
+        #set V_peak
+        self.V[self.spike_locations] = self.neuron_parameters.V_peak
+        
+```
+
+
+
+
+```{python}
+# | code-fold: true
+dt = 1e-5
+times = np.arange(0, 100.e-3, dt)
+
+currents_1 = np.ones_like(times)*220e-12
+lif_vc1 = LIF_Voltage_Clamp(dt, times, params, currents_1, noise_sigma=1.5e-2)
+lif_vc1.simulate()
+
+currents_2 = np.ones_like(times)*600e-12
+lif_vc2 = LIF_Voltage_Clamp(dt, times, params, currents_2, noise_sigma=1.5e-2)
+lif_vc2.simulate()
+
+# use plotly to plot the two simulations with vc on the same trace 
+fig = make_subplots(rows=1, cols=1, shared_xaxes=True, vertical_spacing=0.02)
+fig.add_trace(go.Scatter(x=times, y=lif_vc1.V, name='I=220pA'), row=1, col=1)
+fig.add_trace(go.Scatter(x=times, y=lif_vc2.V, name='I=600pA'), row=1, col=1)
+
+fig.update_layout(height=600, width=800, title_text="Forced VC: Voltage vs Time")
+
+# set axis names
+fig.update_xaxes(title_text="Time (s)", row=1, col=1)
+
+fig.update_yaxes(title_text="Voltage (V)", row=1, col=1)
+
+fig.show()
+
+```
+```{python}
+# | code-fold: true
+lif_ts1 = LIF_Threshold_Increase(dt, times, params, currents_1, noise_sigma=1.5e-2)
+lif_ts1.simulate()
+
+lif_ts2 = LIF_Threshold_Increase(dt, times, params, currents_2, noise_sigma=1.5e-2)
+lif_ts2.simulate()
+
+
+# use plotly to plot the two simulations on the same trace 
+fig = make_subplots(rows=1, cols=1, shared_xaxes=True, vertical_spacing=0.02)
+fig.add_trace(go.Scatter(x=times, y=lif_ts1.V, name='I=220pA'), row=1, col=1)
+fig.add_trace(go.Scatter(x=times, y=lif_ts2.V, name='I=600pA'), row=1, col=1)
+fig.add_trace(go.Scatter(x=times, y=lif_ts1.V_th_array, name='V_th for I=220pA', line=dict(color='green', dash='dash')), row=1, col=1)
+fig.add_trace(go.Scatter(x=times, y=lif_ts2.V_th_array, name='V_th for I=600pA', line=dict(color='cyan', dash='dash')), row=1, col=1)
+
+fig.update_layout(height=600, width=800, title_text="Threshold increase: Voltage vs Time")
+
+# set axis names
+fig.update_xaxes(title_text="Time (s)", row=1, col=1)
+fig.update_yaxes(title_text="Voltage (V)", row=1, col=1)
+
+fig.show()
+
+```
+
+```{python}
+# | code-fold: true
+lif_rc1 = LIF_Threshold_Increase(dt, times, params, currents_1, noise_sigma=1.5e-2, use_refractory_conductance=True)
+lif_rc1.simulate()
+
+lif_rc2 = LIF_Threshold_Increase(dt, times, params, currents_2, noise_sigma=1.5e-2, use_refractory_conductance=True)
+lif_rc2.simulate()
+
+# use plotly to plot the two simulations on the same trace
+fig = make_subplots(rows=1, cols=1, shared_xaxes=True, vertical_spacing=0.02)
+fig.add_trace(go.Scatter(x=times, y=lif_rc1.V, name='I=220pA'), row=1, col=1)
+fig.add_trace(go.Scatter(x=times, y=lif_rc2.V, name='I=600pA'), row=1, col=1)
+fig.update_layout(height=600, width=800, title_text="Threshold increase with refractory conductance: Voltage vs Time")
+
+# set axis names
+fig.update_xaxes(title_text="Time (s)", row=1, col=1)
+fig.update_yaxes(title_text="Voltage (V)", row=1, col=1)
+
+fig.show()
+
+
+```
+
+
+
+```{python}
+# | code-fold: true
+
+currents = np.arange(100e-12, 600e-12, 20e-12)
+
+dt = 1e-4 
+times = np.arange(0., 0.2, dt)
+
+# create empty lists to store the firing rates
+fr_fc = []
+fr_ts = []
+fr_rcts = []
+
+# mean V vs different currents 
+V_fc = []
+V_ts = []
+V_rcts = []
+
+
+
+for current in currents:
+    lif_fc = LIF_Voltage_Clamp(dt, times, params, np.ones_like(times)*current, noise_sigma=1.e-3)
+    lif_fc.simulate()
+
+    lif_ts = LIF_Threshold_Increase(dt, times, params, np.ones_like(times)*current, noise_sigma=1.e-3)
+    lif_ts.simulate()
+
+    lif_rcts = LIF_Threshold_Increase(dt, times, params, np.ones_like(times)*current, noise_sigma=1.e-3, use_refractory_conductance=True)
+    lif_rcts.simulate()
+
+    fr_fc.append(lif_fc.fire_rate)
+    fr_ts.append(lif_ts.fire_rate)
+    fr_rcts.append(lif_rcts.fire_rate)
+
+    V_fc.append(np.mean(lif_fc.V))
+    V_ts.append(np.mean(lif_ts.V))
+    V_rcts.append(np.mean(lif_rcts.V))
+
+
+
+```
+
+
+The following plots are shown:
+
+* Mean firing rate versus input current.
+* Mean voltage as a function of input current.
+* Mean voltage as a function of mean firing rate.
+
+```{python}
+
+# | code-fold: true
+
+# Plot the three refractory models on the same plot, don't use shared x axes and legend
+fig = make_subplots(rows=1, cols=1, shared_xaxes=False, vertical_spacing=0.02)
+fig.add_trace(go.Scatter(x=currents, y=fr_fc, name='Voltage clamp'), row=1, col=1)
+fig.add_trace(go.Scatter(x=currents, y=fr_ts, name='Threshold increase'), row=1, col=1)
+fig.add_trace(go.Scatter(x=currents, y=fr_rcts, name='Threshold increase with refractory conductance'), row=1, col=1)
+
+fig.update_layout(height=600, width=800, title_text="Mean firing rate vs input current")
+
+# set axis names
+fig.update_xaxes(title_text="Input current (A)", row=1, col=1)
+fig.update_yaxes(title_text="Mean firing rate (Hz)", row=1, col=1)
+
+fig.show()
+
+```
+
+```{python}
+# | code-fold: true
+
+# Plot the three refractory models on the same plot, don't use shared x axes and legend
+fig = make_subplots(rows=1, cols=1, shared_xaxes=False, vertical_spacing=0.02)
+fig.add_trace(go.Scatter(x=currents, y=V_fc, name='Voltage clamp'), row=1, col=1)
+fig.add_trace(go.Scatter(x=currents, y=V_ts, name='Threshold increase'), row=1, col=1)
+fig.add_trace(go.Scatter(x=currents, y=V_rcts, name='Threshold increase with refractory conductance'), row=1, col=1)
+
+fig.update_layout(height=600, width=800, title_text="Mean voltage vs input current")
+
+# set axis names
+fig.update_xaxes(title_text="Input current (A)", row=1, col=1)
+fig.update_yaxes(title_text="Mean voltage (V)", row=1, col=1)
+
+fig.show()
+
+```
+
+Upon examining the mean voltage versus input current plot shown above, we can observe a non-monotonic relationship when the threshold increase method is employed. In the case of threshold increase, the voltage threshold decreases at the same rate as the input current increases, causing the voltage to reach the threshold more quickly and higher than $V_{th}$. This explains why the mean voltage is not monotonically increasing in the threshold increase case. As we increase the input current, the mean voltage decreases for a while, then increases again.
+
+However, when we add refractory conductance to the threshold increase method, the mean voltage decreases monotonically as the input current increases. This suggests that the refractory conductance may be slowing down the voltage from reaching the threshold.
+
+```{python}
+# | code-fold: true
+
+# Plot the three refractory models on the same plot, don't use shared x axes and legend
+fig = make_subplots(rows=1, cols=1, shared_xaxes=False, vertical_spacing=0.02)
+fig.add_trace(go.Scatter(x=fr_fc, y=V_fc, name='Voltage clamp'), row=1, col=1)
+fig.add_trace(go.Scatter(x=fr_ts, y=V_ts, name='Threshold increase'), row=1, col=1)
+fig.add_trace(go.Scatter(x=fr_rcts, y=V_rcts, name='Threshold increase with refractory conductance'), row=1, col=1)
+
+fig.update_layout(height=600, width=800, title_text="Mean voltage vs mean firing rate")
+
+# set axis names
+fig.update_xaxes(title_text="Mean firing rate (Hz)", row=1, col=1)
+fig.update_yaxes(title_text="Mean voltage (V)", row=1, col=1)
+
+fig.show()
+
+```
+
+:::{.callout-note}
+
+In this tutorial, I learnt about the different ways to model the refractory period using 3 methods. The non-monotonic relationship for the mean voltage versus input current plot was interesting to observe. My hypothesis was that the   
+
+:::
+
+## Tutorial 2.3: Extentions to the LIF model
+
+
+### LIF model with adaption current
+
+The adaptionation currents adds to the LIF model by adding a hyperpolarising current. 
+
+$$
+C_m \frac{dV}{dt} = (E_L - V) / R_m + G_{SRA} (E_{SRA} - V) + I_{app}
+$$
+
+where 
+
+$$
+\frac{G_{SRA}}{dt} = -G_{SRA} / \tau_{SRA}
+$$
+
+and, 
+
+$$
+ \quad V \ge V_{th} \implies V \rightarrow V_{TH} \And G_{SRA} \rightarrow G_{SRA} + \Delta G_{SRA}
+$$
+
+```{python}
+@dataclasses.dataclass
+class LIF_SRA(LIF):
+    # LIF model with spike-rate adaptation
+
+    G_SRA_array: np.ndarray = None # spike-rate adaptation conductance
+    last_spike_time: float = None # time of last spike 
+    isi_array: List[float] = dataclasses.field(default_factory=list) # inter-spike interval
+
+    def __post_init__(self):
+        super().__post_init__()
+        self.G_SRA_array = np.zeros(self.times.shape)
+
+    def dvdt(self, V_m, I_app, time_index):
+        lif_dvdt = super().dvdt(V_m, I_app)
+
+        # spike-rate adaptation
+        G_SRA = self.G_SRA_array[time_index]
+        dG_SRA = -G_SRA / self.neuron_parameters.tau_SRA
+        self.G_SRA_array[time_index + 1] = G_SRA + dG_SRA * self.dt
+
+        return lif_dvdt + G_SRA * (self.neuron_parameters.E_K - V_m)/self.neuron_parameters.C_m
+
+    def simulate(self):
+
+        for i in range(1, len(self.times)):
+            self.V[i] = self.V[i - 1] + self.dvdt(self.V[i - 1], self.I[i - 1], i - 1) * self.dt
+
+            if self.V[i] >= self.neuron_parameters.V_th:
+                self.V[i] = self.neuron_parameters.V_reset
+                self.G_SRA_array[i] += self.neuron_parameters.Delta_G_SRA 
+                self.num_fire += 1
+                if self.last_spike_time is not None:
+                    self.isi_array.append(self.times[i] - self.last_spike_time)
+                self.last_spike_time = self.times[i]
+```
+
+Below we plot the current, voltage and spike-rate adaptation conductance for a single neuron with a constant input current of 500 pA.
+
+```{python}
+# | code-fold: true
+params = NeuronParameters(
+    C_m=100e-12,
+    E_L=-75.e-3,
+    R_m=100.e6,
+    E_K=-80.e-3,
+    V_th=-50e-3,
+    V_reset=-80.e-3,
+    tau_vc=5.e-3,
+    V_peak=50.e-3,
+    tau_SRA=200e-3,
+    Delta_G_SRA=1e-9,
+
+)
+
+dt = 1e-3
+times = np.arange(0, 1.5, dt)
+
+currents = np.zeros_like(times)
+mask = np.logical_and(times > 0.5, times < 1.0)
+currents[mask] = 400e-12 
+
+lif_sra = LIF_SRA(dt, times, params, currents, noise_sigma=0.0)
+lif_sra.simulate()
+
+fig = make_subplots(rows=1, cols=1, shared_xaxes=False, vertical_spacing=0.02)
+fig.add_trace(go.Scatter(x=lif_sra.times, y=lif_sra.V, name='Voltage'), row=1, col=1)
+fig.add_trace(go.Scatter(x=lif_sra.times, y=lif_sra.G_SRA_array, name='G_SRA(t)'), row=1, col=1)
+
+# Plot voltage and current, voltage and spike-rate adaptation conductance in different plots
+# 3 rows using subplots
+fig = make_subplots(rows=4, cols=1, shared_xaxes=False, vertical_spacing=0.02)
+
+# plot current
+fig.add_trace(go.Scatter(x=lif_sra.times, y=lif_sra.I, name='Current'), row=1, col=1)
+
+# plot voltage
+fig.add_trace(go.Scatter(x=lif_sra.times, y=lif_sra.V, name='Voltage'), row=2, col=1)
+
+# plot spike-rate adaptation conductance
+fig.add_trace(go.Scatter(x=lif_sra.times, y=lif_sra.G_SRA_array, name='G_SRA(t)'), row=3, col=1)
+
+# plot the IST 
+#fig.add_trace(go.Scatter(x=lif_sra.times, y=lif_sra.inter_spike_intervals, name='ISI(t)'), row=4, col=1)
+
+# set axis names
+fig.update_xaxes(title_text="Time (s)", row=3, col=1)
+
+fig.update_yaxes(title_text="Current (A)", row=1, col=1)
+fig.update_yaxes(title_text="Voltage (V)", row=2, col=1)
+#fig.update_yaxes(title_text="G_SRA (S)", row=3, col=1)
+
+fig.show()
+
+```
+
+Wow, the above plot is really interesting and pretty. The adaptation current  - an outward hyperpolarising current - increases when spikes are fired and decrease after due to the differential equation, but when another spike occurs, the adaptation current increases again.  This adaptation current is a function of the membrane potential meaning that the neuron is adapting to the firing rate of the neuron. 
+
+
+
+```{python}
+# | code-fold: true
+
+
+currents = np.arange(150e-12, 350e-12, 10e-12)
+times = np.arange(0, 5, dt)
+
+first_isi = [] 
+steady_isi = [] 
+
+single_spike = []
+for i, I in enumerate(currents):
+    lif_sra = LIF_SRA(dt, times, params, I * np.ones_like(times), noise_sigma=1e-5)
+    lif_sra.simulate()
+
+    isi_array = lif_sra.isi_array
+    if lif_sra.num_fire > 3:
+        first_isi.append(1 / np.mean(isi_array[0:3]))
+        steady_isi.append(1 / isi_array[-1])
+    elif lif_sra.num_fire == 1:
+        single_spike.append(i)
+    else:
+        first_isi.append(0)
+        steady_isi.append(0)
+
+fig = go.Figure()
+# plot first with circles
+fig.add_trace(go.Scatter(x=currents, y=first_isi, mode='markers', name='1/First ISI'))
+fig.add_trace(go.Scatter(x=currents, y=steady_isi, name='1/Steady ISI'))
+# plot single spike with X
+fig.add_trace(go.Scatter(x=currents[single_spike], y=np.zeros_like(single_spike), mode='markers', name='Single spike'))
+fig.update_xaxes(title_text="Current (A)")
+fig.update_yaxes(title_text="Firing rate (Hz)")
+fig.show()
+
+```
+
+In the above f-i curve, the inverse first ISI and inverse steady state ISI shows similarity near the threshold current, and as the applied current increases the inverse first ISI increases faster than inv steady state ISI. This is because due to the spike-rate adaptation, the neuron initially fires at a higher rate, but at steady state the neuron fires much slower. 
+
+
+
+### AELIF - Adaptive Exponential LIF
+
+```{python}
+
+
+
+@dataclasses.dataclass
+class AELIF(LIF):
+
+    I_SRA_array: np.ndarray = None
+    last_spike_time: float = None # time of last spike 
+    isi_array: List[float] = dataclasses.field(default_factory=list) # inter-spike interval
+
+
+    def __post_init__(self):
+        super().__post_init__()
+        self.I_SRA_array = np.zeros_like(self.times)
+
+    def dI_SRA_dt(self, V_m, I_SRA):
+        a = self.neuron_parameters.a
+        b = self.neuron_parameters.b
+        _dI_SRA_dt = a * (V_m - self.neuron_parameters.E_L) - I_SRA 
+
+        return _dI_SRA_dt/self.neuron_parameters.tau_SRA
+
+    def dvdt(self, V_m, I_app, I_SRA):
+
+        exp_term = self.neuron_parameters.Delta_th * np.exp((V_m - self.neuron_parameters.V_th)/self.neuron_parameters.Delta_th)
+        
+
+        _dv_dt = self.neuron_parameters.G_L*(self.neuron_parameters.E_L - V_m + exp_term) - I_SRA + I_app
+
+        #print(f'V_m: {V_m}, I_app: {I_app}, I_SRA: {I_SRA}, dv_dt: {_dv_dt/self.neuron_parameters.C_m}')
+
+        return _dv_dt/self.neuron_parameters.C_m
+
+    def simulate(self):
+        for i in range(1, len(self.times)):
+            self.V[i] = self.V[i-1] + self.dt * self.dvdt(self.V[i-1], self.I[i-1], self.I_SRA_array[i-1])
+
+            self.I_SRA_array[i] = self.I_SRA_array[i-1] + self.dt * self.dI_SRA_dt(self.V[i-1], self.I_SRA_array[i-1])
+
+            if self.V[i] >= self.neuron_parameters.V_max:
+                self.V[i] = self.neuron_parameters.V_reset
+                self.I_SRA_array[i] += self.neuron_parameters.b
+                self.num_fire += 1
+
+                if self.last_spike_time is not None:
+                    self.isi_array.append(self.times[i] - self.last_spike_time)
+
+                self.last_spike_time = self.times[i]
+
+```
+
+Adding an exponential term to the adaptation current model we get the AELIF model:
+
+$$
+C_m \frac{dV_m}{dt} = G_L(E_L - V_m + \Delta_{th}e^{\frac{V_m - V_{th}}{\Delta_{th}}}) - I_{SRA} + I_{app}
+$$
+
+
+The exponential term creates a *positive feedback* loop, which makes the neuron membrane potential spike faster and faster. Using this we don't need to have the `IF` statement when $V_m > V_{th} \rightarrow V_{peak}$, however this still has an `IF` statement because of the clamping by $V_{max}$, how can we get rid of this clamping? 
+
+
+
+
+```{python}
+# | code-fold: true
+params.a = 2e-9
+params.b = 0.02e-9
+params.Delta_th = 2e-3
+params.tau_SRA = 200e-3
+params.G_L = 10e-9
+params.V_max = 100e-3
+
+# plot for 500 pA
+dt = 1e-3
+
+times = np.arange(0, 1.5, dt)
+
+currents = np.zeros_like(times)
+mask = np.logical_and(times > 0.5, times < 1.0)
+currents[mask] = 300e-12 
+
+
+lif_sra = AELIF(dt, times, params, currents, noise_sigma=0)
+lif_sra.simulate()
+
+# plot on different subplots
+fig = make_subplots(rows=3, cols=1, subplot_titles=("AELIF model", "I_SRA"))
+fig.add_trace(go.Scatter(x=times, y=lif_sra.V), row=1, col=1)
+fig.add_trace(go.Scatter(x=times, y=lif_sra.I_SRA_array), row=2, col=1)
+fig.add_trace(go.Scatter(x=times, y=currents), row=3, col=1)
+fig.update_xaxes(title_text="Time (s)", row=3, col=1)
+fig.update_yaxes(title_text="V_m (V)", row=1, col=1)
+fig.update_yaxes(title_text="I_SRA (A)", row=2, col=1)
+fig.update_yaxes(title_text="I_app (A)", row=3, col=1)
+
+fig.update_layout(showlegend=False)
+fig.show()
+
+
+
+dt = 1e-4
+currents = np.arange(150e-12, 350e-12, 5e-12)
+times = np.arange(0, 5, dt)
+
+first_isi = [] 
+steady_isi = [] 
+
+single_spike = []
+for i, I in enumerate(currents):
+    lif_sra = AELIF(dt, times, params, I * np.ones_like(times), noise_sigma=0) #=1e-5)
+    lif_sra.simulate()
+
+    isi_array = lif_sra.isi_array
+    if lif_sra.num_fire > 3:
+        first_isi.append(1 / np.mean(isi_array[0:3]))
+        steady_isi.append(1 / isi_array[-1])
+    elif lif_sra.num_fire == 1:
+        single_spike.append(i)
+    else:
+        first_isi.append(0)
+        steady_isi.append(0)
+
+
+print(single_spike)
+fig = go.Figure()
+# plot first with circles
+fig.add_trace(go.Scatter(x=currents, y=first_isi, mode='markers', name='1/First ISI'))
+fig.add_trace(go.Scatter(x=currents, y=steady_isi, name='1/Steady ISI'))
+# plot single spike with X
+fig.add_trace(go.Scatter(x=currents[single_spike], y=np.zeros_like(single_spike), mode='markers', name='Single spike'))
+fig.update_xaxes(title_text="Current (A)")
+fig.update_yaxes(title_text="Firing rate (Hz)")
+fig.show()
+
+```
+
+### Comparing the ALIF and AEALIF f-I curves
+
+Looking at the two f-I curves they seem to be quite similar, the AELIF is slightly shifted to the right and also the inverse of the first couple ISI is slightly lower. This might be because in the AELIF model the exponential term is a positive feed-back loop, but not instantaneous, so it takes a little bit of time for the neuron to spike, thus reducing the firing rate for the first couple of spikes.
+
+
+## Summary
+
+In Chapter 2 I learned the following:
+
+* How to model a neuron with a leaky integrate and fire model
+* What is a refractory period and 3 methods of modeling the refractory period
+* How to model a neuron with an adaptation current using the exponential LIF model and adaptive exponential LIF model

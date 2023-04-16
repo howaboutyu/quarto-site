@@ -13,7 +13,6 @@ about:
       text: github 
       href: https://github.com/howaboutyu
 
-
 ---
 
 :::{#hero-heading}

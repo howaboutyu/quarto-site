@@ -1,7 +1,7 @@
 {
-  "hash": "92fed2c28da09f79d5d72d82cc16c885",
+  "hash": "50ab4d5bf70fe5cc957206c18bf24769",
   "result": {
-    "markdown": "---\ntitle: Flashcard Links\nformat: html\nreference-location: margin\nhtml-math-method: katex\nlisting:\n  contents: posts\n  sort: date desc\n  type: default\n  categories: true\neditor:\n  render-on-save: true\nexecute:\n  freeze: true\ncomments:\n  hypothesis: true\n---\n\n### Flash card \n\nFlash cards are a great way to learn new topics. This is my list of my flashcards.\n\n# [probability](probability/probability.qmd)\n\n",
+    "markdown": "---\ntitle: Flashcard Links\nformat: html\nreference-location: margin\nhtml-math-method: katex\nlisting:\n  contents: posts\n  sort: date desc\n  type: default\n  categories: true\neditor:\n  render-on-save: true\nexecute:\n  freeze: true\ncomments:\n  hypothesis: true\n---\n\n### Notes and exercises\n\n# [probability](probability/probability.qmd)\n\n",
     "supporting": [
       "base_files"
     ],
