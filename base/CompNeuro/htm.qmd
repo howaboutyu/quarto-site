@@ -8,8 +8,6 @@ html-math-method: katex
 editor:
   render-on-save: true
 
-execute: 
-  freeze: false 
 ---
 
 
