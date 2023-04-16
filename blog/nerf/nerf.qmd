@@ -49,8 +49,6 @@ Check out the accompanying code
 
 NeRF achieves this by integrating rays of light that emanate from the camera and intersect the object. In other words, NeRF can use a bunch of rays to create an image of the object from different viewpoints. NeRF uses a multi-layered perception (MLP) that can be trained to represent a scene from a set of 2D images, and can then generate images taken from new angles. That is how it was done!
 
-When I first read the NeRF paper, I was amazed by its elegance and its potential for scene representation using neural networks. I also saw it as an opportunity to learn more about JAX. In this article, I will outline the NeRF algorithm and explain some of the things I've learned about Jax.  
-
 
 
 
@@ -113,16 +111,16 @@ class Model(nn.Module):
     x = position
 
     for i in range(7):
-        x = nn.Dense(256, name=f'fc{i + 1}')(x)
+        x = nn.Dense(256, name=f"layer_{i}")(x)
         x = nn.relu(x)
 
         # Concatenate x with original input
         if i == 4:
             x = jnp.concatenate([x, position], -1)
 
-    x = nn.Dense(256, name=f'fc{8}_linear')(x)
+    x = nn.Dense(256, name="layer_7")(x)
 
-    vol_density = nn.Dense(1, name=f'fc{8}_sigmoid')(x)
+    vol_density = nn.Dense(1, name="layer_8")(x)
 
     # Create an output for the volume density that is view-independent
     # and > 0 by using a ReLU activation function 
@@ -130,11 +128,11 @@ class Model(nn.Module):
 
     # Concatenate direction information after the volume density
     x = jnp.concatenate([x, direction], -1)
-    x = nn.Dense(128, name='fc_128')(x)
+    x = nn.Dense(128, name="layer_9")(x)
     x = nn.relu(x)
-    x = nn.Dense(3, name='fc_f')(x)
+    x = nn.Dense(3, name="layer_10")(x)
 
-    # RGB color is between 0 and 1
+    # Create an output for the RGB color and make sure it is in the range [0, 1] 
     rgb = nn.sigmoid(x)
     return rgb, vol_density
 
@@ -160,14 +158,14 @@ print(
 )
 ```
 
-1. We initialize the model with a  `PRNGKey` and dummy input data using the `init` method.
+1. We can use the `init` method to initialize the model parameters. [docs](https://flax.readthedocs.io/en/latest/api_reference/flax.linen.html) 
 2. We can use the `tabulate` method to see the model summary. [docs](https://flax.readthedocs.io/en/latest/api_reference/flax.linen.html)
 
 
 
 ### The NeRF algorithm 
 
-Consider a line or ray directed pointing away from the camera, with the equation $\vec{r}(t) = \vec{o} +t \vec{d}$, where $\vec{o}$ is the origin point on the ray, $t$ is a parameter that controls how far along the ray we are and $\vec{d}$ is the direction of the ray - a unit vector pointing away from the camera. The authors split the ray into $N$ segments, with each segment having a length equal to $\delta_i = t_{i+1}-t_i$. At each segment along the ray, the color and density of segment $i$ can be approximated by the neural network $F_\Theta(\vec{r}(t_i), \vec{d_i}) \rightarrow (\vec{c}_i, \sigma_i)$. The expected color of that ray that would appear in our image, $\hat{C}(\vec{r})$, can be calculated using a set of approximation integral equations, as shown below:
+Consider a line or ray directed pointing away from the camera, with the equation $\vec{r}(t) = \vec{o} +t \vec{d}$, where $\vec{o}$ is the origin point on the ray, $t$ is a parameter that controls how far along the ray we are and $\vec{d}$ is the direction of the ray - a unit vector pointing away from the camera. The authors split the ray into $N$ segments, with each segment having a length equal to $\delta_i = t_{i+1}-t_i$. At each segment along the ray, the color $c_i$ and volume density $\sigma_i$ of segment $i$ can be approximated by the neural network $F_\Theta(\vec{r}(t_i), \vec{d_i}) \rightarrow (\vec{c}_i, \sigma_i)$. The expected color of that ray that would appear in our image, $\hat{C}(\vec{r})$, can be calculated using a set of approximation integral equations, as shown below:
 
 $$
 \hat{C}(\vec{r}) = \sum_{i=1}^{N} T_i a_i \vec{c}_i 
@@ -185,7 +183,7 @@ $$
 T_i=\text{exp}\left( -\sum_{j=1}^{i-1} \sigma_j \delta_j \right)
 $${#eq-nerf-transmittance}
 
-$T_i$ is the accumulated transmittance up to that point, which can be thought of as the probability that the ray has not encountered anything up to that point. Therefore, $T_i$ should be $1$ for every point along the ray before a solid object. If the ray encounters a solid object, $T_i$ would start to decrease because the volume density $\sigma$ begins to increase. We can observe that the alpha values $a_i$ for low volume density become $0$, ignoring that color in the integral. It's an intriguing relationship!
+Okay, so what do these equations mean? Let's start with the color equation. The color of the ray is the sum of the color of each segment along the ray, weighted by the transmittance $T_i$ and the alpha value $a_i$. The alpha value $a_i$ is the probability that the ray has not encountered anything up to that point. The transmittance $T_i$ is the accumulated transmittance up to that point, which can be thought of as the probability that the ray has not encountered anything up to that point. Therefore, $T_i$ should be $1$ for every segment along the ray before a solid object. If the ray encounters a solid object, $T_i$ would start to decrease because the volume density $\sigma$ begins to increase. We can observe that the alpha values $a_i$ for low volume density become $0$, ignoring that color in the integral. It's an intriguing relationship!
 
 
 ::: {.callout-info}
@@ -232,9 +230,9 @@ $$
 P(X=x) = \frac{w_x}{  \sum_j^{N_c} w_j } \quad \text{for} \quad 1 < x < N_c 
 $$
 
-### Inverse transform sampling example
+### Inverse transform sampling 
 
-Consider a ray located at the center of the image. The Probability Density Function (PDF), $P(x)$, the Cumulative Distribution Function (CDF)^[The CDF of a random variable $X$ is $F(x) = P(X\leq x)$], $F(x)$, and the inverse CDF, $F^{-1}(x)$, are plotted below. From the plots, it can be inferred that there is an object surface near the $50^{\text{th}}$ element along the ray.
+Consider a ray taken from an arbitrary NeRF model. The Probability Density Function (PDF), $P(x)$, the Cumulative Distribution Function (CDF)^[The CDF of a random variable $X$ is $F(x) = P(X\leq x)$], $F(x)$, and the inverse CDF, $F^{-1}(x)$, are plotted below. From the plots, it can be inferred that there is an object surface near the $52^{\text{th}}$ element along the ray. 
 
 
 ```{python}
@@ -478,11 +476,11 @@ jax.debug.breakpoint()
 
 ## Training details 
 
-The training was using the same hyperparameters as the original NeRF paper. The model was trained for 400,000 steps, and the learning rate was decayed using a cosine schedule. The model was trained on a single A10 GPU (24 GB memory) for 400,000 steps with a batch size of 2048, the training took about 10 hours.
+The model was trained for 400,000 steps, and the learning rate was decayed using a cosine decay schedule. The model was trained on a single A10 GPU (24 GB memory) with a batch size of 2048, the training took about 10 hours.
 
 
-### The training images
-Below are the training images used for training the model, in total there are 35 images, 33 of which are used for training and 2 for validation. The images were taken from an iPhone video of a Ramen restaurant Lego set.  
+### Training images 
+Below are the training images used for training the model, in total, there are 35 images, 33 of which are used for training and 2 for validation. The images were taken from an iPhone video of a Ramen restaurant Lego set.  
 
 ::: {#fig-train }
 ![Training images](images/training_img.png){#fig-train-img}
@@ -493,10 +491,10 @@ Training images, 35 images in total.
 
 ###  Results
 
-After training for around 400k steps, the model was able to achieve a validation SSIM score of 0.928.
+After training for around 400k steps, the model was able to achieve a validation [SSIM](https://en.wikipedia.org/wiki/Structural_similarity) score of 0.928.
 
 
-The following figure shows the ground truth images, the predicted images, and the predicted depth maps. The last col shows the rendered validation images as the model is being trained.
+The following figure shows the ground truth images, the predicted images, and the predicted depth maps. The last column shows the rendered validation images as the model is being trained.
 
 
 ::: {#fig-val layout-ncol=4}
@@ -515,27 +513,30 @@ Ground truth images, predicted images, predicted depth maps and rendered validat
 
 ## Conclusion
 
-Nerf has exploded in popularity in the last few years, and there are many implementations and extensions of it. 
 
-Here are some of the extensions that I found interesting:  
+In this project, I implemented NeRF using Jax and Flax. I also trained a NeRF model on a custom set of images and rendered a custom 5-second video using NeRF. 
+
+Learning about NeRF was a lot of fun, and I hope you enjoyed reading this post as much as I enjoyed writing it. Follow me on [Twitter](https://twitter.com/hyu754) for more updates on my projects.
+
+### What's next?
+Nerf has exploded in popularity in the last few years, and there are many implementations and extensions of it. Here are some of the extensions that I found and would like to try out:  
 
 * [KiloNeRF](https://arxiv.org/pdf/2103.13744.pdf): This paper proposes a real-time rendering approach that uses thousands of smaller MLPs to represent parts of a scene, resulting in faster evaluations compared to a single large MLP. 
 
 * [NeuS](https://lingjie0206.github.io/papers/NeuS/): This paper introduces NeuS, a novel neural surface reconstruction method that represents the surface as the zero-level set of a signed distance function (SDF).  
 
-For more papers and implementations, check out the [awesome NeRF list](https://github.com/awesome-NeRF/awesome-NeRF).
-
-In this project, I implemented NeRF using Jax and Flax. I also trained a NeRF model on a custom set of images and rendered a custom 5-second video using NeRF. Very cool!
 
 
-## Helpful resources 
+### Additional Resources
 
-Looking at other implementations of NeRF was very helpful:
+If you want to learn more about NeRF and see additional implementations, here are some helpful resources:
 
-* [Original NeRF implementation in tf](https://github.com/bmild/nerf) by `@bmild`
-* [NeRF in Jax](https://github.com/google-research/google-research/tree/master/jaxnerf) by `@google-research`
+* **Awesome NeRF**: Check out the [awesome NeRF list](https://github.com/awesome-NeRF/awesome-NeRF) for a list of papers, implementations, and resources related to NeRF.
 
-This ImageNet example was also very helpful for understanding how to use `Flax`:
+* **Original NeRF Implementation in TensorFlow**: The [original NeRF implementation in TensorFlow](https://github.com/bmild/nerf) by Ben Mildenhall is a great starting point for understanding the NeRF algorithm and its implementation details.
 
-* [ImageNet example](https://github.com/google/flax/tree/main/examples/imagenet)
+* **NeRF in JAX**: The [NeRF implementation in JAX](https://github.com/google-research/google-research/tree/master/jaxnerf) by the Google Research team is a powerful and efficient implementation of NeRF using JAX and Flax.
+
+* **Flax ImageNet Example**: The [Flax ImageNet example](https://github.com/google/flax/tree/main/examples/imagenet) provides a great introduction to using Flax for large-scale deep learning tasks. This example demonstrates how to train a state-of-the-art image classification model on the ImageNet dataset using Flax.
+
 
