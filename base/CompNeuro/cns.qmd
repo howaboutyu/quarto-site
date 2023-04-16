@@ -953,8 +953,8 @@ Looking at the two f-I curves they seem to be quite similar, the AELIF is slight
 
 ## Summary
 
-In chapter 2 I learnt the following:
+In Chapter 2 I learned the following:
 
 * How to model a neuron with a leaky integrate and fire model
-* What is a refractory period and 3 methods of modelling the refractory period
-* How to model a neuron with an adaptation current using exponential LIF model and adaptive exponential LIF model
+* What is a refractory period and 3 methods of modeling the refractory period
+* How to model a neuron with an adaptation current using the exponential LIF model and adaptive exponential LIF model
