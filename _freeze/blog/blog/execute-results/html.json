@@ -1,0 +1,11 @@
+{
+  "hash": "c5223e67da5909a707b151ee56c793d3",
+  "result": {
+    "markdown": "---\ntitle: Projects\nformat: html\nreference-location: margin\nhtml-math-method: katex\nlisting:\n  categories: true\n  contents:\n    - nerf/nerf.qmd\n---\n\n",
+    "supporting": [
+      "blog_files"
+    ],
+    "filters": [],
+    "includes": {}
+  }
+}
