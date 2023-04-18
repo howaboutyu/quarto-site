@@ -1,0 +1,274 @@
+
+---
+title: Chapter 3 - Generating receptive fields with spike-triggered averages 
+format: html
+reference-location: margin
+jupyter: python3
+bibliography: ../../references.bib
+html-math-method: katex
+editor:
+  render-on-save: true
+---
+
+
+
+
+```{python}
+# | code-fold: true
+import dataclasses
+import numpy as np
+from typing import List, Tuple, Union
+import plotly.graph_objects as go
+```
+
+```{python}
+# | code-fold: true
+@dataclasses.dataclass
+class NeuronParameters:
+    C_m: float # membrane capacitance
+    E_L: float # leak reversal potential
+    E_K: float # potassium reversal potential
+    R_m: float # membrane resistance
+    V_th: float # threshold potential
+    V_reset: float # reset potential
+    V_peak: float = None # peak potential
+
+    # refractory period parameters
+    tau_vc: float = None # time constant for voltage clamp
+    tau_vth: float = None # time constant for voltage increase method 
+    V_th_max: float = None # maximum voltage for V inc method 
+    tau_G_ref: float = None # time constant for conductance increase method
+
+    # spike adaptation parameters
+    G_SRA: float = None # spike rate adaptation conductance
+    Delta_G_SRA: float = None # spike rate adaptation conductance delta 
+    tau_SRA: float = None # spike rate adaptation time constant
+    V_max: float = None # maximum voltage for spike adaptation
+    Delta_th: float = None # spike adaptation threshold delta
+    a: float = None # spike adaptation parameter
+    b: float = None # spike adaptation parameter
+
+
+    def __post_init__(self):
+        self.G_L = 1./self.R_m # leak conductance
+        self.tau_m = self.C_m/self.G_L # membrane time constant
+        self.I_th = self.G_L*(self.V_th - self.E_L) # threshold current 
+
+
+@dataclasses.dataclass
+class SimulatorBase:
+    dt: float 
+    times: np.ndarray 
+    neuron_parameters: NeuronParameters 
+    I: np.ndarray 
+    num_fire: int = 0
+    
+    def __post_init__(self):
+        self.V = np.zeros_like(self.times)
+        self.V[0] = self.neuron_parameters.E_L
+
+    @property
+    def fire_rate(self):
+        return self.num_fire/(self.times[-1] - self.times[0])
+
+    def dvdt(self):
+        raise NotImplementedError
+
+    def simulate(self):
+        raise NotImplementedError
+
+
+
+
+@dataclasses.dataclass
+class LIF(SimulatorBase):
+    noise_sigma: float = 0.
+    noises: np.ndarray = None
+
+    def __post_init__(self):
+        super().__post_init__()
+        self.noises = np.random.normal(size=self.times.shape) * self.noise_sigma * np.sqrt(self.dt) 
+
+    def dvdt(self, V_m, I_app):
+        _dvdt = (self.neuron_parameters.E_L - V_m)/self.neuron_parameters.R_m + I_app
+        _dvdt = _dvdt/self.neuron_parameters.C_m
+        return _dvdt
+
+
+    def simulate(self):
+        for i in range(1, len(self.times)):
+            V_new = self.V[i-1] + self.dvdt(self.V[i-1], self.I[i-1]) * self.dt
+
+            if isinstance(self.noises, np.ndarray):
+                V_new = V_new + self.noises[i]
+
+            if V_new > self.neuron_parameters.V_th:
+                V_new = self.neuron_parameters.V_reset
+                self.num_fire += 1
+                self.last_fire_time = self.times[i]
+
+            self.V[i] = V_new
+
+
+
+@dataclasses.dataclass
+class AELIF(LIF):
+
+    I_SRA_array: np.ndarray = None
+    last_spike_time: float = None # time of last spike 
+    isi_array: List[float] = dataclasses.field(default_factory=list) # inter-spike interval
+    spike_location: np.ndarray = None # location of spikes 
+
+    def __post_init__(self):
+        super().__post_init__()
+        self.I_SRA_array = np.zeros_like(self.times)
+        self.spike_location = np.zeros_like(self.times)
+
+    def dI_SRA_dt(self, V_m, I_SRA):
+        a = self.neuron_parameters.a
+        b = self.neuron_parameters.b
+        _dI_SRA_dt = a * (V_m - self.neuron_parameters.E_L) - I_SRA 
+
+        return _dI_SRA_dt/self.neuron_parameters.tau_SRA
+
+    def dvdt(self, V_m, I_app, I_SRA):
+
+        exp_term = self.neuron_parameters.Delta_th * np.exp((V_m - self.neuron_parameters.V_th)/self.neuron_parameters.Delta_th)
+        
+
+        _dv_dt = self.neuron_parameters.G_L*(self.neuron_parameters.E_L - V_m + exp_term) - I_SRA + I_app
+
+        #print(f'V_m: {V_m}, I_app: {I_app}, I_SRA: {I_SRA}, dv_dt: {_dv_dt/self.neuron_parameters.C_m}')
+
+        return _dv_dt/self.neuron_parameters.C_m
+
+    def simulate(self):
+        for i in range(1, len(self.times)):
+            self.V[i] = self.V[i-1] + self.dt * self.dvdt(self.V[i-1], self.I[i-1], self.I_SRA_array[i-1])
+
+            self.I_SRA_array[i] = self.I_SRA_array[i-1] + self.dt * self.dI_SRA_dt(self.V[i-1], self.I_SRA_array[i-1])
+
+            if self.V[i] >= self.neuron_parameters.V_max:
+                self.V[i] = self.neuron_parameters.V_reset
+                self.I_SRA_array[i] += self.neuron_parameters.b
+                self.num_fire += 1
+
+                if self.last_spike_time is not None:
+                    self.isi_array.append(self.times[i] - self.last_spike_time)
+
+                self.last_spike_time = self.times[i]
+                self.spike_location[i] = 1
+```
+
+
+```{python}
+params = NeuronParameters(
+    C_m=100e-12,
+    E_L=-60.e-3,
+    R_m=100.e6,
+    E_K=-80.e-3,
+    V_th=-50e-3,
+    V_reset=-80.e-3,
+    V_peak=50.e-3,
+    tau_SRA=50e-3,
+    a=10e-9,
+    b=0.5e-9,
+    Delta_th=2e-3,
+    V_max=100e-3,    
+)
+
+
+params.G_L = 8e-9
+```
+
+
+## Time-varying stimulus
+
+We will sample 40,000 currents from a uniform distribution $I \sim U(-0.5, 0.5)$ nA. We will then apply this current to the neuron for 5ms, this is to see how changes in the input current affect the neuron's firing rate.
+
+
+```{python}
+
+num_blocks = 40000
+random_currents = np.random.uniform(-0.5, 0.5, size=num_blocks)
+dt = 0.02e-3
+times_5ms = np.arange(0, 5e-3, dt)
+currents = np.repeat(random_currents, 250)
+
+times = np.arange(0, num_blocks*5e-3, dt)
+print(f'Times shape : {times.shape}')
+print(f'Currents shape : {currents.shape}')
+
+aelif_varying_current = AELIF(
+    times=times,
+    neuron_parameters=params,
+    I=currents,
+    noise_sigma=0,
+    dt=dt,
+)
+aelif_varying_current.simulate()
+```
+
+
+```{python}
+def expand_bins(spikes, new_dt, old_dt):
+    sf = int(new_dt/old_dt)
+    spikes = np.split(spikes, sf, axis=0)
+    spikes = np.array(spikes)
+    spikes = np.mean(spikes, axis=0)
+    return spikes
+
+spikes_original = aelif_varying_current.spike_location
+print(f'Spikes original shape: {spikes_original.shape}')
+spikes_downsampled = expand_bins(spikes_original, 1e-3, 0.02e-3)
+spikes_downsampled = np.round(spikes_downsampled)
+print(f'Downsampled spikes shape: {spikes_downsampled.shape}')
+
+current_downsampled = expand_bins(currents, 1e-3, 0.02e-3)
+```
+
+```{python}
+def STA(currents, spikes, dt, t_minus=72e-3, t_plus=25e-3):
+    nminus = int(t_minus/dt)
+    nplus = int(t_plus/dt)
+    n = nminus + nplus + 1
+    print(f'N: {n}')
+    sta = np.zeros(n)
+
+    for i in range(nminus, len(spikes)-nplus):
+        if spikes[i] == 1:
+            sta += currents[i-nminus:i+nplus+1]
+
+    sta /= np.sum(spikes)
+    
+    time_window = np.arange(-nminus, nplus+1, 1)*dt*1e3
+
+    return sta, time_window
+
+sta, time_window = STA(current_downsampled, spikes_downsampled, dt)
+
+# plot with plotly
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=-time_window, y=sta, mode='lines', name='STA'))
+fig.update_layout(
+    title='STA',
+    xaxis_title='Time (ms)',
+    yaxis_title='Current (nA)',
+    font=dict(
+        family="Courier New, monospace",
+        size=18,
+        color="#7f7f7f"
+    )
+) 
+
+fig.show()
+
+```
+
+
+With the STA plotted above, we can see the spike-triggerd average for an AELIF neuron. We can see that the currents patterns that causes spikes is initially close to zero, and then increases to a peak, and then decreases back to zero. This is because the neuron is initially at rest, and then the current causes the neuron to spike, and then the neuron returns to rest. This is a very simple example, but we can see that the STA can capture the general shape of the current pattern that causes spikes. Immediately after a spike the current goes below zero. 
+
+
+
+
+

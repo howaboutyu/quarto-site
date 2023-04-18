@@ -1,7 +1,7 @@
 
 
 ---
-title: Computation neural science 
+title: Chapter 2 - The neuron and minimal spiking models 
 format: html
 reference-location: margin
 jupyter: python3
