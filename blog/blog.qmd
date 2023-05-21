@@ -8,5 +8,6 @@ listing:
   categories: true
   contents:
     - "nerf/nerf.qmd" 
+    - "nca/nca.qmd"
 ---
 
