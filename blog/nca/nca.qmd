@@ -1,6 +1,6 @@
 
 ---
-title: Exploring Neural Cellular Automata 
+title: Exploring Neural Cellular Automata  🌱🔬🔍 
 date: 21 May 2023
 author: [Hao Bo Yu]
 title-block-banner: true
@@ -35,7 +35,8 @@ description: My implementation notes on the NCA algorithm
 
 ## Introduction
 
-In this blog post, I will be sharing my replication and exploration findings about Neural Cellular Automata (NCA) inspired by the original Distill article. The article discusses the fascinating concept of morphogenesis, which sparked my interest and motivated me to explore it further. As a result, I experimented to implement the NCA algorithm using Jax, a powerful machine learning library.
+In this blog post, I will be sharing my replication and exploration findings about Neural Cellular Automata (NCA) inspired by the original Distill article [@mordvintsev2020growing]. The article discusses the fascinating concept of morphogenesis, which sparked my interest and motivated me to explore it further. As a result, I experimented to implement the NCA algorithm using Jax, a powerful machine learning library.
+
 
 Morphogenesis is the process by which life develops from a single cell into complex shapes and forms. While the NCA algorithm does not capture all the intricacies of this process due to our limited understanding, it provides an interesting and enjoyable way to visualize emoji generation and its ability to regenerate after damage. In this post, I will discuss the challenges I encountered while implementing the NCA algorithm and present several plots to showcase its functionality.
 
@@ -480,107 +481,7 @@ In conclusion, the Neural Cellular Automata (NCA) system demonstrates that one c
 
 The intelligence found within cells and organisms offers valuable lessons and opportunities for advancements in artificial intelligence. The application of the NCA system to complex tasks, such as the Self-classifying MNIST Digits project [@randazzo2020self-classifying], showcases the potential of the NCA system to be applied to real-world problems. 
 
+
 While the NCA system may face challenges, such as difficulties in regeneration amidst significant distortions, I firmly believe in the promising inherent emergent intelligence it possesses. These observations can potentially contribute to enhancing the robustness of AI systems, particularly in their ability to handle noise [@goodfellow2014explaining] and make recurrent decisions.
 
-
-<!--  
-
-::: {#fig-channel-prop layout-ncol=4 }
-![c1](channel_0.gif)
-
-![c2](channel_1.gif)
-
-![c3](channel_2.gif)
-
-![c4](channel_3.gif)
-
-![c5](channel_4.gif)
-
-![c6](channel_5.gif)
-
-![c7](channel_6.gif)
-
-![c8](channel_7.gif)
-
-![c9](channel_8.gif)
-
-![c10](channel_9.gif)
-
-![c11](channel_10.gif)
-
-![c12](channel_11.gif)
-
-![c13](channel_12.gif)
-
-![c14](channel_13.gif)
-
-![c15](channel_14.gif)
-
-![c16](channel_15.gif)
-
-The above shows the evolution of the CA for each channel. 16 channels are shown.
-:::
-
--->
-
-<!--  
-
-```{python}
-# | code-fold: true
-import numpy as np
-from PIL import Image
-import imageio
-import matplotlib.pyplot as plt
-import matplotlib.cm as cm
-import matplotlib.colors as colors
-
-# Your data
-data = np.load('./data/state_grid_cache.npy')
-
-# apply
-kernel_x, kernel_y = nca.create_perception_kernel(input_size=16, output_size=16)
-
-perceived_data_jnp = nca.perceive(data, kernel_x, kernel_y) 
-perceived_data = np.copy(perceived_data_jnp)
-perceived_data = np.transpose(perceived_data, (0, 2, 3, 1))
-
-perception_x = perceived_data[:, :, :, :16]
-
-data = perception_x
-
-normalized_data = np.zeros_like(data)
-
-# normalize from 0-1, per channel, using log scale
-for channel in range(data.shape[-1]):
-    log_data = np.log10(data[:, :, :, channel] - data.min() + 1)  # add 1 to avoid log(0)
-    normalized_data[:, :, :, channel] = (log_data - np.min(log_data)) / (np.max(log_data) - np.min(log_data))
-# nan to 0
-normalized_data = np.nan_to_num(normalized_data)
-
-# Resize factor
-resize_factor = 10
-
-# Create a GIF animation for each channel
-for channel in range(data.shape[-1]):
-    frames = []
-    for t in range(data.shape[0]):
-        img = normalized_data[t, :, :, channel]
-
-        # Apply colormap and convert to RGB
-        cmap = cm.get_cmap('viridis')
-        colored_img = cmap(img)
-        colored_img = (colored_img[:, :, :3] * 255).astype(np.uint8)
-        colored_img = Image.fromarray(colored_img, mode='RGB')
-        
-        # Resize the image
-        colored_img = colored_img.resize((colored_img.width * resize_factor, colored_img.height * resize_factor), Image.NEAREST)
-        frames.append(colored_img)
-
-    # Save the GIF animation
-    imageio.mimsave(f'channel_{channel}.gif', frames, format='GIF', duration=0.2)
-
-
-
-```
-
--->
+Thanks for reading! I hope you enjoyed this article. If you have any comments, please leave them below. 😊📝👇
