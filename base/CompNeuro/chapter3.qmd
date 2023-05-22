@@ -189,7 +189,7 @@ We will sample 40,000 currents from a uniform distribution $I \sim U(-0.5, 0.5)$
 
 ```{python}
 
-num_blocks = 40000
+num_blocks = 4000
 random_currents = np.random.uniform(-0.5, 0.5, size=num_blocks)
 dt = 0.02e-3
 times_5ms = np.arange(0, 5e-3, dt)
@@ -266,7 +266,205 @@ fig.show()
 ```
 
 
-With the STA plotted above, we can see the spike-triggerd average for an AELIF neuron. We can see that the currents patterns that causes spikes is initially close to zero, and then increases to a peak, and then decreases back to zero. This is because the neuron is initially at rest, and then the current causes the neuron to spike, and then the neuron returns to rest. This is a very simple example, but we can see that the STA can capture the general shape of the current pattern that causes spikes. Immediately after a spike the current goes below zero. 
+With the STA plotted above, we can see the spike-triggerd average for an AELIF neuron. We can see that the currents patterns that causes spikes is initially close to zero, and then increases to a peak, and then decreases back to zero. This is because the neuron is initially at rest, and then the current causes the neuron to spike, and then the neuron returns to rest. This is a very simple example, but we can see that the STA can capture the general shape of the current pattern that causes spikes. Immediately after a spike the current goes below zero.x` 
+
+
+
+
+
+## Spike-train statistics
+
+:::{.callout-note collapse="true"}
+# Fano factor and coefficient of variation
+
+CV is defined as the standard deviation divided by the mean of a dataset, usually applied to ISI.
+
+
+Fano factor is defined as the variance divided by the mean of a dataset, usually applied to spike counts.
+
+$$
+FF = \frac{\sigma^2}{\mu}
+$$
+
+
+:::
+
+
+The Poisson distribution is a discrete PDF that describes the probability of a given number of events occurring in a fixed interval of time. The Poisson distribution is defined as:
+
+$$
+P(k) = \frac{\lambda^k e^{-\lambda}}{k!}
+$$
+
+where $\lambda$ is the mean number of events in the interval, if we set $\lambda=rT$, where $T$ is the length of the interval and $r$ is the firing rate. So $P(1)$ is the probability of one spike in the interval, etc. So the number of spikes $N$ can be described by a Poisson distribution with mean $rT$.
+
+$$
+N \sim P(rT)
+$$
+
+The probability of observing one spike in the interval is: $P(1) = (rT) ^ 1 e^{-rT} / 1! = rT e^{-rT}$, but if the time window is small then $P(1) \approx rT$.
+
+
+## Statistical properties of the spike trains
+
+### AELIF neuron with noise
+
+
+```{python}
+
+params.E_L = -70e-3
+params.G_L = 10e-9
+params.a = 2e-9
+params.b = 0
+
+params.tau_SRA = 150e-3
+
+dt = 0.01e-3
+times = np.arange(0, 10, dt)
+
+
+mu, sigma = 0, 50e-9/np.sqrt(dt) 
+currents = np.random.normal(mu, sigma, len(times))
+
+print(f'Current max : {np.max(currents)}')
+print(f'Currents min: {np.min(currents)}')
+
+aelif = AELIF(
+    dt=dt,
+    times=times,
+    I=currents,
+    neuron_parameters=params,
+)
+
+aelif.simulate()
+
+inter_spike_intervals = np.asarray(aelif.isi_array)
+
+# remove outliers
+
+inter_spike_intervals = inter_spike_intervals[inter_spike_intervals < 0.01]
+
+print('set of ISI: ', set(inter_spike_intervals))
+
+# plot the ISI with plotly
+fig = go.Figure()
+fig.add_trace(go.Histogram(x=inter_spike_intervals, name='ISI', nbinsx=25))
+fig.update_layout(
+    title='ISI',
+    xaxis_title='Time (s)',
+    yaxis_title='Count',
+    font=dict(
+        family="Courier New, monospace",
+        size=18,
+        color="#7f7f7f"
+    )
+)
+
+fig.show()
+
+
+
+```
+
+The CV score for the ISI is a measure of how much the ISI varies. So for the simulation above, the CV score is :
+
+```{python}
+CV = np.std(inter_spike_intervals)/np.mean(inter_spike_intervals)
+print(f'CV : {CV}')
+```
+
+
+```{python}
+
+# find the number of spikes in 100 ms windows
+def find_fano_factor(time_range, spike_locations):
+    num_steps_per_window = int(time_range/dt)
+
+    # check if we can split
+    if len(spike_locations) % num_steps_per_window != 0:
+        return
+
+    # spit the 
+    spike_locations = np.split(spike_locations, num_steps_per_window, axis=0)
+    spike_locations = np.asarray(spike_locations)
+    print(spike_locations.shape)
+
+    # count the number of spikes in each window
+    spike_counts = np.sum(spike_locations, axis=1)
+
+    # calculate the Fano factor
+    fano_factor = np.var(spike_counts)/np.mean(spike_counts)
+
+    return fano_factor
+
+
+
+spike_locations = np.asarray(aelif.spike_location)
+fano_factor_b0 = find_fano_factor(100e-3, spike_locations)
+
+```
+
+Let's try with range from 10ms to 1s. 
+
+```{python}
+
+time_range_array = np.arange(10e-3, 1, 2e-3)
+fano_factor_array = []
+
+for time_range in time_range_array:
+
+    fano_factor = find_fano_factor(time_range, spike_locations)
+    if fano_factor is not None:
+        fano_factor_array.append(fano_factor)
+
+# plot with plotly
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=time_range_array*1e3, y=fano_factor_array, mode='lines', name='Fano factor'))
+
+fig.update_layout(
+    title='Fano factor',
+    xaxis_title='Time window (ms)',
+    yaxis_title='Fano factor',
+    font=dict(
+        family="Courier New, monospace",
+        size=18,
+        color="#7f7f7f"
+    )
+)
+
+fig.show()
+```
+
+As we increase the time window from 10ms to 1s, the Fano factor decreases. This is because the Fano factor is the variance divided by the mean, so as the mean increases, the variance decreases.
+
+Now, what if we set the AELIF parameter to $b=1nA$? What happens to the Fano factor?
+
+```{python}
+params.b = 1e-9
+
+aelif = AELIF(
+    dt=dt,
+    times=times,
+    I=currents,
+    neuron_parameters=params,
+)
+
+aelif.simulate()
+
+# find the fano factor
+
+spike_locations = np.asarray(aelif.spike_location)
+fano_factor2 = find_fano_factor(100e-3, spike_locations)
+
+print(f'The Fano factor with b=0 is: {fano_factor_b0}')
+print(f'The Fano factor with b=1nA is: {fano_factor2}')
+
+```
+
+The variable $b$ for the AELIF neuron is how much the $I_{SRA}$ current increases after there is a spike. This current is hyperpolarising, so after a spike, the chance of firing for the next time step gets slower and slower. So the Fano factor decreases as $b$ increases. 
+
+
+### ROC analysis
 
 
 
