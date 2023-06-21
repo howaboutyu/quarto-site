@@ -12,7 +12,6 @@ editor:
 
 ---
 
-# Chapter 2: The neuron and minimal spiking models
 
 ## Coding style
 
@@ -200,6 +199,7 @@ fig.update_yaxes(title_text="Voltage (V)", row=1, col=1)
 fig.update_yaxes(title_text="Voltage (V)", row=2, col=1)
 
 fig.show()
+
 ```
 
 
@@ -892,7 +892,10 @@ mask = np.logical_and(times > 0.5, times < 1.0)
 currents[mask] = 300e-12 
 
 
-lif_sra = AELIF(dt, times, params, currents, noise_sigma=0)
+from synapseflow.neuron_models.lif_model import LIFModel, AELIFModel
+
+
+lif_sra = AELIFModel(params, times=times, I=currents*0, noise_sigma=0)
 lif_sra.simulate()
 
 # plot on different subplots
