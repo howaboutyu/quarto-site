@@ -1,0 +1,45 @@
+
+---
+title: pgm week1 notes
+format: html
+reference-location: margin
+jupyter: python3
+bibliography: ../../references.bib
+html-math-method: katex
+editor:
+  render-on-save: true
+
+execute: 
+  enabled: false 
+---
+
+
+## Factors
+
+A factor is a function that maps a set of discrete variables to a real number. A factor $\phi$ is defined over a scope $\{X_1, \dots, X_k\}$, where each $X_i$ is a discrete variable. The factor $\phi$ is defined as a function from the set of all possible assignments to the variables in the scope to the real numbers.
+
+$$\phi: \{X_1, \dots, X_k\} \rightarrow \mathbb{R}$$
+
+some operations on factors include:
+* factor product
+* factor marginalization
+* factor reduction
+
+They are the fundamental building blocks of probabilistic models.
+
+
+
+## 
+
+explaining away, when two variables are independent, but become dependent when conditioned on a third variable.
+
+
+## Bayesian Networks
+
+a bayesian network is a directed acyclic graph (DAG) whoes nodes represent the random variables, for each node $X_i$ in the network is a CPD with $P(X_i | \text{Parents}(X_i))$. The VN represents a joint distribution via the chain rule where $P(X_1, \dots, X_n) = \prod_{i=1}^n P(X_i | \text{Parents}(X_i))$.
+
+A distribution $P$ factorizes over $G$if $P$ can be written as a product of factors, one for each node in $G$, 
+
+$P(X_1, \dots, X_n) = \prod_{i=1}^n P(X_i | \text{Parents}(X_i))$
+
+

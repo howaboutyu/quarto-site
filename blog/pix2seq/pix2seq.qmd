@@ -1,0 +1,51 @@
+
+---
+title: PIX2SEQ framework - object detection in tensorflow2 
+format: html
+reference-location: margin
+jupyter: python3
+bibliography: ../../references.bib
+html-math-method: katex
+editor:
+  render-on-save: true
+
+execute: 
+  enabled: false 
+---
+
+
+
+in essense they cast object detection aas a language mdoeling task conditioned on pixel inputs. traditional object detection tasks require lots of different building blocks, such as MaskRCNN, YOLO, SSD, etc. They usually have a backbone network that extracts features from the image, and then a head that predicts the bounding boxes and classes. The design of the head is usually very specific to the task, and the backbone is usually a pretrained network. 
+
+
+this paper turns object detection into a language modeling task, using a encoder-decoder architecture to preidction the bounding boxes as a sequence of tokens. The
+
+## The sequence construction
+
+the sequence onstruction is taken from two corner points of the bounding box the x and y coordinates. so an object is represented as a sequence of fix tokens $[y_{min}, x_{min}, y_{max}, x_{max}, c]$, where ach of the values are turned into an integer between 1 and $n_{bins}$. 
+
+## the objective is 
+
+The objective is trained to predict the tokens given an image and its preceding tokens. 
+$$
+\text{maximize} \sum_{j=1}^T \log P(\tilde{y}_j | y_{1:t-1}, x)
+$$
+
+This is done by using a transformer encoder-decoder architecture, the encoder can be any feature extractor such as CNNs or transformers. The decoder is a transformer decoder that predicts the next token given the previous tokens.
+
+## sequence augmentation
+
+they found some issues, that includes:
+
+the model tends to finish the sequence early without predicting all the objects. they use sequence augmentation where they add some synthetic noise tokens, so that the model can learn to identify the noise tokens rather than to mimic them. 
+
+
+they also add some random bounding boxes as input toe the decoder, and they use the target of noise objects to the "noise" class, and disgard the weights of the noise class to be zero.
+
+
+```{python}
+import tensorflow as tf
+import tensorflow_datasets as tfds
+
+
+```

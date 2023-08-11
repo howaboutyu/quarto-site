@@ -28,6 +28,8 @@ import plotly.graph_objects as go
 from synapseflow.neuron_models.lif_model import LIFModel, AELIFModel
 from synapseflow.neuron_models.neuron_parameters import NeuronParameters
 
+from synapseflow.neuron_models.utils import expand_bins, STA, find_fano_factor
+
 params = NeuronParameters(
     C_m=100e-12,
     E_L=-60.e-3,
@@ -55,7 +57,7 @@ We will sample 40,000 currents from a uniform distribution $I \sim U(-0.5, 0.5)$
 
 ```{python}
 
-num_blocks = 40000
+num_blocks = 4000
 random_currents = np.random.uniform(-0.5, 0.5, size=num_blocks)
 dt = 0.02e-3
 times_5ms = np.arange(0, 5e-3, dt)
@@ -351,7 +353,9 @@ For a data point, the number of std away from the mean of the distribution
 :::
 
 
-```{python}
+```python
+#import ray
+#ray.init()
 
 params.E_L = -70e-3
 params.V_th = -50e-3
@@ -362,7 +366,6 @@ params.C_m = 100e-12
 params.a = 2e-9
 params.b = 0
 params.tau_SRA = 150e-3
-
 
 dt = 0.01 * 1e-3
 
@@ -379,7 +382,10 @@ mu, sigma = 0, noise_sigma/np.sqrt(dt)
 current_no_stimulus = np.ones_like(times) * 0 + np.random.normal(mu, sigma, len(times))
 current_stimulus = np.ones_like(times) * 0.1e-9 + np.random.normal(mu, sigma, len(times))
 
-for trail_id in range(num_trails):
+#for trail_id in range(num_trails):
+
+#@ray.remote
+def run_simulation(trail_id):
 
     aelif_no_stim = AELIFModel(
         times=times,
@@ -399,9 +405,19 @@ for trail_id in range(num_trails):
 
     aelif_stim.simulate()
 
-    num_spikes_array_no_stim.append(np.sum(aelif_no_stim.spike_array))
-    num_spikes_array_stim.append(np.sum(aelif_stim.spike_array))
+    #num_spikes_array_no_stim.append(np.sum(aelif_no_stim.spike_array))
+    #num_spikes_array_stim.append(np.sum(aelif_stim.spike_array))
 
+    no_spike = np.sum(aelif_no_stim.spike_array)
+    spike = np.sum(aelif_stim.spike_array)
+
+    return no_spike, spike
+
+results = ray.get([run_simulation.remote(trail_id) for trail_id in range(num_trails)])
+
+for result in results:
+    num_spikes_array_no_stim.append(result[0])
+    num_spikes_array_stim.append(result[1])
 
 
 max_number_of_spikes = np.max(num_spikes_array_stim)
