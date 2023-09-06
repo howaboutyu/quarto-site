@@ -1,3 +1,9 @@
 numpy
 tqdm
 plotly
+tensorflow
+tensorflow_datasets
+jupyter
+jupyter-cache
+nbformat
+nbclient

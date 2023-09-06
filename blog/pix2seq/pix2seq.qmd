@@ -10,7 +10,7 @@ editor:
   render-on-save: true
 
 execute: 
-  enabled: false 
+  enabled: true 
 ---
 
 
@@ -47,5 +47,8 @@ they also add some random bounding boxes as input toe the decoder, and they use 
 import tensorflow as tf
 import tensorflow_datasets as tfds
 
+dataset = tfds.load( "coco/2017", split=["validation"], with_info=True, data_dir="~/data" )
+
+print(dataset)
 
 ```
