@@ -9,5 +9,6 @@ listing:
   contents:
     - "nerf/nerf.qmd" 
     - "nca/nca.qmd"
+    - "pix2seq/pix2seq.qmd"
 ---
 

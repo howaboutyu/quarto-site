@@ -1,9 +1,9 @@
 {
-  "hash": "b56f3ce2332892d8ba6e442caf4fc995",
+  "hash": "4c3557225eaf2007aae3e2f18fe5b0d5",
   "result": {
-    "markdown": "---\ntitle: Projects\nformat: html\nreference-location: margin\nhtml-math-method: katex\nlisting:\n  categories: true\n  contents:\n    - nerf/nerf.qmd\n    - nca/nca.qmd\n---\n\n",
+    "markdown": "---\ntitle: Projects\nformat: html\nreference-location: margin\nhtml-math-method: katex\nlisting:\n  categories: true\n  contents:\n    - nerf/nerf.qmd\n    - nca/nca.qmd\n    - pix2seq/pix2seq.qmd\n---\n\n",
     "supporting": [
-      "blog_files"
+      "blog_files/figure-html"
     ],
     "filters": [],
     "includes": {}
