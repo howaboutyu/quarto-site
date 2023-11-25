@@ -1,0 +1,11 @@
+{
+  "hash": "0916c587f53191c64df8d63cbcf24817",
+  "result": {
+    "markdown": "---\ntitle: Pix2Seq\ndate: 21 May 2023\nauthor:\n  - Hao Bo Yu\ntitle-block-banner: true\ncode-annotations: hover\nformat: html\nreference-location: margin\nbibliography: ../../references.bib\nhtml-math-method: katex\nhighlight-style: solarized\ncallout-appearance: simple\ncomments:\n  giscus:\n    repo: howaboutyu/quarto-site\nreading-time: true\ncategories:\n  - morphogenesis\n  - jax\n  - neural cellular automata\nexecute:\n  cache: true\ndescription: Pix2seq\n---\n\nHi\n\n",
+    "supporting": [
+      "pix2seq_files/figure-html"
+    ],
+    "filters": [],
+    "includes": {}
+  }
+}
