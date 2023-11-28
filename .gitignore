@@ -7,3 +7,5 @@ blog/nca/NCA
 /_site/
 
 /env/
+*.DS_Store
+*cache*

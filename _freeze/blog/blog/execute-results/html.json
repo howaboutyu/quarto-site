@@ -1,7 +1,7 @@
 {
-  "hash": "b56f3ce2332892d8ba6e442caf4fc995",
+  "hash": "d937a21041fe3821d87b2b8dc151663b",
   "result": {
-    "markdown": "---\ntitle: Projects\nformat: html\nreference-location: margin\nhtml-math-method: katex\nlisting:\n  categories: true\n  contents:\n    - nerf/nerf.qmd\n    - nca/nca.qmd\n---\n\n",
+    "markdown": "---\ntitle: Projects\nformat: html\nreference-location: margin\nhtml-math-method: katex\nlisting:\n  categories: true\n  contents:\n    - nerf/nerf.qmd\n    - nca/nca.qmd\n  feed:\n    categories: posts\n---\n\n",
     "supporting": [
       "blog_files"
     ],

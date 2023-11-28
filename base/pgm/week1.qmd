@@ -12,6 +12,25 @@ editor:
 execute: 
   enabled: false 
 ---
+```{dot}
+//| fig-cap: Bayesian Network
+digraph BayesianNetwork {
+    layout=dot
+    Difficulty -> Grade;
+    Intelligence -> Grade;
+    Intelligence -> SAT;
+    Grade -> Letter;
+}
+```
+
+```{dot}
+//| fig-cap: Markov Network
+
+graph MarkovNetwork {
+  A -- B -- C -- D -- A; 
+}
+```
+
 
 
 ## Factors

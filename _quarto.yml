@@ -8,7 +8,10 @@ website:
     left:
       - href: blog/blog.qmd
         text: Blogs 
-
+    right: 
+      - icon: rss
+        href: blog/blog.xml
+  site-url: "https://www.david-yu.com"
 format:
   html:
     theme:
