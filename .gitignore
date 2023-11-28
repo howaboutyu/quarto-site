@@ -5,3 +5,7 @@
 blog/nca/NCA
 /.quarto/
 /_site/
+
+/env/
+*.DS_Store
+*cache*
