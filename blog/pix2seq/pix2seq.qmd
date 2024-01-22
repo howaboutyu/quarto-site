@@ -1,6 +1,11 @@
-
 ---
-title: PIX2SEQ framework - object detection in tensorflow2 
+title: Pix2Seq 
+date: 21 May 2023
+author: [Hao Bo Yu]
+title-block-banner: true
+#title-block-style: plain
+code-annotations: hover
+
 format: html
 reference-location: margin
 jupyter: python3
@@ -52,3 +57,4 @@ dataset = tfds.load( "coco/2017", split=["validation"], with_info=True, data_dir
 print(dataset)
 
 ```
+

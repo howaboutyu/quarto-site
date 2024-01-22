@@ -7,11 +7,11 @@ website:
   navbar:
     left:
       - href: blog/blog.qmd
-        text: Blogs 
-    right: 
-      - icon: rss
-        href: blog/blog.xml
-  site-url: "https://www.david-yu.com"
+        text: Projects 
+
+      - href: base/base.qmd
+        text: Notes
+
 format:
   html:
     theme:
