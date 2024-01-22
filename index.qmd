@@ -21,10 +21,9 @@ about:
 
 :::{#hero-heading}
 
-👋 Hi, I'm Hao Bo Yu (pronounced as “how about you”).
+👋 Hi, I'm David
 
 
-I'm passionate about machine learning, robotics 🤖 and the brain 🧠. 
 
 
 <!-- ## Education

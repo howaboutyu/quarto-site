@@ -10,5 +10,6 @@ listing:
     - "nerf/nerf.qmd" 
     - "nca/nca.qmd"
   feed: true 
+
 ---
 
