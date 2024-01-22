@@ -1,5 +1,5 @@
 ---
-title: Flashcard Links 
+title: Notes 
 format: html
 reference-location: margin
 jupyter: python3
@@ -19,6 +19,15 @@ comments:
   hypothesis: true
 ---
 
-### Notes and exercises
 
-# [probability](probability/probability.qmd)
+## Computational Neuroscience
+
+### Chapter 2: [Tutorial](CompNeuro/chapter2.qmd) 
+### Chapter 3: [Tutorial](CompNeuro/chapter3.qmd)
+
+ 
+
+
+
+
+
