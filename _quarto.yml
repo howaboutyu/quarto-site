@@ -9,8 +9,7 @@ website:
       - href: blog/blog.qmd
         text: Projects 
 
-      - href: base/base.qmd
-        text: Notes
+
 
 format:
   html:
