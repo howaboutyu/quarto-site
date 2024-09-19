@@ -1,4 +1,5 @@
 numpy
+seaborn
 tqdm
 plotly
 tensorflow
@@ -7,3 +8,4 @@ jupyter
 jupyter-cache
 nbformat
 nbclient
+pythreejs
