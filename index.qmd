@@ -19,11 +19,10 @@ about:
 
 ---
 
+
 :::{#hero-heading}
 
 👋 Hi, I'm David
-
-
 
 
 <!-- ## Education

@@ -6,7 +6,12 @@ title-block-banner: true
 #title-block-style: plain
 code-annotations: hover
 
-format: html
+format: 
+    html:
+        code-links:
+          - text: Github  
+            icon: github 
+            href: https://github.com/higgsboost/nerf-jax 
 reference-location: margin
 jupyter: python3
 bibliography: ../../references.bib

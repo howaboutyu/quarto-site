@@ -5,10 +5,14 @@ reference-location: margin
 jupyter: python3
 html-math-method: katex
 listing:
+  sort: false 
   categories: true
   contents:
+    - "diffusion/diffusion.qmd"
     - "nerf/nerf.qmd" 
     - "nca/nca.qmd"
-  feed: true 
+
+
 ---
+
 
