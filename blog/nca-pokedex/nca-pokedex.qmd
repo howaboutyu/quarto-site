@@ -27,6 +27,15 @@ The aim is deliberately modest. This is not a 3D mesh generator; it is a
 conditional cellular automaton whose local Conv3D rules reconstruct a 2D
 Pokémon sprite while maintaining a structured hidden volume.
 
+## Damage recovery looks stronger in 3D
+
+In the current qualitative damage rollouts, increasing the automaton from a
+2D lattice to a shallow 3D volume appears to make regeneration from cutouts
+faster and more robust. The extra depth gives cells additional local routes to
+communicate around damaged regions, rather than relying only on the image
+plane. This is an experimental observation from the rollout behaviour, not yet
+a controlled speed or robustness benchmark.
+
 :::{.callout-note}
 The code and training configuration live in the
 [NCA repository](https://github.com/howaboutyu/NCA). The examples below are
