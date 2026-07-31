@@ -1,1 +1,12 @@
 /* css styles */
+
+.pixel-art-frame {
+  text-align: center;
+}
+
+.pixel-art {
+  width: min(100%, 512px);
+  height: auto;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}

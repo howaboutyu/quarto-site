@@ -96,7 +96,9 @@ cleaner without collapsing the useful communication path is the next problem.
 
 ### Selected reconstructed face
 
-![Selected reconstructed Pokémon face](gifs/59500_selected_face.gif)
+<p class="pixel-art-frame">
+  <img src="gifs/59500_selected_face.gif" class="pixel-art" width="512" alt="Selected reconstructed Pokémon face">
+</p>
 
 ### All depth slices
 
