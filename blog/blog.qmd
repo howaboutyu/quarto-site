@@ -9,6 +9,6 @@ listing:
   contents:
     - "nerf/nerf.qmd" 
     - "nca/nca.qmd"
+    - "nca-pokedex/nca-pokedex.qmd"
   feed: true 
 ---
-
