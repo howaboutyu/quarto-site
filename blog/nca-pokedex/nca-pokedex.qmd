@@ -2,6 +2,7 @@
 title: "NCA Pokédex: Growing Pokémon in 3D"
 subtitle: "A conditional 3D convolutional neural cellular automaton"
 date: 2026-07-31
+date-modified: 2026-08-04
 author: [Hao Bo Yu]
 title-block-banner: true
 format: html
@@ -38,8 +39,11 @@ a controlled speed or robustness benchmark.
 
 :::{.callout-note}
 The code and training configuration live in the
-[NCA repository](https://github.com/howaboutyu/NCA). The examples below are
-from validation at training step 59,500 of the 64×64 experiment.
+[NCA repository](https://github.com/howaboutyu/NCA). The multi-Pokémon examples
+below are the latest available validation rollout for each identity from the
+five-target 64×64 run. Validation rotates identities every 500 optimizer steps,
+so the source checkpoints span steps 95,500–98,000 rather than pretending that
+all four panels came from one checkpoint.
 :::
 
 ## The cellular state
@@ -52,7 +56,7 @@ $$
 
 The first three channels are RGB, the fourth is alpha/liveness, and the
 remaining channels are hidden state. In the main run, $D=8$ and $C=32$. A
-single middle depth slice is supervised against the target RGBA sprite; the
+selected $z=0$ depth slice is supervised against the target RGBA sprite; the
 other slices are free to participate in local communication.
 
 ## A learned local rule
@@ -72,41 +76,57 @@ structure.
 
 ## Conditioning on Pokémon identity
 
-For the multi-sprite variant, each Pokémon ID maps to a learned embedding. The
-embedding is broadcast through the volume and concatenated to the Conv3D
-features before the local update network. That means the rule can stay local
-while still knowing which sprite it is trying to grow.
+For this multi-sprite run, channels 4–8 receive a one-hot Pokémon identity only
+in the living cells of a fresh seed at $t=0$. No external identity vector is
+re-injected during later cellular updates. The recurrent rule must preserve
+and propagate that initial information through its own state—a small test of
+whether the automaton can learn from history rather than from a static label.
 
-The training loss emphasizes foreground pixels so transparent background does
-not dominate reconstruction:
+The selected face is trained with ordinary mean-squared error over all four
+RGBA channels, matching the original 2D objective used by this project:
 
 $$
-L_{fg} = \frac{\operatorname{mean}(w \odot (\hat y-y)^2)}
-              {\operatorname{mean}(w)},
-\qquad
-w = 1 + (\lambda_{fg}-1)y_\alpha.
+L_{RGBA} = \operatorname{mean}\!\left[(\operatorname{clip}(\hat y,0,1)-y)^2\right].
 $$
 
-## What it looks like at step 59,500
+## Latest multi-Pokémon rollouts
 
-The selected face is already recognizable. The depth and voxel views are more
-revealing: the automaton has organized activity through the volume, but the
-reconstruction still carries visible lattice noise. Making those hidden slices
-cleaner without collapsing the useful communication path is the next problem.
+Each panel starts from a seed carrying a different one-time identity and runs
+the same learned local rule. The timeline includes scheduled cutouts, so the
+animation shows both growth and qualitative recovery. The panels are aligned
+by rollout time; exact source steps are recorded in `gifs/sources.tsv`.
 
-### Selected reconstructed face
-
-<p class="pixel-art-frame">
-  <img src="gifs/59500_selected_face.gif" class="pixel-art" width="512" alt="Selected reconstructed Pokémon face">
+<p class="pokemon-showcase-frame">
+  <img src="gifs/conditional_pokemon_showcase_latest.gif" class="pixel-art pokemon-showcase" width="768" alt="Conditional 3D NCA rollouts for Charmander, Squirtle, Pikachu, and Eevee">
 </p>
 
-### All depth slices
+### Individual rollouts
 
-![Depth-slice evolution](gifs/59500_z_slices.gif)
+:::{.pokemon-grid}
+<figure>
+  <img src="gifs/pokemon_01_charmander_latest.gif" class="pixel-art" alt="Charmander 3D NCA rollout">
+  <figcaption>Charmander</figcaption>
+</figure>
 
-### RGB voxel preview
+<figure>
+  <img src="gifs/pokemon_02_squirtle_latest.gif" class="pixel-art" alt="Squirtle 3D NCA rollout">
+  <figcaption>Squirtle</figcaption>
+</figure>
 
-![RGB voxel evolution](gifs/59500_rgb_voxels.gif)
+<figure>
+  <img src="gifs/pokemon_03_pikachu_latest.gif" class="pixel-art" alt="Pikachu 3D NCA rollout">
+  <figcaption>Pikachu</figcaption>
+</figure>
+
+<figure>
+  <img src="gifs/pokemon_04_eevee_latest.gif" class="pixel-art" alt="Eevee 3D NCA rollout">
+  <figcaption>Eevee</figcaption>
+</figure>
+:::
+
+The reconstructions are recognizable and stable, but this remains qualitative
+evidence. The validation sequence is useful for inspecting growth and recovery;
+it is not yet a controlled comparison against an otherwise identical 2D model.
 
 ## Where to take it next
 
